@@ -4,6 +4,8 @@ import { walk } from './marawa/node-walker';
 import { cleanRichNodes, cleanContexts } from './support/rich-node-printer';
 import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
+import getRdfaGraph from 'graph-rdfa-processor';
+
 
 app.get('/', function( req, res ) {
   res.send({ msg: 'Hello mu-javascript-template' });
@@ -64,4 +66,16 @@ app.get('/scan/langeAanstelling', (req, res) => {
   const cleanedContexts = cleanContexts( contexts );
 
   res.send({ contexts: cleanedContexts });
+});
+
+app.get('/rdfa/aanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.aanstelling );
+  let graph = getRdfaGraph(dom.window.document.querySelector("div.annotation-snippet"), { baseURI: "https://data.vlaanderen.be/vlavirgem/29348" } );
+  res.send( { graph: graph.toString() } );
+});
+
+app.get('/rdfa/langeAanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
+  let graph = getRdfaGraph(dom.window.document.querySelector("div.annotation-snippet"), { baseURI: "https://data.vlaanderen.be/vlavirgem/29348" } );
+  res.send( { graph: graph.toString() } );
 });
