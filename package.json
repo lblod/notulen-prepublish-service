@@ -1,0 +1,19 @@
+{
+  "name": "notule-importer",
+  "version": "0.0.0",
+  "description": "mu-semtech import microservice for legal documents",
+  "main": "app.js",
+  "dependencies": {
+    "jsdom": "^11.6.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@git.semte.ch:9922/vo/lblod/services/notule-importer.git"
+  },
+  "author": "Aad Versteden",
+  "license": "MIT"
+}
