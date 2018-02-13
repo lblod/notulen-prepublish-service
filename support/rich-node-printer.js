@@ -6,6 +6,9 @@ import {get, set} from '../marawa/ember-object-mock';
  * certain properties from the rendered output.
  */
 function cleanContexts( [ node, ...nodes ] ){
+  node.rdfaAttributes = node.richNode[0].rdfaAttributes;
+  node.rdfaContext = node.richNode[0].rdfaContext;
+
   node.parent = undefined;
   node.domNode = undefined;
   node.richNode = undefined;
