@@ -6,6 +6,7 @@ import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
+import { graphForDomNode } from './support/graph-context-helpers';
 
 
 app.get('/', function( req, res ) {
@@ -81,21 +82,23 @@ app.get('/rdfa/langeAanstelling', (req, res) => {
   res.send( { graph: graph.toString() } );
 });
 
+app.get('/rdfaPlus/aanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.aanstelling );
+  const node = dom.window.document.querySelector('div.annotation-snippet');
+  const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
+  res.send( { graph: graph.toString() } );
+});
+
 app.get('/rdfaPlus/langeAanstelling', (req, res) => {
   const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
   const node = dom.window.document.querySelector('div.annotation-snippet');
-  const ctx = analyseContexts( node )[0];
-  const ctxDomNode = ctx.richNode[0].domNode;
+  const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
+  res.send( { graph: graph.toString() } );
+});
 
-  const wrapper = dom.window.document.createElement('div');
-  wrapper.appendChild( ctxDomNode );
-  // note, it may be that we need to pick this from a different child...
-  wrapper.setAttribute( 'prefix', ctx.richNode[0].rdfaContext[0].prefix );
-  wrapper.setAttribute( 'vocab', ctx.richNode[0].rdfaContext[0].vocab );
-
-  const doc = new dom.window.Document();
-  doc.appendChild( wrapper );
-
-  const graph = getRdfaGraph( doc, { baseURI: "https://data.vlaanderen.be/vlavirgem/29348" } );
+app.get('/rdfaPlus/langeAanstelling/alles', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
+  const node = dom.window.document.querySelector('#ember279');
+  const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
   res.send( { graph: graph.toString() } );
 });
