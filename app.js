@@ -6,7 +6,8 @@ import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
-import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore } from './support/graph-context-helpers';
+import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph } from './support/graph-context-helpers';
+import { importAgenda } from './support/notule-export-helpers';
 
 
 app.get('/', function( req, res ) {
@@ -116,4 +117,34 @@ app.get('/rdfaDump/langeAanstelling', (req, res) => {
     } )
     .then( () => res.send( { graph: graphName } ) )
     .catch( () => res.send( { message: `An error occurred, could not save to ${graphName}` } ) );
+});
+
+app.get('/rdfaDump/notuleNiel', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.notuleNiel );
+  const node = dom.window.document.querySelector('div[typeof="besluit:Zitting"]');
+
+  const graphName = `http://notule-importer.mu/${uuid()}`;
+
+  const graph = graphForDomNode( node, dom, "https://besluit.edu" );
+  console.log( graph.toString() );
+  saveGraphInTriplestore( graph, graphName )
+    .then( () => saveNodeInTriplestore( node, graphName ) )
+    .then( () => res.send( { graph: graphName, content: graph.toString() } ) )
+    .catch( () => res.send( { message: `An error occurred, could not save to ${graphName}` } ) );
+});
+
+app.get('/extractAgenda/notuleNiel', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.notuleNiel );
+  const node = dom.window.document.querySelector('div[typeof="besluit:Zitting"]');
+
+  const graphName = `http://notule-importer.mu/${uuid()}`;
+
+  const graph = graphForDomNode( node, dom, "https://besluit.edu" );
+  console.log( graph.toString() );
+  saveGraphInTriplestore( graph, graphName )
+    .then( () => saveNodeInTriplestore( node, graphName ) )
+    .then( () => importAgenda( graphName ) )
+    .then( () => cleanTempGraph( graphName ) )
+    .then( () => res.send( { item: graphName, content: graph.toString() } ) )
+    .catch( (err) => res.send( { message: `An error occurred, could not save to ${graphName}`, err: err } ) );
 });

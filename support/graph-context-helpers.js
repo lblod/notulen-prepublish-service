@@ -77,7 +77,6 @@ function saveGraphInTriplestore( graph, graphUri ) {
  * @return {Promise} Promise which yields true when the content was
  * saved successfully.
  */
-
 function saveNodeInTriplestore( node, resource ) {
   console.log(`Saving ${node} to ${resource}`);
   const html = node.outerHTML;
@@ -90,6 +89,20 @@ function saveNodeInTriplestore( node, resource ) {
 INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derivedFrom ""${escapedHtml}"". } }` );
 }
 
+/**
+ * Removes all content from a temporary graph
+ *
+ * @method cleanTempGraph
+ * 
+ * @param {string} tempGraph Temporary graph which should be cleared.
+ *
+ * @return {Promise} Promise which emits successfully if the graph was
+ * correctly cleaned.
+ */
 
+function cleanTempGraph( tempGraph ) {
+  console.log(`cleaning temporary graph ${tempGraph}`);
+  update( `DELETE WHERE { GRAPH <${tempGraph}> {?s ?p ?o.} }` );
+}
 
-export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore }
+export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph }
