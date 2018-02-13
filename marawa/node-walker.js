@@ -1,3 +1,4 @@
+import RichNode from './rich-node';
 import {get, set} from './ember-object-mock';
 
 if( ! Node ) {
@@ -22,48 +23,11 @@ if( ! Node ) {
 }
 
 /**
- * Represents an enriched DOM node.
- *
- * The DOM node is available in the 'domNode' property.
- *
- * @module editor-core
- * @class RichNode
- * @constructor
- * @extends EmberObject
- */
-class RichNode {
-  constructor(content) {
-    for( var key in content )
-      this[key] = content[key];
-  }
-  region() {
-    const start = get(this, 'start');
-    const end = get(this, 'end');
-
-    return [ start, end || start ];
-  }
-  length() {
-    const end = get(this, 'end') || 0;
-    const start = get(this, 'start') || 0;
-    const diff = Math.max( 0, end - start );
-    return diff;
-  }
-  isInRegion(start, end) {
-    return get(this, 'start') >= start && get(this, 'end') <= end;
-  }
-  isPartiallyInRegion(start, end) {
-    return ( get(this, 'start') >= start && get(this, 'start') < end )
-      || ( get(this, 'end') > start && get(this, 'end') <= end );
-  }
-}
-
-/**
  * DOM tree walker producing RichNodes
  *
  * @module editor-core
  * @class NodeWalker
  * @constructor
- * @extends EmberObject
  */
 class NodeWalker {
   /**
@@ -187,5 +151,10 @@ class NodeWalker {
   }
 }
 
+function walk(node) {
+  const NW = new NodeWalker();
+  return NW.processDomNode( node );
+}
+
 export default NodeWalker;
-export { RichNode };
+export { walk };
