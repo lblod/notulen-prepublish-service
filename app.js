@@ -5,6 +5,7 @@ import { cleanRichNodes, cleanContexts } from './support/rich-node-printer';
 import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
+import { get } from './marawa/ember-object-mock';
 
 
 app.get('/', function( req, res ) {
@@ -77,5 +78,24 @@ app.get('/rdfa/aanstelling', (req, res) => {
 app.get('/rdfa/langeAanstelling', (req, res) => {
   const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
   let graph = getRdfaGraph(dom.window.document.querySelector("div.annotation-snippet"), { baseURI: "https://data.vlaanderen.be/vlavirgem/29348" } );
+  res.send( { graph: graph.toString() } );
+});
+
+app.get('/rdfaPlus/langeAanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
+  const node = dom.window.document.querySelector('div.annotation-snippet');
+  const ctx = analyseContexts( node )[0];
+  const ctxDomNode = ctx.richNode[0].domNode;
+
+  const wrapper = dom.window.document.createElement('div');
+  wrapper.appendChild( ctxDomNode );
+  // note, it may be that we need to pick this from a different child...
+  wrapper.setAttribute( 'prefix', ctx.richNode[0].rdfaContext[0].prefix );
+  wrapper.setAttribute( 'vocab', ctx.richNode[0].rdfaContext[0].vocab );
+
+  const doc = new dom.window.Document();
+  doc.appendChild( wrapper );
+
+  const graph = getRdfaGraph( doc, { baseURI: "https://data.vlaanderen.be/vlavirgem/29348" } );
   res.send( { graph: graph.toString() } );
 });

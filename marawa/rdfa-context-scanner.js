@@ -271,7 +271,7 @@ class RdfaContextScanner {
       region: richNode.region(),
       text: get(richNode, 'text'),
       context: this.toTriples(get(richNode, 'rdfaContext')),
-      richNode: richNode,
+      richNode: [richNode],
       isRdfaBlock: get( richNode, 'isLogicalBlock' )
     }];
   }
@@ -313,8 +313,14 @@ class RdfaContextScanner {
     // const clonedChildren = combinedChildren.map( this.shallowClone );
 
     // override isRdfaBlock on each child, based on current node
+    // set ourselves as the current first richNode in the blocks's rich nodes
     if( get( richNode, 'isLogicalBlock' ) )
-      combinedChildren.forEach( (child) => set( child, 'isRdfaBlock', true ) );
+      combinedChildren.forEach( (child) => {
+        set( child, 'isRdfaBlock', true );
+        set( child, 'richNode', [ richNode, ...get( child, 'richNode' ) ] );
+      });
+
+
 
     // return new map
     return combinedChildren;
@@ -346,11 +352,15 @@ class RdfaContextScanner {
                 return [newElement, pastElement, ...rest];
               else {
                 let [ start, end ] = get( pastElement, 'region' );
+                const combinedRichNodes = [ newElement, pastElement ]
+                      .map( (e) => get( e, 'richNode') )
+                      .reduce( (a,b) => a.concat(b), [] );
+
                 const combinedRdfaNode = {
                   region: [ start, end ],
                   text: get(pastElement, 'text').concat( get(newElement, 'text' ) ),
                   context: get( pastElement, 'context' ),  // pick any of the two
-                  richNode: [ get( newElement, 'richNode' ), get( pastElement, 'richNode' )],
+                  richNode: combinedRichNodes,
                   isRdfaBlock: false // these two nodes are text nodes
                 };
                 return [combinedRdfaNode, ...rest];
