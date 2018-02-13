@@ -1,4 +1,4 @@
-import { app, query } from 'mu';
+import { app, query, uuid } from 'mu';
 import FIXTURES from './fixtures/default';
 import { walk } from './marawa/node-walker';
 import { cleanRichNodes, cleanContexts } from './support/rich-node-printer';
@@ -6,7 +6,7 @@ import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
-import { graphForDomNode } from './support/graph-context-helpers';
+import { graphForDomNode, saveGraphInTriplestore } from './support/graph-context-helpers';
 
 
 app.get('/', function( req, res ) {
@@ -101,4 +101,16 @@ app.get('/rdfaPlus/langeAanstelling/alles', (req, res) => {
   const node = dom.window.document.querySelector('#ember279');
   const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
   res.send( { graph: graph.toString() } );
+});
+
+app.get('/rdfaDump/langeAanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.aanstelling );
+  const node = dom.window.document.querySelector('div.annotation-snippet');
+
+  const graphName = `http://notule-importer.mu/${uuid()}`;
+
+  const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
+  saveGraphInTriplestore( graph, graphName )
+    .then( () => res.send( { graph: graphName } ) )
+    .catch( () => res.send( { message: `An error occurred, could not save to ${graphName}` } ) );
 });
