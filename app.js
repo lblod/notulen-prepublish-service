@@ -1,9 +1,9 @@
 import { app, query } from 'mu';
+import FIXTURES from './fixtures/default';
 
 app.get('/', function( req, res ) {
   res.send({ msg: 'Hello mu-javascript-template' });
 } );
-
 
 app.get('/query', function( req, res ) {
   var myQuery = `
@@ -22,3 +22,6 @@ app.get('/query', function( req, res ) {
       res.send( "Oops something went wrong: " + JSON.stringify( err ) );
     });
 } );
+
+app.get('/fixtures/aanstelling', (req, res) => res.send( { content: FIXTURES.aanstelling } ));
+app.get('/fixtures/langeAanstelling', (req, res) => res.send( { content: FIXTURES.langeAanstelling } ));
