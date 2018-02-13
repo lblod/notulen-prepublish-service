@@ -300,26 +300,14 @@ class RdfaContextScanner {
    * @private
    */
   createRdfaBlocksFromTag( richNode ){
-    console.log( `${richNode} has children ${get(richNode, 'children')}` );
-    console.log( richNode );
-    console.log( get(richNode, 'children' ) );
-
     // flatten our children
     const flatRdfaChildren =
           (get(richNode, 'children') || [])
           .map( (child) => get( child, 'rdfaBlocks' ) )
           .reduce( (a,b) => a.concat(b), []);
 
-    console.log( `${richNode} has flat children ${flatRdfaChildren}` );
-    console.log( richNode );
-    console.log( flatRdfaChildren );
-
     // map & combine children when possible
     const combinedChildren = this.combineRdfaBlocks( flatRdfaChildren );
-
-    console.log( `${richNode} has combined children ${combinedChildren}` );
-    console.log( richNode );
-    console.log( combinedChildren );
 
     // clone children
     // const clonedChildren = combinedChildren.map( this.shallowClone );
@@ -327,10 +315,6 @@ class RdfaContextScanner {
     // override isRdfaBlock on each child, based on current node
     if( get( richNode, 'isLogicalBlock' ) )
       combinedChildren.forEach( (child) => set( child, 'isRdfaBlock', true ) );
-
-    console.log( `${richNode} has logical children ${combinedChildren}` );
-    console.log( richNode );
-    console.log( combinedChildren );
 
     // return new map
     return combinedChildren;

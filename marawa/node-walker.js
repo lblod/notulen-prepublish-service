@@ -34,7 +34,6 @@ class NodeWalker {
    * Processes a single dom node.
    */
   processDomNode( domNode, parentNode, start = 0 ) {
-    console.log( `processing ${domNode}` );
     const myStart = (parentNode && get(parentNode, 'end')) || start;
     const richNode = this.createRichNode({
       domNode: domNode,
@@ -102,7 +101,6 @@ class NodeWalker {
    * Processes a single rich tag
    */
   processTagNode( richNode ) {
-    console.log(`processing tag node ${richNode}`);
     set(richNode, 'end', get(richNode, 'start')); // end will be updated during run
     const domNode = get(richNode, 'domNode');
     const childDomNodes = domNode.childNodes;
@@ -124,18 +122,13 @@ class NodeWalker {
    * Detects the type of a DOM node
    */
   detectDomNodeType( domNode ) {
-    console.log( `Detecting type of domNode ${domNode}` );
-
     if (domNode.hasChildNodes && domNode.hasChildNodes()) {
-      console.log(`It is a tag`);
       return 'tag';
     }
     else if (domNode.nodeType != Node.COMMENT_NODE) {
-      console.log(`It is text`);
       return 'text';
     }
     else {
-      console.log(`It is something else`);
       return 'other';
     }
   }
