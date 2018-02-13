@@ -1,8 +1,9 @@
 import { app, query } from 'mu';
 import FIXTURES from './fixtures/default';
 import { walk } from './marawa/node-walker';
-import { cleanRichNodes } from './support/rich-node-printer';
+import { cleanRichNodes, cleanContexts } from './support/rich-node-printer';
 import jsdom from 'jsdom';
+import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 
 app.get('/', function( req, res ) {
   res.send({ msg: 'Hello mu-javascript-template' });
@@ -45,4 +46,22 @@ app.get('/walk/langeAanstelling', (req, res) => {
   const cleanNodes = cleanRichNodes( walkedNodes );
 
   res.send({ nodes: cleanNodes });
+});
+
+app.get('/scan/aanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.aanstelling );
+  const node = dom.window.document.querySelector("div.annotation-snippet");
+  const contexts = analyseContexts( node );
+  const cleanedContexts = cleanContexts( contexts );
+
+  res.send({ contexts: cleanedContexts });
+});
+
+app.get('/scan/langeAanstelling', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
+  const node = dom.window.document.querySelector("#ember279");
+  const contexts = analyseContexts( node );
+  const cleanedContexts = cleanContexts( contexts );
+
+  res.send({ contexts: cleanedContexts });
 });
