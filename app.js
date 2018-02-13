@@ -6,7 +6,7 @@ import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
-import { graphForDomNode, saveGraphInTriplestore } from './support/graph-context-helpers';
+import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore } from './support/graph-context-helpers';
 
 
 app.get('/', function( req, res ) {
@@ -111,6 +111,9 @@ app.get('/rdfaDump/langeAanstelling', (req, res) => {
 
   const graph = graphForDomNode( node, dom, "https://besluit.edu/" );
   saveGraphInTriplestore( graph, graphName )
+    .then( () => {
+      saveNodeInTriplestore( node, graphName );
+    } )
     .then( () => res.send( { graph: graphName } ) )
     .catch( () => res.send( { message: `An error occurred, could not save to ${graphName}` } ) );
 });

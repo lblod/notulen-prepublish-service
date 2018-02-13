@@ -3,7 +3,7 @@
  * and for retrieving the graph of triples from the discovered RDFa
  * ContextNode.
  */
-import { update } from 'mu';
+import { update, sparqlEscapeString } from 'mu';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from '../marawa/ember-object-mock';
 import { analyse as analyseContexts } from '../marawa/rdfa-context-scanner';
@@ -62,11 +62,34 @@ function graphForDomNode( node, dom, baseUri ){
  *
  * @return {Promise} Returns truethy when the store could be populated.
  */
-
 function saveGraphInTriplestore( graph, graphUri ) {
   return update(`INSERT DATA { GRAPH <${graphUri}> { ${graph.toString()} } }`);
 }
 
+/**
+ * Saves the node to the triplestore as the source of the supplied resource.
+ *
+ * @method saveNodeInTriplestore
+ *
+ * @param {DomNode} node Node to be saved
+ * @param {string} resource Resource to which the content should be linked
+ *
+ * @return {Promise} Promise which yields true when the content was
+ * saved successfully.
+ */
+
+function saveNodeInTriplestore( node, resource ) {
+  console.log(`Saving ${node} to ${resource}`);
+  const html = node.outerHTML;
+  console.log(`HTML of node is ${node}`);
+  const escapedHtml = sparqlEscapeString( html );
+  console.log(`Escaped html of node is ${escapedHtml}`);
+
+  // We've put two quotes around escapedHtml to make the escapedHtml happy.  We can probably do better in the template.
+  return update( `PREFIX pav: <http://purl.org/pav/>
+INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derivedFrom ""${escapedHtml}"". } }` );
+}
 
 
-export { graphForDomNode, saveGraphInTriplestore }
+
+export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore }
