@@ -23,14 +23,15 @@ import { analyse as analyseContexts } from '../marawa/rdfa-context-scanner';
  */
 function graphForDomNode( node, dom, baseUri ){
   const ctx = analyseContexts( node )[0];
-  const contextDomNode = ctx.richNode[0].domNode;
+  const contextDomNode = ctx.semanticNode.domNode;
 
-  const prefix = ctx.richNode[0].rdfaContext[0].prefix;
-  const vocab = ctx.richNode[0].rdfaContext[0].vocab;
+  const rdfaPrefixes = ctx.semanticNode.rdfaPrefixes;
+  const prefix = extractPrefixString( rdfaPrefixes );
+  const vocab = rdfaPrefixes[""];
 
   const wrapper = dom.window.document.createElement('div');
   wrapper.appendChild( contextDomNode );
-  // note, it may be that we need to pick this from a different rdfaContext...
+
   wrapper.setAttribute( 'prefix', prefix );
   wrapper.setAttribute( 'vocab', vocab );
   console.log(`Prefix is ${prefix}`);
@@ -44,6 +45,27 @@ function graphForDomNode( node, dom, baseUri ){
   doc.appendChild( wrapper );
 
   return getRdfaGraph( doc, { baseURI: baseUri } );
+}
+
+/**
+ * Extracts the prefix string from the prefixObject
+ *
+ * @method extractPrefixString
+ *
+ * @param {Object} prefixObject Prefix object from the rdfa scanner
+ *
+ * @return {string} String which can be set as the prefix attribute of
+ * a dom node.
+ *
+ * @private
+ */
+function extractPrefixString( prefixObject ){
+  let resultStr = "";
+  for( var key in prefixObject ){
+    if( key != "" )
+      resultStr += ` ${key}: ${prefixObject[key]}`;
+  }
+  return resultStr;
 }
 
 /**
@@ -123,7 +145,7 @@ function findFirstNodeOfType( node, type ) {
       let triple = ctxObj.context[cdx];
       if( triple.predicate === "a"
           && triple.object === type )
-        return ctxObj.richNode[0].domNode;
+        return ctxObj.semanticNode.domNode;
     }
   }
   console.log(`Could not find resource of type ${type}`);
