@@ -272,7 +272,8 @@ class RdfaContextScanner {
       text: get(richNode, 'text'),
       context: this.toTriples(get(richNode, 'rdfaContext')),
       richNode: [richNode],
-      isRdfaBlock: get( richNode, 'isLogicalBlock' )
+      isRdfaBlock: get( richNode, 'isLogicalBlock' ),
+      semanticNode: ( get( richNode, 'isLogicalBlock' ) && richNode )
     }];
   }
 
@@ -317,10 +318,9 @@ class RdfaContextScanner {
     if( get( richNode, 'isLogicalBlock' ) )
       combinedChildren.forEach( (child) => {
         set( child, 'isRdfaBlock', true );
-        set( child, 'richNode', [ richNode, ...get( child, 'richNode' ) ] );
+        if ( ! get( child, 'semanticNode' ) )
+          set( child, 'semanticNode', richNode );
       });
-
-
 
     // return new map
     return combinedChildren;
@@ -352,7 +352,7 @@ class RdfaContextScanner {
                 return [newElement, pastElement, ...rest];
               else {
                 let [ start, end ] = get( pastElement, 'region' );
-                const combinedRichNodes = [ newElement, pastElement ]
+                const combinedRichNodes = [ pastElement, newElement ]
                       .map( (e) => get( e, 'richNode') )
                       .reduce( (a,b) => a.concat(b), [] );
 
