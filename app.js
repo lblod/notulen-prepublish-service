@@ -6,7 +6,7 @@ import jsdom from 'jsdom';
 import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
-import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph } from './support/graph-context-helpers';
+import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType } from './support/graph-context-helpers';
 import { importAgenda } from './support/notule-export-helpers';
 
 
@@ -65,6 +65,15 @@ app.get('/scan/aanstelling', (req, res) => {
 app.get('/scan/langeAanstelling', (req, res) => {
   const dom = new jsdom.JSDOM( FIXTURES.langeAanstelling );
   const node = dom.window.document.querySelector("#ember279");
+  const contexts = analyseContexts( node );
+  const cleanedContexts = cleanContexts( contexts );
+
+  res.send({ contexts: cleanedContexts });
+});
+
+app.get('/scan/notuleNiel', (req, res) => {
+  const dom = new jsdom.JSDOM( FIXTURES.notuleNiel );
+  const node = dom.window.document.querySelector("body");
   const contexts = analyseContexts( node );
   const cleanedContexts = cleanContexts( contexts );
 
@@ -135,7 +144,8 @@ app.get('/rdfaDump/notuleNiel', (req, res) => {
 
 app.get('/extractAgenda/notuleNiel', (req, res) => {
   const dom = new jsdom.JSDOM( FIXTURES.notuleNiel );
-  const node = dom.window.document.querySelector('div[typeof="besluit:Zitting"]');
+  const topDomNode = dom.window.document.querySelector('body');
+  const node = findFirstNodeOfType( topDomNode, 'http://data.vlaanderen.be/ns/besluit#Zitting' );
 
   const graphName = `http://notule-importer.mu/${uuid()}`;
 

@@ -99,10 +99,36 @@ INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derived
  * @return {Promise} Promise which emits successfully if the graph was
  * correctly cleaned.
  */
-
 function cleanTempGraph( tempGraph ) {
   console.log(`cleaning temporary graph ${tempGraph}`);
   update( `DELETE WHERE { GRAPH <${tempGraph}> {?s ?p ?o.} }` );
 }
 
-export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph }
+/**
+ * Finds the first dom node with the supplied type
+ *
+ * @method findFirstNodeOfType
+ *
+ * @param {DomNode} DomNode Highest level DOM node
+ * @param {string} type URI of the type which should be matched
+ *
+ * @return {DomNode} Dom Node which has the correct type
+ */
+function findFirstNodeOfType( node, type ) {
+  console.log(`Finding first node of type ${type} in ${node}`);
+  const orderedContexts = analyseContexts( node );
+  for( var idx = 0; idx < orderedContexts.length; idx++ ) {
+    let ctxObj = orderedContexts[idx];
+    for( var cdx = 0; cdx < ctxObj.context.length; cdx++ ) {
+      let triple = ctxObj.context[cdx];
+      if( triple.predicate === "a"
+          && triple.object === type )
+        return ctxObj.richNode[0].domNode;
+    }
+  }
+  console.log(`Could not find resource of type ${type}`);
+  return null;
+}
+
+
+export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType }

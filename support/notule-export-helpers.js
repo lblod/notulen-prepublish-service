@@ -22,8 +22,8 @@ function importAgenda( tempGraph ){
                     GRAPH <${tempGraph}> {
                       {
                         ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
-                        ?s <http://data.vlaanderen.be/ns/besluit#behandelt> ?o.
-                        BIND( <http://data.vlaanderen.be/ns/besluit#behandelt> AS ?p )
+                        ?s ?p ?o.
+                        VALUES ?p { a <http://data.vlaanderen.be/ns/besluit#behandelt> }
                       }
                       UNION 
                       {
