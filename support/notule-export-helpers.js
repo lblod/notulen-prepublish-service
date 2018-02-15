@@ -142,7 +142,8 @@ function editorDocumentFromUuid( uuid ){
      GRAPH <http://mu.semte.ch/application> {
        ?uri a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
             ext:editorDocumentContent ?content;
-            ext:editorDocumentContext ?context.
+            ext:editorDocumentContext ?context;
+            <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid )}
        }
      }`)
     .then( (queryResult) => {
