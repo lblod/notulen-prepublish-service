@@ -175,17 +175,36 @@ function editorDocumentFromUuid( uuid ){
  * @return {Promise} promise which resolves when the operation has
  * finished.
  */
-
 function ensureGlobalUuidsForAgendaImport( graphName ){
+  return ensureGlobalUuidsForTypes( graphName, [
+    "http://mu.semte.ch/vocabularies/ext/EditorDocument",
+    "http://data.vlaanderen.be/ns/besluit#Zitting",
+    "http://data.vlaanderen.be/ns/besluit#Agenda",
+    "http://data.vlaanderen.be/ns/besluit#AgendaPunt"
+  ]);
+}
+
+/**
+ * Ensures all resources in the temporary graph with the supplied
+ *  types have a UUID in the shared mu.semte.ch graph.
+ *
+ * @method ensureGlobalUuidsForTypes
+ *
+ * @param {string} graphName Name of the graph in which we'll search
+ * for the resources.
+ * @param {[string]} types Full string uri of all types which should
+ * receive the uuid treatment.
+ *
+ * @return {Promise} promise which resolves when the operation has
+ * finished.
+ */
+function ensureGlobalUuidsForTypes( graphName, types ){
   return query(
     `SELECT ?subject WHERE {
        GRAPH ${sparqlEscapeUri( graphName )} {
          ?subject a ?type
          VALUES ?type {
-           <http://mu.semte.ch/vocabularies/ext/EditorDocument>
-           <http://data.vlaanderen.be/ns/besluit#Zitting>
-           <http://data.vlaanderen.be/ns/besluit#Agenda>
-           <http://data.vlaanderen.be/ns/besluit#AgendaPunt>
+           ${ types.map( sparqlEscapeUri ).join( " " ) }
          }
        }
      }`).then( (response) => {
