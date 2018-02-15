@@ -42,3 +42,52 @@ function importAgenda( tempGraph ){
 }
 
 export { importAgenda };
+class EditorDocument {
+  constructor(content) {
+    for( var key in content )
+      this[key] = content[key];
+  }
+
+  // uri = null
+  // title = null
+  // context = null
+  // content = null
+}
+
+/**
+ * Retrieves the EditorDocument belonging to the supplied uuid
+ *
+ * @method editorDocumentFromUuid
+ *
+ * @param {string} uuid UUID which is coupled to the EditorDocument as
+ * mu:uuid property.
+ *
+ * @return {EditorDocument} Object representing the EditorDocument
+ */
+function editorDocumentFromUuid( uuid ){
+  // We have removed dc:title from here
+  return query(
+    `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+     SELECT * WHERE {
+     GRAPH <http://mu.semte.ch/application> {
+       ?uri a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
+            ext:editorDocumentContent ?content;
+            ext:editorDocumentContext ?context.
+       }
+     }`)
+    .then( (queryResult) => {
+      if( queryResult.results.bindings.length === 0 )
+        throw `No content found for EditorDocument ${uuid}`;
+      const result = queryResult.results.bindings[0];
+
+      const doc = new EditorDocument({
+        uri: result.uri.value,
+        // title: result.title,
+        context: JSON.parse( result.context.value ),
+        content: result.content.value
+      });
+
+      return doc;
+    } );
+}
+
