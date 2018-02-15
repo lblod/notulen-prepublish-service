@@ -160,7 +160,37 @@ app.get('/extractAgenda/notuleNiel', (req, res) => {
 });
 
 app.get('/extractAgenda/fromDb', (req, res) => {
-  editorDocumentFromUuid( "5A843926D6498B0009000002" ).then( (doc) => {
+  editorDocumentFromUuid( "5A855347D6498B000900002A" ).then( (doc) => {
+    const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
+    const topDomNode = dom.window.document.querySelector('body');
+    topDomNode.setAttribute( 'vocab', doc.context.vocab );
+    topDomNode.setAttribute( 'prefix', ( () => {
+      var str = "";
+      for( var key in doc.context.prefix )
+        if( key != "" )
+          str += `${key}: ${doc.context.prefix[key]} `;
+      return str;
+    } )() );
+
+    const node = findFirstNodeOfType( topDomNode, 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+
+    const graphName = `http://notule-importer.mu/${uuid()}`;
+
+    const graph = graphForDomNode( node, dom, "https://besluit.edu" );
+    removeBlankNodes( graph );
+
+    saveGraphInTriplestore( graph, graphName )
+      .then( () => importAgendaFromDoc( graphName, doc, node ) )
+      .then( () => ensureGlobalUuidsForAgendaImport( graphName ) )
+      .then( () => cleanTempGraph( graphName ) )
+      .then( () => res.send( { item: graphName, content: graph.toString() } ) )
+      .catch( (err) => res.send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } ) );
+  } );
+});
+
+
+app.post('/publish/agenda/:documentIdentifier', (req, res) => {
+  editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
     const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
     const topDomNode = dom.window.document.querySelector('body');
     topDomNode.setAttribute( 'vocab', doc.context.vocab );
