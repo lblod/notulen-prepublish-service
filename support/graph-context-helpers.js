@@ -188,14 +188,15 @@ function removeBlankNodes( graph ){
             newObjectsArr.reverse();
             predicate.objects = newObjectsArr;
           } else {
-            console.log(`No keys left in ${pkey}, removing`);
+            console.log(`No keys left in predicate ${pkey}, removing`);
             delete subject.predicates[pkey];
           }
         }
       }
-      if( Object.keys( subject.predicats ).length == 0 )
-        console.log(`No keys left in ${skey}, removing`);
+      if( Object.keys( subject.predicates ).length === 0 ) {
+        console.log(`No keys left in subject ${skey}, removing`);
         delete graph.subjects[skey];
+      }
     }
   }
   return graph;
