@@ -7,7 +7,7 @@ import { analyse as analyseContexts } from './marawa/rdfa-context-scanner';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from './marawa/ember-object-mock';
 import { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType, removeBlankNodes } from './support/graph-context-helpers';
-import { importAgenda, importAgendaFromDoc, editorDocumentFromUuid } from './support/notule-export-helpers';
+import { importAgenda, importAgendaFromDoc, editorDocumentFromUuid, ensureGlobalUuidsForAgendaImport } from './support/notule-export-helpers';
 
 
 app.get('/', function( req, res ) {
@@ -181,6 +181,7 @@ app.get('/extractAgenda/fromDb', (req, res) => {
 
     saveGraphInTriplestore( graph, graphName )
       .then( () => importAgendaFromDoc( graphName, doc, node ) )
+      .then( () => ensureGlobalUuidsForAgendaImport( graphName ) )
       .then( () => cleanTempGraph( graphName ) )
       .then( () => res.send( { item: graphName, content: graph.toString() } ) )
       .catch( (err) => res.send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } ) );

@@ -161,4 +161,57 @@ function editorDocumentFromUuid( uuid ){
     } );
 }
 
-export { importAgenda, editorDocumentFromUuid, importAgendaFromDoc };
+/**
+ * Ensures all resources related to the agenda have a UUID in the
+ *  mu.semte.ch graph.  For this, we read the concepts from the old
+ *  graph, and verify that they have a UUID in the global graph.
+ *
+ * @method ensureGlobalUuidsForAgendaImport
+ *
+ * @param {string} graphName Name of the graph in which we'll search
+ * for the resources.
+ *
+ * @return {Promise} promise which resolves when the operation has
+ * finished.
+ */
+
+function ensureGlobalUuidsForAgendaImport( graphName ){
+  return query(
+    `SELECT ?subject WHERE {
+       GRAPH ${sparqlEscapeUri( graphName )} {
+         ?subject a ?type
+         VALUES ?type {
+           <http://mu.semte.ch/vocabularies/ext/EditorDocument>
+           <http://data.vlaanderen.be/ns/besluit#Zitting>
+           <http://data.vlaanderen.be/ns/besluit#Agenda>
+           <http://data.vlaanderen.be/ns/besluit#AgendaPunt>
+         }
+       }
+     }`).then( (response) => {
+       const promiseArr =
+             response.results.bindings.map( ({subject}) => {
+               const query = `
+                 INSERT {
+                   GRAPH <http://mu.semte.ch/application> {
+                     ${sparqlEscapeUri(subject.value)}
+                       <http://mu.semte.ch/vocabularies/core/uuid>
+                         ${sparqlEscapeString( uuid() )}.
+                   }
+                 } WHERE {
+                   GRAPH <http://mu.semte.ch/application> {
+                     ?s ?p ?o.
+                     FILTER NOT EXISTS {
+                       ${sparqlEscapeUri(subject.value)}
+                         <http://mu.semte.ch/vocabularies/core/uuid> ?uuid.
+                     }
+                   }
+                 }`;
+
+               console.log( query );
+
+               return update(query); } );
+       return Promise.all( promiseArr );
+     } );
+}
+
+export { importAgenda, editorDocumentFromUuid, importAgendaFromDoc, ensureGlobalUuidsForAgendaImport };
