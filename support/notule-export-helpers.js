@@ -199,9 +199,8 @@ function ensureGlobalUuidsForAgendaImport( graphName ){
                          ${sparqlEscapeString( uuid() )}.
                    }
                  } WHERE {
-                   GRAPH <http://mu.semte.ch/application> {
-                     ?s ?p ?o.
-                     FILTER NOT EXISTS {
+                   NOT EXISTS {
+                     GRAPH <http://mu.semte.ch/application> {
                        ${sparqlEscapeUri(subject.value)}
                          <http://mu.semte.ch/vocabularies/core/uuid> ?uuid.
                      }
