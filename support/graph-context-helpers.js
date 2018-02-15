@@ -153,6 +153,31 @@ function findFirstNodeOfType( node, type ) {
 }
 
 /**
+ * Finds all dom nodes with the supplied type
+ *
+ * @method findAllNodesOfType
+ *
+ * @param {DomNode} DomNode Highest level DOM node
+ * @param {string} type URI of the type which should be matched
+ *
+ * @return {[DomNode]} Dom Nodes which have the correct type
+ */
+function findAllNodesOfType( node, type ) {
+  console.log(`Finding all nodes of type ${type} in ${node}`);
+  const orderedContexts = analyseContexts( node );
+  let matchingDomNodes = [];
+  for( var idx = 0; idx < orderedContexts.length; idx++ ) {
+    let ctxObj = orderedContexts[idx];
+    let topContext = ctxObj.context[0]; // let's assume it's in the top context
+    if( topContext.predicate === "a"
+        && topContext.object === type )
+      matchingDomNodes += ctxObj.semanticNode.domNode;
+  }
+  console.log(`Found ${matchingDomNodes.length} nodes: ${matchingDomNodes}`);
+  return matchingDomNodes;
+}
+
+/**
  * Removes the blank nodes from the supplied RDFa graph
  *
  * @method removeBlankNodes
@@ -203,4 +228,4 @@ function removeBlankNodes( graph ){
 }
 
 
-export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType, removeBlankNodes }
+export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType, findAllNodesOfType, removeBlankNodes }
