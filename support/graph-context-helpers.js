@@ -152,5 +152,54 @@ function findFirstNodeOfType( node, type ) {
   return null;
 }
 
+/**
+ * Removes the blank nodes from the supplied RDFa graph
+ *
+ * @method removeBlankNodes
+ *
+ * @param {RdfaGraph} graph Graph from which the blank nodes will be
+ * removed.
+ *
+ * @return {RdfaGraph} Manipulated graph with removed contents
+ */
+function removeBlankNodes( graph ){
+  for( let skey in graph.subjects ){
+    const subject = graph.subjects[skey];
+    if( skey.indexOf("_:") === 0 ) {
+      console.log( `Will remove ${skey}` );
+      delete graph.subjects[skey];
+    } else {
+      for( let pkey in subject.predicates ){
+        const predicate = subject.predicates[pkey];
+        if( pkey.indexOf("_:") === 0 ) {
+          console.log( `Will remove predicate ${pkey}` );
+          delete subject.predicates[pkey];
+        } else {
+          let newObjectsArr = [];
+          for( let idx = 0 ; idx < predicate.objects.length ; idx++ ) {
+            const value = predicate.objects[idx];
+            if( value.value.indexOf( "_:" ) === 0 && value.type === "http://www.w3.org/1999/02/22-rdf-syntax-ns#object" ) {
+              console.log( `Will remove value ${value.value}` );
+            } else {
+              newObjectsArr = [ value , ...newObjectsArr ];
+            }
+          }
+          if( newObjectsArr.length > 0 ){
+            newObjectsArr.reverse();
+            predicate.objects = newObjectsArr;
+          } else {
+            console.log(`No keys left in ${pkey}, removing`);
+            delete subject.predicates[pkey];
+          }
+        }
+      }
+      if( Object.keys( subject.predicats ).length == 0 )
+        console.log(`No keys left in ${skey}, removing`);
+        delete graph.subjects[skey];
+    }
+  }
+  return graph;
+}
 
-export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType }
+
+export { graphForDomNode, saveGraphInTriplestore, saveNodeInTriplestore, cleanTempGraph, findFirstNodeOfType, removeBlankNodes }
