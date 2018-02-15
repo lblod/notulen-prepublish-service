@@ -50,12 +50,14 @@ function importAgenda( tempGraph ){
  * @param {string} tempGraph Name of the graph from which the contents
  * originate.
  * @param {EditorDocument} doc Document from which the contents originated.
+ * @param {DomNode} domNode Node which was used to import the contents
+ * into the triplestore.
  *
  * @return {Promise} Yields positive when the content has been saved
  * to the main triplestore.
  */
 
-function importAgendaFromDoc( tempGraph, doc ) {
+function importAgendaFromDoc( tempGraph, doc, domNode ) {
   console.log( `Importing agenda from ${tempGraph}` );
 
   // make agenda resource
@@ -63,43 +65,51 @@ function importAgendaFromDoc( tempGraph, doc ) {
 
   return update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
                   WHERE {
-                    GRAPH <${tempGraph}> {
-                      {
-                        ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
-                        ?s ?p ?o.
-                        VALUES ?p {
-                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
-                          <http://data.vlaanderen.be/ns/besluit#heeftAgenda>
-                        }
-                      }
-                      UNION {
-                        ?ss a <http://data.vlaanderen.be/ns/besluit#Zitting>;
-                            <http://data.vlaanderen.be/ns/besluit#heeftAgenda> ?s.
-                        ?s ?p ?o.
-                        VALUES ?p {
-                          <http://data.vlaanderen.be/ns/besluit#behandelt>
-                          <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
-                        }
-                      }
-                      UNION
-                      {
-                        ?ss <http://data.vlaanderen.be/ns/besluit#behandelt> ?s.
-                        ?s ?p ?o.
-                        VALUES ?p {
-                          <http://purl.org/dc/terms/title>
-                          <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar>
-                          <http://data.vlaanderen.be/ns/besluit#AgendaPunt.type>
-                          <http://purl.org/dc/terms/description>
-                        }
-                      }
-                      UNION
-                      {
-                        ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
-                        BIND ( <http://data.vlaanderen.be/ns/besluit#heeftNotulen> AS ?p )
-                        BIND ( ${sparqlEscapeUri(doc.uri)} AS ?o )
-                      }
-                    }
-                  }` );
+                     GRAPH <${tempGraph}> {
+                       {
+                         ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
+                         ?s ?p ?o.
+                         VALUES ?p {
+                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                           <http://data.vlaanderen.be/ns/besluit#heeftAgenda>
+                         }
+                       }
+                       UNION {
+                         ?ss a <http://data.vlaanderen.be/ns/besluit#Zitting>;
+                             <http://data.vlaanderen.be/ns/besluit#heeftAgenda> ?s.
+                         ?s ?p ?o.
+                         VALUES ?p {
+                           <http://data.vlaanderen.be/ns/besluit#heeftAgendapunt>
+                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+                         }
+                       }
+                       UNION
+                       {
+                         ?ss <http://data.vlaanderen.be/ns/besluit#heeftAgendapunt> ?s.
+                         ?s ?p ?o.
+                         VALUES ?p {
+                           <http://purl.org/dc/terms/title>
+                           <http://purl.org/dc/terms/description>
+                           <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar>
+                           <http://data.vlaanderen.be/ns/besluit#AgendaPunt.type>
+                         }
+                       }
+                       UNION
+                       {
+                         ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
+                         BIND ( <http://data.vlaanderen.be/ns/besluit#heeftNotulen> AS ?p )
+                         BIND ( ${sparqlEscapeUri(doc.uri)} AS ?o )
+                       }
+                     }
+                   }` );
+
+  // we skipped the following
+  //   UNION
+  //   {
+  //     ?ss <http://data.vlaanderen.be/ns/besluit#heeftAgenda> ?s.
+  //     BIND ( <http://purl.org/pav/derivedFrom> AS ?p )
+  //     BIND ( ""${sparqlEscapeString( domNode.outerHTML )}"" AS ?o )
+  //   }
 }
 
 class EditorDocument {

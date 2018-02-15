@@ -180,7 +180,7 @@ app.get('/extractAgenda/fromDb', (req, res) => {
     removeBlankNodes( graph );
 
     saveGraphInTriplestore( graph, graphName )
-      .then( () => importAgendaFromDoc( graphName, doc ) )
+      .then( () => importAgendaFromDoc( graphName, doc, node ) )
       .then( () => cleanTempGraph( graphName ) )
       .then( () => res.send( { item: graphName, content: graph.toString() } ) )
       .catch( (err) => res.send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } ) );
