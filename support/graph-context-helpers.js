@@ -27,7 +27,7 @@ function graphForDomNode( node, dom, baseUri ){
 
   const rdfaPrefixes = ctx.semanticNode.rdfaPrefixes;
   const prefix = extractPrefixString( rdfaPrefixes );
-  const vocab = rdfaPrefixes[""];
+  const vocab = rdfaPrefixes[""] || "http://data.vlaanderen.be/ns/besluit#"; // TODO: not sure why vocab is not found
 
   const wrapper = dom.window.document.createElement('div');
   wrapper.appendChild( contextDomNode );
