@@ -133,7 +133,8 @@ class EditorDocument {
  * @param {string} uuid UUID which is coupled to the EditorDocument as
  * mu:uuid property.
  *
- * @return {EditorDocument} Object representing the EditorDocument
+ * @return {Promise} Promise which resolves to an object representing
+ * the EditorDocument
  */
 function editorDocumentFromUuid( uuid ){
   // We have removed dc:title from here
@@ -214,21 +215,14 @@ function ensureGlobalUuidsForTypes( graphName, types ){
                const query = `
                  INSERT {
                    GRAPH <http://mu.semte.ch/application> {
-                     ${sparqlEscapeUri(subject.value)}
-                       <http://mu.semte.ch/vocabularies/core/uuid>
-                         ${sparqlEscapeString( uuid() )}.
+                     ?s <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid() )}.
                    }
                  } WHERE {
-                   NOT EXISTS {
-                     GRAPH <http://mu.semte.ch/application> {
-                       ${sparqlEscapeUri(subject.value)}
-                         <http://mu.semte.ch/vocabularies/core/uuid> ?uuid.
-                     }
+                   FILTER NOT EXISTS {
+                    ?s <http://mu.semte.ch/vocabularies/core/uuid> ?uuid
                    }
+                   VALUES ?s { ${sparqlEscapeUri(subject.value)} }
                  }`;
-
-               console.log( query );
-
                return update(query); } );
        return Promise.all( promiseArr );
      } );
