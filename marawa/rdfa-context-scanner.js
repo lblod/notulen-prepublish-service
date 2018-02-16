@@ -3,6 +3,101 @@ import { rdfaKeywords, prefixableRdfaKeywords, defaultPrefixes } from './support
 import { walk } from './node-walker';
 
 /**
+ * Resolves the URIs in an RDFa attributes object with the correct prefix
+ * based on a set of known prefixes.
+ *
+ * @method resolvePrefix
+ *
+ * @param {Object} rdfaAttributes An object of RDFa attributes
+ * @param {Object} prefixes A map of known prefixes
+ *
+ * @return {Object} An RDFa attributes object containing resolved URIs
+ */
+function resolvePrefixes(rdfaAttributes, prefixes) {
+  const clonedAttributes = Object.assign({}, rdfaAttributes);
+  prefixableRdfaKeywords.forEach( (key) => {
+    if (clonedAttributes[key] != null)
+      clonedAttributes[key] = resolvePrefix(clonedAttributes[key], prefixes);
+  });
+  return clonedAttributes;
+}
+
+/**
+ * Resolves a given (array of) URI(s) with the correct prefix (if it's prefixed)
+ * based on a set of known prefixes.
+ *
+ * @method resolvePrefix
+ *
+ * @param {string|Array} uri An (array of) URI(s) to resolve
+ * @param {Object} prefixes A map of known prefixes
+ *
+ * @return {string} The resolved URI
+ *
+ * @private
+ */
+function resolvePrefix(uri, prefixes) {
+  const resolve = (uri) => {
+    if (isFullUri(uri) || isRelativeUrl(uri)) {
+      return uri;
+    } else {
+      const i = uri.indexOf(':');
+
+      if (i < 0) { // no prefix defined. Use default.
+        if (prefixes[''] == null)
+          warn(`No default RDFa prefix defined`, { id: 'rdfa.missingPrefix' });
+        uri = prefixes[''] + uri;
+      } else {
+        const key = uri.substr(0, i);
+        if (prefixes[key] == null)
+          warn(`No RDFa prefix '${key}' defined`, { id: 'rdfa.missingPrefix' });
+        uri = prefixes[key] + uri.substr(i + 1);
+      }
+
+      return uri;
+    }
+  };
+
+  if (Array.isArray(uri)) {
+    return uri.map( u => resolve(u));
+  } else {
+    return resolve(uri);
+  }
+}
+
+/**
+ * Returns whether a given URI is a full URI.
+ *
+ * @method isFullUri
+ *
+ * @param {string} uri A URI
+ *
+ * @return {boolean} Whether the given URI is a full URI.
+ *
+ * @private
+ */
+function isFullUri(uri) {
+  return uri.includes('://');
+}
+
+/**
+ * Returns whether a given URI is a relative URI.
+ *
+ * @method isRelativeUrl
+ *
+ * @param {string} uri A URI
+ *
+ * @return {boolean} Whether the given URI is a relative URI.
+ *
+ * @private
+ */
+function isRelativeUrl(uri) {
+  return uri.startsWith('#') || uri.startsWith('/') || uri.startsWith('./') || uri.startsWith('../');
+}
+
+
+
+
+/**
  * Scanner of the RDFa context of DOM nodes
  *
  * @module editor-core
@@ -90,7 +185,7 @@ class RdfaContextScanner {
 
       rootContext.forEach((rdfa) => {
         rootPrefixes = this.mergePrefixes(rootPrefixes, rdfa);
-        const context = this.resolvePrefixes(rdfa, rootPrefixes);
+        const context = resolvePrefixes(rdfa, rootPrefixes);
         resolvedRootContext.push(context);
       });
     }
@@ -120,7 +215,7 @@ class RdfaContextScanner {
     set(richNode, 'rdfaPrefixes', prefixes);
 
     if (!this.isEmptyRdfaAttributes(nodeRdfaAttributes)) {
-      const resolvedRdfaAttributes = this.resolvePrefixes(nodeRdfaAttributes, prefixes);
+      const resolvedRdfaAttributes = resolvePrefixes(nodeRdfaAttributes, prefixes);
       set(richNode, 'rdfaContext', parentContext.concat(resolvedRdfaAttributes));
     }
     else {
@@ -489,100 +584,6 @@ class RdfaContextScanner {
   }
 
   /**
-   * Resolves the URIs in an RDFa attributes object with the correct prefix
-   * based on a set of known prefixes.
-   *
-   * @method resolvePrefix
-   *
-   * @param {Object} rdfaAttributes An object of RDFa attributes
-   * @param {Object} prefixes A map of known prefixes
-   *
-   * @return {Object} An RDFa attributes object containing resolved URIs
-   *
-   * @private
-   */
-  resolvePrefixes(rdfaAttributes, prefixes) {
-    const clonedAttributes = Object.assign({}, rdfaAttributes);
-    prefixableRdfaKeywords.forEach( (key) => {
-      if (clonedAttributes[key] != null)
-        clonedAttributes[key] = this.resolvePrefix(clonedAttributes[key], prefixes);
-    });
-    return clonedAttributes;
-  }
-
-  /**
-   * Resolves a given (array of) URI(s) with the correct prefix (if it's prefixed)
-   * based on a set of known prefixes.
-   *
-   * @method resolvePrefix
-   *
-   * @param {string|Array} uri An (array of) URI(s) to resolve
-   * @param {Object} prefixes A map of known prefixes
-   *
-   * @return {string} The resolved URI
-   *
-   * @private
-   */
-  resolvePrefix(uri, prefixes) {
-    const resolve = (uri) => {
-      if (this.isFullUri(uri) || this.isRelativeUrl(uri)) {
-        return uri;
-      } else {
-        const i = uri.indexOf(':');
-
-        if (i < 0) { // no prefix defined. Use default.
-          if (prefixes[''] == null)
-            warn(`No default RDFa prefix defined`, { id: 'rdfa.missingPrefix' });
-          uri = prefixes[''] + uri;
-        } else {
-          const key = uri.substr(0, i);
-          if (prefixes[key] == null)
-            warn(`No RDFa prefix '${key}' defined`, { id: 'rdfa.missingPrefix' });
-          uri = prefixes[key] + uri.substr(i + 1);
-        }
-
-        return uri;
-      }
-    };
-
-    if (Array.isArray(uri)) {
-      return uri.map( u => resolve(u));
-    } else {
-      return resolve(uri);
-    }
-  }
-
-  /**
-   * Returns whether a given URI is a full URI.
-   *
-   * @method isFullUri
-   *
-   * @param {string} uri A URI
-   *
-   * @return {boolean} Whether the given URI is a full URI.
-   *
-   * @private
-   */
-  isFullUri(uri) {
-    return uri.includes('://');
-  }
-
-  /**
-   * Returns whether a given URI is a relative URI.
-   *
-   * @method isRelativeUrl
-   *
-   * @param {string} uri A URI
-   *
-   * @return {boolean} Whether the given URI is a relative URI.
-   *
-   * @private
-   */
-  isRelativeUrl(uri) {
-    return uri.startsWith('#') || uri.startsWith('/') || uri.startsWith('./') || uri.startsWith('../');
-  }
-
-  /**
    * Transforms an array of RDFa attribute objects to an array of triples.
    * A triple is an object consisting of a subject, predicate and object.
    *
@@ -696,4 +697,4 @@ function analyse(node){
 }
 
 export default RdfaContextScanner;
-export { analyse };
+export { analyse , resolvePrefixes };
