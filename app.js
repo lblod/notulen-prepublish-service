@@ -19,46 +19,43 @@ function nodeAndDomForEditorDocument( doc ){
   return [ topDomNode, dom ];
 }
 
-app.post('/publish/agenda/:documentIdentifier', (req, res) => {
-  editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
+app.post('/publish/agenda/:documentIdentifier', async function(req, res) {
+  try {
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
-
     const node = findFirstNodeOfType( topDomNode, 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-
     const graphName = `http://notule-importer.mu/${uuid()}`;
-
     const graph = graphForDomNode( node, dom, "https://besluit.edu" );
     removeBlankNodes( graph );
 
-    saveGraphInTriplestore( graph, graphName )
-      .then( () => importAgendaFromDoc( graphName, doc, node ) )
-      .then( () => ensureGlobalUuidsForAgendaImport( graphName ) )
-      .then( () => cleanTempGraph( graphName ) )
-      .then( () => res.send( { success: true, item: graphName, content: graph.toString() } ) )
-      .catch( (err) => {
-        return res
-          .status(400)
-          .send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } );
-      } );
-  } );
-});
+    await saveGraphInTriplestore( graph, graphName );
+    await importAgendaFromDoc( graphName, doc, node );
+    await ensureGlobalUuidsForAgendaImport( graphName );
+    await cleanTempGraph( graphName );
 
-app.post('/publish/notule/:documentIdentifier', (req, res) => {
-  editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
+    res.send( { success: true, item: graphName, content: graph.toString() } );
+  } catch (err) {
+    res.status(400)
+      .send( { message: `An error occurred while publishing agenda ${req.params.documentIdentifier}`, err: JSON.stringify(err) } );
+  }
+} );
+
+app.post('/publish/notule/:documentIdentifier', async function(req, res) {
+  try {
+    const documentId = req.params.documentIdentifier;
+    const doc = await editorDocumentFromUuid( documentId );
+
     let topDomNode, dom;
     [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
 
-    importNotuleFromDoc( topDomNode, dom, doc )
-      .then( () => {
-        let topDomNode, dom;
-        [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
-        return importDecisionsFromDoc( topDomNode, dom, doc );
-      })
-      .then( () => res.send( { success: true } ) )
-      .catch( (err) => {
-        return res
-          .status(400)
-          .send( { message: `An error occurred`, err: JSON.stringify( err ) } );
-      } );
-  } );
+    await importNotuleFromDoc( topDomNode, dom, doc );
+
+    [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
+    await importDecisionsFromDoc( topDomNode, dom, doc );
+    res.send( { success: true } );
+  } catch (err) {
+    res
+      .status(400)
+      .send( { message: `An error occurred while publishing minutes for ${req.params.documentIdentifier}`, err: JSON.stringify( err ) } );
+  }
 });
