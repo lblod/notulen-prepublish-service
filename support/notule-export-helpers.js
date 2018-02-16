@@ -1,6 +1,6 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 
-import { graphForDomNode, findFirstNodeOfType, findAllNodesOfType, saveGraphInTriplestore, cleanTempGraph } from './graph-context-helpers';
+import { graphForDomNode, findFirstNodeOfType, findAllNodesOfType, saveGraphInTriplestore, cleanTempGraph, removeBlankNodes } from './graph-context-helpers';
 /**
  * This file contains helpers for exporting content from the notule.
  */
@@ -228,11 +228,12 @@ function ensureGlobalUuidsForTypes( graphName, types ){
      } );
 }
 
-async function importNotuleFromDoc( node, dom ){
+async function importNotuleFromDoc( node, dom, doc ){
   // Store session in temporary graph
   const sessionNode = findFirstNodeOfType( node, "http://data.vlaanderen.be/ns/besluit#Zitting" );
   const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
   const tmpGraph = graphForDomNode( sessionNode, dom, "https://besluit.edu" );
+  removeBlankNodes( tmpGraph );
   
   // Find outerHTML of session
   const outerHtml = sessionNode.outerHTML;
@@ -281,7 +282,10 @@ async function importNotuleFromDoc( node, dom ){
       GRAPH <http://mu.semte.ch/application> {
         ${sparqlEscapeUri( sessionUri )} 
           <http://purl.org/pav/derivedFrom>
-            ""${sparqlEscapeString( outerHtml )}""
+            ""${sparqlEscapeString( outerHtml )}"".
+        ${sparqlEscapeUri( sessionUri )}
+          <http://data.vlaanderen.be/ns/besluit#heeftNotulen>
+            ${sparqlEscapeUri( doc.uri )}.
       }
     }`);
   await ensureGlobalUuidsForTypes( tmpGraphName, [ "http://data.vlaanderen.be/ns/besluit#Zitting" ] );
@@ -305,6 +309,7 @@ async function importDecisionsFromDoc( node, dom ){
   await Promise.all( sessionNodes.map( async function(besluitNode){
     const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
     const tmpGraph = graphForDomNode( besluitNode, dom, "https://besluit.edu" );
+    removeBlankNodes( tmpGraph );
     // Find outerHTML of AgendaPointTreatment
     const outerHtml = besluitNode.outerHTML;
     // Store node in temporary graph (in Virtuoso)
@@ -364,6 +369,17 @@ async function importDecisionsFromDoc( node, dom ){
               eli:language
               prov:value
             }
+          } UNION {
+            ?ss a besluit:BehandelingVanAgendapunt;
+                prov:generated ?s.
+            ?s ?p ?o.
+            BIND ( <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#score> AS ?p )
+            BIND ( STRDT("1", xsd:float) AS ?o )
+          } UNION {
+            ?ss a besluit:BehandelingVanAgendapunt;
+                prov:generated ?s.
+            ?s eli:title ?o.
+            BIND ( eli:title_short AS ?p )
           }
         }
       }
