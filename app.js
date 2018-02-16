@@ -4,18 +4,24 @@ import { graphForDomNode, saveGraphInTriplestore, cleanTempGraph, findFirstNodeO
 import { importAgendaFromDoc, editorDocumentFromUuid, ensureGlobalUuidsForAgendaImport } from './support/notule-export-helpers';
 import { importNotuleFromDoc, importDecisionsFromDoc } from './support/notule-export-helpers';
 
+function nodeAndDomForEditorDocument( doc ){
+  const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
+  const topDomNode = dom.window.document.querySelector('body');
+  topDomNode.setAttribute( 'vocab', doc.context.vocab );
+  topDomNode.setAttribute( 'prefix', ( () => {
+    var str = "";
+    for( var key in doc.context.prefix )
+      if( key != "" )
+        str += `${key}: ${doc.context.prefix[key]} `;
+    return str;
+  } )() );
+
+  return [ topDomNode, dom ];
+}
+
 app.post('/publish/agenda/:documentIdentifier', (req, res) => {
   editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
-    const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
-    const topDomNode = dom.window.document.querySelector('body');
-    topDomNode.setAttribute( 'vocab', doc.context.vocab );
-    topDomNode.setAttribute( 'prefix', ( () => {
-      var str = "";
-      for( var key in doc.context.prefix )
-        if( key != "" )
-          str += `${key}: ${doc.context.prefix[key]} `;
-      return str;
-    } )() );
+    const [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
 
     const node = findFirstNodeOfType( topDomNode, 'http://data.vlaanderen.be/ns/besluit#Zitting' );
 
@@ -36,21 +42,6 @@ app.post('/publish/agenda/:documentIdentifier', (req, res) => {
       } );
   } );
 });
-
-function nodeAndDomForEditorDocument( doc ){
-  const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
-  const topDomNode = dom.window.document.querySelector('body');
-  topDomNode.setAttribute( 'vocab', doc.context.vocab );
-  topDomNode.setAttribute( 'prefix', ( () => {
-    var str = "";
-    for( var key in doc.context.prefix )
-      if( key != "" )
-        str += `${key}: ${doc.context.prefix[key]} `;
-    return str;
-  } )() );
-
-  return [ topDomNode, dom ];
-}
 
 app.post('/publish/notule/:documentIdentifier', (req, res) => {
   editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
