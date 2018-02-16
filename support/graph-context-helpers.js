@@ -6,7 +6,7 @@
 import { update, sparqlEscapeString } from 'mu';
 import getRdfaGraph from 'graph-rdfa-processor';
 import { get } from '../marawa/ember-object-mock';
-import { analyse as analyseContexts } from '../marawa/rdfa-context-scanner';
+import { analyse as analyseContexts, resolvePrefixes } from '../marawa/rdfa-context-scanner';
 
 
 /**
@@ -163,18 +163,26 @@ function findFirstNodeOfType( node, type ) {
  * @return {[DomNode]} Dom Nodes which have the correct type
  */
 function findAllNodesOfType( node, type ) {
-  console.log(`Finding all nodes of type ${type} in ${node}`);
-  const orderedContexts = analyseContexts( node );
-  let matchingDomNodes = [];
-  for( var idx = 0; idx < orderedContexts.length; idx++ ) {
-    let ctxObj = orderedContexts[idx];
-    let topContext = ctxObj.context[0]; // let's assume it's in the top context
-    if( topContext.predicate === "a"
-        && topContext.object === type )
-      matchingDomNodes += ctxObj.semanticNode.domNode;
-  }
-  console.log(`Found ${matchingDomNodes.length} nodes: ${matchingDomNodes}`);
-  return matchingDomNodes;
+  const [ {semanticNode: richNode} ] = analyseContexts( node );
+
+  let matchingNodes = [];
+
+  const processItem = function( richNode ){
+    if( richNode.rdfaAttributes.typeof ) {
+      const nodeTypes = resolvePrefixes( richNode.rdfaAttributes, richNode.rdfaPrefixes ).typeof;
+      if( nodeTypes.includes( type ) )
+        matchingNodes.push( richNode );
+    }
+  };
+
+  const walk = function( richNode, functor ){
+    functor(richNode);
+    (richNode.children || []).forEach( (child) => walk( child, functor ) );
+  };
+
+  walk( richNode, processItem );
+
+  return matchingNodes.map( (richNode) => richNode.domNode );
 }
 
 /**
