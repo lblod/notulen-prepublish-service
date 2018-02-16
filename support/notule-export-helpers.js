@@ -34,7 +34,7 @@ function importAgenda( tempGraph ){
                         VALUES ?p {
                           <http://purl.org/dc/terms/title>
                           <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar>
-                          <http://data.vlaanderen.be/ns/besluit#AgendaPunt.type>
+                          <http://data.vlaanderen.be/ns/besluit#Agendapunt.type>
                           <http://purl.org/dc/terms/description>
                         }
                       }
@@ -92,7 +92,7 @@ function importAgendaFromDoc( tempGraph, doc, domNode ) {
                            <http://purl.org/dc/terms/title>
                            <http://purl.org/dc/terms/description>
                            <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar>
-                           <http://data.vlaanderen.be/ns/besluit#AgendaPunt.type>
+                           <http://data.vlaanderen.be/ns/besluit#Agendapunt.type>
                          }
                        }
                        UNION
@@ -181,7 +181,7 @@ function ensureGlobalUuidsForAgendaImport( graphName ){
     "http://mu.semte.ch/vocabularies/ext/EditorDocument",
     "http://data.vlaanderen.be/ns/besluit#Zitting",
     "http://data.vlaanderen.be/ns/besluit#Agenda",
-    "http://data.vlaanderen.be/ns/besluit#AgendaPunt"
+    "http://data.vlaanderen.be/ns/besluit#Agendapunt"
   ]);
 }
 
