@@ -60,12 +60,12 @@ function graphForDomNode( node, dom, baseUri ){
  * @private
  */
 function extractPrefixString( prefixObject ){
-  let resultStr = "";
+  let prefixes = [];
   for( var key in prefixObject ){
     if( key != "" )
-      resultStr += ` ${key}: ${prefixObject[key]}`;
+      prefixes = [` ${key}: ${prefixObject[key]}`, ...prefixes];
   }
-  return resultStr;
+  return prefixes.join(" ");
 }
 
 /**
