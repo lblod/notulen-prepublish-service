@@ -215,26 +215,45 @@ app.post('/publish/agenda/:documentIdentifier', (req, res) => {
       .then( () => ensureGlobalUuidsForAgendaImport( graphName ) )
       .then( () => cleanTempGraph( graphName ) )
       .then( () => res.send( { success: true, item: graphName, content: graph.toString() } ) )
-      .catch( (err) => res.send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } ) );
+      .catch( (err) => {
+        return res
+          .status(400)
+          .send( { message: `An error occurred, could not save to ${graphName}`, err: JSON.stringify(err) } );
+      } );
   } );
 });
 
-app.post('/publish/notulen/:documentIdentifier', (req, res) => {
-  editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
-    const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
-    const topDomNode = dom.window.document.querySelector('body');
-    topDomNode.setAttribute( 'vocab', doc.context.vocab );
-    topDomNode.setAttribute( 'prefix', ( () => {
-      var str = "";
-      for( var key in doc.context.prefix )
-        if( key != "" )
-          str += `${key}: ${doc.context.prefix[key]} `;
-      return str;
-    } )() );
+function nodeAndDomForEditorDocument( doc ){
+  const dom = new jsdom.JSDOM( `<body>${doc.content}</body>` );
+  const topDomNode = dom.window.document.querySelector('body');
+  topDomNode.setAttribute( 'vocab', doc.context.vocab );
+  topDomNode.setAttribute( 'prefix', ( () => {
+    var str = "";
+    for( var key in doc.context.prefix )
+      if( key != "" )
+        str += `${key}: ${doc.context.prefix[key]} `;
+    return str;
+  } )() );
 
-    importNotuleFromDoc( topDomNode, dom )
-      .then( () => importDecisionsFromDoc( topDomNode, dom ) )
+  return [ topDomNode, dom ];
+}
+
+app.post('/publish/notule/:documentIdentifier', (req, res) => {
+  editorDocumentFromUuid( req.params.documentIdentifier ).then( (doc) => {
+    let topDomNode, dom;
+    [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
+
+    importNotuleFromDoc( topDomNode, dom, doc )
+      .then( () => {
+        let topDomNode, dom;
+        [ topDomNode, dom ] = nodeAndDomForEditorDocument( doc );
+        return importDecisionsFromDoc( topDomNode, dom, doc );
+      })
       .then( () => res.send( { success: true } ) )
-      .catch( (err) => res.send( { message: `An error occurred`, err: JSON.stringify( err ) } ) );
+      .catch( (err) => {
+        return res
+          .status(400)
+          .send( { message: `An error occurred`, err: JSON.stringify( err ) } );
+      } );
   } );
 });
