@@ -2,10 +2,12 @@ import { app, uuid } from 'mu';
 
 import { editorDocumentFromUuid } from './support/editor-document';
 
-import { importAgendaFromDoc,
-         importNotuleFromDoc,
+import { importAgendaFromDoc } from './support/agenda-exporter';
+        
+
+import { importNotuleFromDoc,
          importDecisionsFromDoc
-       } from './support/notule-export-helpers';
+       } from './support/notule-exporter';
 
 app.post('/publish/agenda/:documentIdentifier', async function(req, res) {
   try {
