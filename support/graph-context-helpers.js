@@ -34,12 +34,6 @@ function graphForDomNode( node, dom, baseUri ){
 
   wrapper.setAttribute( 'prefix', prefix );
   wrapper.setAttribute( 'vocab', vocab );
-  console.log(`Prefix is ${prefix}`);
-  console.log( prefix );
-  console.log( JSON.stringify( prefix ) );
-  console.log(`Vocab is ${vocab}`);
-  console.log( vocab );
-  console.log( JSON.stringify( vocab ) );
 
   const doc = new dom.window.Document();
   doc.appendChild( wrapper );
@@ -100,11 +94,8 @@ function saveGraphInTriplestore( graph, graphUri ) {
  * saved successfully.
  */
 function saveNodeInTriplestore( node, resource ) {
-  console.log(`Saving ${node} to ${resource}`);
   const html = node.outerHTML;
-  console.log(`HTML of node is ${node}`);
   const escapedHtml = sparqlEscapeString( html );
-  console.log(`Escaped html of node is ${escapedHtml}`);
 
   // We've put two quotes around escapedHtml to make the escapedHtml happy.  We can probably do better in the template.
   return update( `PREFIX pav: <http://purl.org/pav/>
@@ -122,7 +113,6 @@ INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derived
  * correctly cleaned.
  */
 function cleanTempGraph( tempGraph ) {
-  console.log(`cleaning temporary graph ${tempGraph}`);
   update( `DELETE WHERE { GRAPH <${tempGraph}> {?s ?p ?o.} }` );
 }
 
@@ -137,7 +127,6 @@ function cleanTempGraph( tempGraph ) {
  * @return {DomNode} Dom Node which has the correct type
  */
 function findFirstNodeOfType( node, type ) {
-  console.log(`Finding first node of type ${type} in ${node}`);
   const orderedContexts = analyseContexts( node );
   for( var idx = 0; idx < orderedContexts.length; idx++ ) {
     let ctxObj = orderedContexts[idx];
@@ -199,20 +188,17 @@ function removeBlankNodes( graph ){
   for( let skey in graph.subjects ){
     const subject = graph.subjects[skey];
     if( skey.indexOf("_:") === 0 ) {
-      console.log( `Will remove ${skey}` );
       delete graph.subjects[skey];
     } else {
       for( let pkey in subject.predicates ){
         const predicate = subject.predicates[pkey];
         if( pkey.indexOf("_:") === 0 ) {
-          console.log( `Will remove predicate ${pkey}` );
           delete subject.predicates[pkey];
         } else {
           let newObjectsArr = [];
           for( let idx = 0 ; idx < predicate.objects.length ; idx++ ) {
             const value = predicate.objects[idx];
             if( value.value.indexOf( "_:" ) === 0 && value.type === "http://www.w3.org/1999/02/22-rdf-syntax-ns#object" ) {
-              console.log( `Will remove value ${value.value}` );
             } else {
               newObjectsArr = [ value , ...newObjectsArr ];
             }
@@ -221,13 +207,11 @@ function removeBlankNodes( graph ){
             newObjectsArr.reverse();
             predicate.objects = newObjectsArr;
           } else {
-            console.log(`No keys left in predicate ${pkey}, removing`);
             delete subject.predicates[pkey];
           }
         }
       }
       if( Object.keys( subject.predicates ).length === 0 ) {
-        console.log(`No keys left in subject ${skey}, removing`);
         delete graph.subjects[skey];
       }
     }

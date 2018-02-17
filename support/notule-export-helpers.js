@@ -17,7 +17,6 @@ import { graphForDomNode, findFirstNodeOfType, findAllNodesOfType, saveGraphInTr
  * to the main triplestore.
  */
 function importAgenda( tempGraph ){
-  console.log( `Importing agenda from ${tempGraph}` );
   return update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
                   WHERE {
                     GRAPH <${tempGraph}> {
@@ -59,8 +58,6 @@ function importAgenda( tempGraph ){
  */
 
 function importAgendaFromDoc( tempGraph, doc, domNode ) {
-  console.log( `Importing agenda from ${tempGraph}` );
-
   // make agenda resource
   // ensure output is written to pav:derivedFrom
 
