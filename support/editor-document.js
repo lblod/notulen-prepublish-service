@@ -64,9 +64,9 @@ class EditorDocument {
  * @return {Promise} Promise which resolves to an object representing
  * the EditorDocument
  */
-function editorDocumentFromUuid( uuid ){
+async function editorDocumentFromUuid( uuid ){
   // We have removed dc:title from here
-  return query(
+  const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
      SELECT * WHERE {
      GRAPH <http://mu.semte.ch/application> {
@@ -75,21 +75,20 @@ function editorDocumentFromUuid( uuid ){
             ext:editorDocumentContext ?context;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid )}
        }
-     }`)
-    .then( (queryResult) => {
-      if( queryResult.results.bindings.length === 0 )
-        throw `No content found for EditorDocument ${uuid}`;
-      const result = queryResult.results.bindings[0];
+     }`);
+  
+  if( queryResult.results.bindings.length === 0 )
+    throw `No content found for EditorDocument ${uuid}`;
+  const result = queryResult.results.bindings[0];
 
-      const doc = new EditorDocument({
-        uri: result.uri.value,
-        // title: result.title,
-        context: JSON.parse( result.context.value ),
-        content: result.content.value
-      });
+  const doc = new EditorDocument({
+    uri: result.uri.value,
+    // title: result.title,
+    context: JSON.parse( result.context.value ),
+    content: result.content.value
+  });
 
-      return doc;
-    } );
+  return doc;
 }
 
 

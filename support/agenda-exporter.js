@@ -47,8 +47,8 @@ async function importAgendaFromDoc( doc ) {
  *
  * @private
  */
-function importAgenda( tempGraph ){
-  return update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
+async function importAgenda( tempGraph ){
+  await update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
                   WHERE {
                     GRAPH <${tempGraph}> {
                       {
@@ -89,11 +89,11 @@ function importAgenda( tempGraph ){
  *
  * @private
  */
-function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
+async function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
   // make agenda resource
   // ensure output is written to pav:derivedFrom
 
-  return update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
+  await update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
                   WHERE {
                      GRAPH <${tempGraph}> {
                        {
@@ -157,8 +157,8 @@ function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
  *
  * @private
  */
-function ensureGlobalUuidsForAgendaImport( graphName ){
-  return ensureGlobalUuidsForTypes( graphName, [
+async function ensureGlobalUuidsForAgendaImport( graphName ){
+  await ensureGlobalUuidsForTypes( graphName, [
     "http://mu.semte.ch/vocabularies/ext/EditorDocument",
     "http://data.vlaanderen.be/ns/besluit#Zitting",
     "http://data.vlaanderen.be/ns/besluit#Agenda",

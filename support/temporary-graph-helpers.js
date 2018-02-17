@@ -21,8 +21,8 @@ import { update } from 'mu';
  *
  * @return {Promise} Returns truethy when the store could be populated.
  */
-function saveGraphInTriplestore( graph, graphUri ) {
-  return update(`INSERT DATA { GRAPH <${graphUri}> { ${graph.toString()} } }`);
+async function saveGraphInTriplestore( graph, graphUri ) {
+  await update(`INSERT DATA { GRAPH <${graphUri}> { ${graph.toString()} } }`);
 }
 
 /**
@@ -35,8 +35,8 @@ function saveGraphInTriplestore( graph, graphUri ) {
  * @return {Promise} Promise which emits successfully if the graph was
  * correctly cleaned.
  */
-function cleanTempGraph( tempGraph ) {
-  update( `DELETE WHERE { GRAPH <${tempGraph}> {?s ?p ?o.} }` );
+async function cleanTempGraph( tempGraph ) {
+  await update( `DELETE WHERE { GRAPH <${tempGraph}> {?s ?p ?o.} }` );
 }
 
 

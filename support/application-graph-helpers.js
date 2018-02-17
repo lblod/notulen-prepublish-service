@@ -19,12 +19,12 @@ import { update, query,
  * @return {Promise} Promise which yields true when the content was
  * saved successfully.
  */
-function saveNodeInTriplestore( node, resource ) {
+async function saveNodeInTriplestore( node, resource ) {
   const html = node.outerHTML;
   const escapedHtml = sparqlEscapeString( html );
 
   // We've put two quotes around escapedHtml to make the escapedHtml happy.  We can probably do better in the template.
-  return update( `PREFIX pav: <http://purl.org/pav/>
+  await update( `PREFIX pav: <http://purl.org/pav/>
 INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derivedFrom ""${escapedHtml}"". } }` );
 }
 
@@ -42,8 +42,8 @@ INSERT DATA { GRAPH <http://mu.semte.ch/application> { <${resource}> pav:derived
  * @return {Promise} promise which resolves when the operation has
  * finished.
  */
-function ensureGlobalUuidsForTypes( graphName, types ){
-  return query(
+async function ensureGlobalUuidsForTypes( graphName, types ){
+  const response = await query(
     `SELECT ?subject WHERE {
        GRAPH ${sparqlEscapeUri( graphName )} {
          ?subject a ?type
@@ -51,23 +51,22 @@ function ensureGlobalUuidsForTypes( graphName, types ){
            ${ types.map( sparqlEscapeUri ).join( " " ) }
          }
        }
-     }`).then( (response) => {
-       const promiseArr =
-             response.results.bindings.map( ({subject}) => {
-               const query = `
-                 INSERT {
-                   GRAPH <http://mu.semte.ch/application> {
-                     ?s <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid() )}.
-                   }
-                 } WHERE {
-                   FILTER NOT EXISTS {
-                    ?s <http://mu.semte.ch/vocabularies/core/uuid> ?uuid
-                   }
-                   VALUES ?s { ${sparqlEscapeUri(subject.value)} }
-                 }`;
-               return update(query); } );
-       return Promise.all( promiseArr );
-     } );
+     }`);
+
+  await Promise.all(
+    response.results.bindings.map( async function({subject}){
+      await update(
+        `INSERT {
+           GRAPH <http://mu.semte.ch/application> {
+             ?s <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid() )}.
+           }
+         } WHERE {
+           FILTER NOT EXISTS {
+            ?s <http://mu.semte.ch/vocabularies/core/uuid> ?uuid
+           }
+           VALUES ?s { ${sparqlEscapeUri(subject.value)} }
+         }`);
+    }) );
 }
 
 export { ensureGlobalUuidsForTypes };
