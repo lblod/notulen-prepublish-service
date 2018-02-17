@@ -1,6 +1,6 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 
-import { ensureGlobalUuidsForTypes } from './application-graph-helpers';
+import { ensureGlobalUuidsForTypes, insertUnionOfQueries } from './application-graph-helpers';
 import { saveGraphInTriplestore, cleanTempGraph } from './temporary-graph-helpers';
 
 import { findFirstNodeOfType, findAllNodesOfType } from './dom-helpers';
@@ -111,65 +111,63 @@ async function importDecisionsFromDoc( node, dom ){
     `);
     const bvapUri = queryResult.results.bindings[0].uri.value;
     
-    await update(`
-      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-      PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
-      PREFIX prov: <http://www.w3.org/ns/prov#>
-      PREFIX eli: <http://data.europa.eu/eli/ontology#>
-      INSERT {
-        GRAPH <http://mu.semte.ch/application> {
+    await insertUnionOfQueries( {
+      prefix: `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+               PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+               PREFIX prov: <http://www.w3.org/ns/prov#>
+               PREFIX eli: <http://data.europa.eu/eli/ontology#>`,
+      sourceGraph: tmpGraphName,
+      splitCalls: false, // set to true to get different calls
+      queries: [
+        // importeer het type, het gevolg van de behandeling (TODO: is dit correct?) en de link naar het besluit.
+        ` ?s a besluit:BehandelingVanAgendapunt.
+          ?s ?p ?o
+          VALUES ?p {
+            rdf:type
+            besluit:gevolg
+            prov:generated
+          }`
+        ,
+        // Eigenschappen van het besluit zelf
+        ` ?ss a besluit:BehandelingVanAgendapunt;
+               prov:generated ?s.
+           ?s ?p ?o.
+           VALUES ?p {
+             rdf:type
+             eli:cites
+             eli:language
+             eli:title
+             eli:description
+             besluit:motivering
+             eli:has_part
+           }`
+        ,
+        // Informatie over de Artikels van het besluit
+        ` ?sss a besluit:BehandelingVanAgendapunt;
+               prov:generated ?ss.
+          ?ss eli:has_part ?s.
           ?s ?p ?o.
-        }
-      } WHERE {
-        GRAPH ${sparqlEscapeUri( tmpGraphName )}
-        {
-          {
-            ?s a besluit:BehandelingVanAgendapunt.
-            ?s ?p ?o
-            VALUES ?p {
-              rdf:type 
-              besluit:gevolg
-              prov:generated
-            }
-          } UNION {
-            ?ss a besluit:BehandelingVanAgendapunt;
-                prov:generated ?s.
-            ?s ?p ?o.
-            VALUES ?p {
-              rdf:type
-              eli:cites
-              eli:language
-              eli:title
-              eli:description
-              besluit:motivering
-              eli:has_part
-            }
-          } UNION {
-            ?sss a besluit:BehandelingVanAgendapunt;
-                 prov:generated ?ss.
-            ?ss eli:has_part ?s.
-            ?s ?p ?o.
-            VALUES ?p {
-              rdf:type
-              eli:number
-              eli:language
-              prov:value
-            }
-          } UNION {
-            ?ss a besluit:BehandelingVanAgendapunt;
-                prov:generated ?s.
-            ?s ?p ?o.
-            BIND ( <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#score> AS ?p )
-            BIND ( STRDT("1", xsd:float) AS ?o )
-          } UNION {
-            ?ss a besluit:BehandelingVanAgendapunt;
-                prov:generated ?s.
-            ?s eli:title ?o.
-            BIND ( eli:title_short AS ?p )
-          }
-        }
-      }
-    `);
+          VALUES ?p {
+            rdf:type
+            eli:number
+            eli:language
+            prov:value
+          }`
+        ,
+        // Score zodat het besluit bovenaan komt
+        ` ?ss a besluit:BehandelingVanAgendapunt;
+              prov:generated ?s.
+          ?s ?p ?o.
+          BIND ( <http://www.semanticdesktop.org/ontologies/2007/08/15/nao#score> AS ?p )
+          BIND ( STRDT("1", xsd:float) AS ?o )`
+        ,
+        // Zorg dat de verkorte titel dezelfde is als de gewone titel
+        // TODO: hoort dit in de toekomst zo te blijven?
+        ` ?ss a besluit:BehandelingVanAgendapunt;
+              prov:generated ?s.
+          ?s eli:title ?o.
+          BIND ( eli:title_short AS ?p )`
+      ] } );
     await update(`
       INSERT DATA {
         GRAPH <http://mu.semte.ch/application> {
