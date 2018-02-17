@@ -1,9 +1,42 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 
-import { graphForDomNode, findFirstNodeOfType, findAllNodesOfType, saveGraphInTriplestore, cleanTempGraph, removeBlankNodes } from './graph-context-helpers';
+import { ensureGlobalUuidsForTypes } from './application-graph-helpers';
+import { saveGraphInTriplestore, cleanTempGraph } from './temporary-graph-helpers';
+
+import { findFirstNodeOfType, findAllNodesOfType } from './dom-helpers';
+
+import { graphForDomNode, removeBlankNodes } from './rdfa-helpers';
+
 /**
  * This file contains helpers for exporting content from the notule.
  */
+
+
+// AGENDA
+
+
+/**
+ * Imports the agenda stored in Doc into the triplestore
+ *
+ * @method importAgendaFromDoc
+ * 
+ * @param {EditorDocument} doc EditorDocument in which the agenda is
+ * contained.
+ *
+ * @return {Promise} Promise which returns positive iff the agenda was
+ * imported correctly
+ */
+async function importAgendaFromDoc( doc ) {
+  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+  const graphName = `http://notule-importer.mu/${uuid()}`;
+  const graph = graphForDomNode( node, doc.getDom(), "https://besluit.edu" );
+  removeBlankNodes( graph );
+
+  await saveGraphInTriplestore( graph, graphName );
+  await importAgendaTriplesFromDoc( graphName, doc, node );
+  await ensureGlobalUuidsForAgendaImport( graphName );
+  await cleanTempGraph( graphName );
+}
 
 /**
  * Imports the Agenda into the main graph
@@ -15,6 +48,8 @@ import { graphForDomNode, findFirstNodeOfType, findAllNodesOfType, saveGraphInTr
  *
  * @return {Promise} Yields positive when the content has been saved
  * to the main triplestore.
+ *
+ * @private
  */
 function importAgenda( tempGraph ){
   return update( `INSERT { GRAPH <http://mu.semte.ch/application> { ?s ?p ?o. } }
@@ -45,7 +80,7 @@ function importAgenda( tempGraph ){
  * Imports the agenda in the tempGraph, which originates from the
  * supplied EditorDocument to the triplestore.
  *
- * @method importAgendaFromDoc
+ * @method importAgendaTriplesFromDoc
  *
  * @param {string} tempGraph Name of the graph from which the contents
  * originate.
@@ -55,9 +90,10 @@ function importAgenda( tempGraph ){
  *
  * @return {Promise} Yields positive when the content has been saved
  * to the main triplestore.
+ *
+ * @private
  */
-
-function importAgendaFromDoc( tempGraph, doc, domNode ) {
+function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
   // make agenda resource
   // ensure output is written to pav:derivedFrom
 
@@ -110,57 +146,6 @@ function importAgendaFromDoc( tempGraph, doc, domNode ) {
   //   }
 }
 
-class EditorDocument {
-  constructor(content) {
-    for( var key in content )
-      this[key] = content[key];
-  }
-
-  // uri = null
-  // title = null
-  // context = null
-  // content = null
-}
-
-/**
- * Retrieves the EditorDocument belonging to the supplied uuid
- *
- * @method editorDocumentFromUuid
- *
- * @param {string} uuid UUID which is coupled to the EditorDocument as
- * mu:uuid property.
- *
- * @return {Promise} Promise which resolves to an object representing
- * the EditorDocument
- */
-function editorDocumentFromUuid( uuid ){
-  // We have removed dc:title from here
-  return query(
-    `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-     SELECT * WHERE {
-     GRAPH <http://mu.semte.ch/application> {
-       ?uri a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
-            ext:editorDocumentContent ?content;
-            ext:editorDocumentContext ?context;
-            <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid )}
-       }
-     }`)
-    .then( (queryResult) => {
-      if( queryResult.results.bindings.length === 0 )
-        throw `No content found for EditorDocument ${uuid}`;
-      const result = queryResult.results.bindings[0];
-
-      const doc = new EditorDocument({
-        uri: result.uri.value,
-        // title: result.title,
-        context: JSON.parse( result.context.value ),
-        content: result.content.value
-      });
-
-      return doc;
-    } );
-}
-
 /**
  * Ensures all resources related to the agenda have a UUID in the
  *  mu.semte.ch graph.  For this, we read the concepts from the old
@@ -173,6 +158,8 @@ function editorDocumentFromUuid( uuid ){
  *
  * @return {Promise} promise which resolves when the operation has
  * finished.
+ *
+ * @private
  */
 function ensureGlobalUuidsForAgendaImport( graphName ){
   return ensureGlobalUuidsForTypes( graphName, [
@@ -183,47 +170,8 @@ function ensureGlobalUuidsForAgendaImport( graphName ){
   ]);
 }
 
-/**
- * Ensures all resources in the temporary graph with the supplied
- *  types have a UUID in the shared mu.semte.ch graph.
- *
- * @method ensureGlobalUuidsForTypes
- *
- * @param {string} graphName Name of the graph in which we'll search
- * for the resources.
- * @param {[string]} types Full string uri of all types which should
- * receive the uuid treatment.
- *
- * @return {Promise} promise which resolves when the operation has
- * finished.
- */
-function ensureGlobalUuidsForTypes( graphName, types ){
-  return query(
-    `SELECT ?subject WHERE {
-       GRAPH ${sparqlEscapeUri( graphName )} {
-         ?subject a ?type
-         VALUES ?type {
-           ${ types.map( sparqlEscapeUri ).join( " " ) }
-         }
-       }
-     }`).then( (response) => {
-       const promiseArr =
-             response.results.bindings.map( ({subject}) => {
-               const query = `
-                 INSERT {
-                   GRAPH <http://mu.semte.ch/application> {
-                     ?s <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid() )}.
-                   }
-                 } WHERE {
-                   FILTER NOT EXISTS {
-                    ?s <http://mu.semte.ch/vocabularies/core/uuid> ?uuid
-                   }
-                   VALUES ?s { ${sparqlEscapeUri(subject.value)} }
-                 }`;
-               return update(query); } );
-       return Promise.all( promiseArr );
-     } );
-}
+
+// NOTULEN
 
 async function importNotuleFromDoc( node, dom, doc ){
   // Store session in temporary graph
@@ -426,5 +374,6 @@ async function importDecisionsFromDoc( node, dom ){
   // Remove APG
 }
 
-export { importAgenda, editorDocumentFromUuid, importAgendaFromDoc, ensureGlobalUuidsForAgendaImport };
+export { importAgendaFromDoc };
+
 export { importNotuleFromDoc, importDecisionsFromDoc };
