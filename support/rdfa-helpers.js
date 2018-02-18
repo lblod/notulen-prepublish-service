@@ -54,8 +54,9 @@ function extractPrefixString( prefixObject ){
   let prefixes = [];
   for( var key in prefixObject ){
     if( key != "" )
-      prefixes = [` ${key}: ${prefixObject[key]}`, ...prefixes];
+      prefixes = [`${key}: ${prefixObject[key]}`, ...prefixes];
   }
+  prefixes = [`ext: http://mu.semte.ch/vocabularies/ext/`, ...prefixes];
   return prefixes.join(" ");
 }
 
