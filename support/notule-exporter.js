@@ -14,7 +14,7 @@ import { graphForDomNode, removeBlankNodes } from './rdfa-helpers';
 
 // NOTULEN
 
-async function importNotuleFromDoc( node, dom, doc ){
+async function importCoreNotuleFromDoc( node, dom, doc ){
   // Store session in temporary graph
   const sessionNode = findFirstNodeOfType( node, "http://data.vlaanderen.be/ns/besluit#Zitting" );
   const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
@@ -27,17 +27,6 @@ async function importNotuleFromDoc( node, dom, doc ){
   // Store session in temporary graph (in Virtuoso)
   await saveGraphInTriplestore( tmpGraph, tmpGraphName );
 
-  // Find URI of session
-  let queryResult;
-  queryResult = await query(`
-    SELECT ?uri WHERE {
-      GRAPH ${sparqlEscapeUri( tmpGraphName )} {
-        ?uri a <http://data.vlaanderen.be/ns/besluit#Zitting>
-      }
-    }
-  `);
-  const sessionUri = queryResult.results.bindings[0].uri.value;
-  
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
@@ -54,26 +43,11 @@ async function importNotuleFromDoc( node, dom, doc ){
           rdf:type 
           besluit:isGehoudenDoor
           besluit:geplandeStart
-          prov:atLocation
-          prov:startedAtTime
-          prov:endedAtTime
-          besluit:heeftAgenda
           ext:behandelt
         }
       }
     }
   `);
-  await update(`
-    INSERT DATA {
-      GRAPH <http://mu.semte.ch/application> {
-        ${sparqlEscapeUri( sessionUri )} 
-          <http://purl.org/pav/derivedFrom>
-            ""${sparqlEscapeString( outerHtml )}"".
-        ${sparqlEscapeUri( sessionUri )}
-          <http://data.vlaanderen.be/ns/besluit#heeftNotulen>
-            ${sparqlEscapeUri( doc.uri )}.
-      }
-    }`);
   await ensureGlobalUuidsForTypes( tmpGraphName, [ "http://data.vlaanderen.be/ns/besluit#Zitting" ] );
   await cleanTempGraph( tmpGraphName );
   // Store session in main graph
@@ -213,4 +187,64 @@ async function importDecisionsFromDoc( node, dom ){
   // Remove APG
 }
 
-export { importNotuleFromDoc, importDecisionsFromDoc };
+async function importFullNotuleFromDoc( node, dom, doc ){
+  // Store session in temporary graph
+  const sessionNode = findFirstNodeOfType( node, "http://data.vlaanderen.be/ns/besluit#Zitting" );
+  const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
+  const tmpGraph = graphForDomNode( sessionNode, dom, "https://besluit.edu" );
+  removeBlankNodes( tmpGraph );
+  
+  // Find outerHTML of session
+  const outerHtml = sessionNode.outerHTML;
+
+  // Store session in temporary graph (in Virtuoso)
+  await saveGraphInTriplestore( tmpGraph, tmpGraphName );
+
+  // Find URI of session
+  let queryResult;
+  queryResult = await query(`
+    SELECT ?uri WHERE {
+      GRAPH ${sparqlEscapeUri( tmpGraphName )} {
+        ?uri a <http://data.vlaanderen.be/ns/besluit#Zitting>
+      }
+    }
+  `);
+  const sessionUri = queryResult.results.bindings[0].uri.value;
+  
+  await update(`
+    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+    INSERT {
+      GRAPH <http://mu.semte.ch/application> {
+        ?s ?p ?o.
+      }
+    } WHERE {
+      GRAPH ${sparqlEscapeUri( tmpGraphName )} {
+        ?s a besluit:Zitting.
+        ?s ?p ?o
+        VALUES ?p {
+          rdf:type 
+          prov:atLocation
+          prov:startedAtTime
+          prov:endedAtTime
+        }
+      }
+    }
+  `);
+  await update(`
+    INSERT DATA {
+      GRAPH <http://mu.semte.ch/application> {
+        ${sparqlEscapeUri( sessionUri )}
+          <http://purl.org/pav/derivedFrom>
+            ""${sparqlEscapeString( outerHtml )}"".
+        ${sparqlEscapeUri( sessionUri )}
+          <http://data.vlaanderen.be/ns/besluit#heeftNotulen>
+            ${sparqlEscapeUri( doc.uri )}.
+      }
+    }`);
+  await ensureGlobalUuidsForTypes( tmpGraphName, [ "http://data.vlaanderen.be/ns/besluit#Zitting" ] );
+  await cleanTempGraph( tmpGraphName );
+}
+
+export { importCoreNotuleFromDoc, importDecisionsFromDoc, importFullNotuleFromDoc };
