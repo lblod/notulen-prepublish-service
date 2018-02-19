@@ -101,6 +101,7 @@ async function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
           <http://data.vlaanderen.be/ns/besluit#heeftAgenda>
           <http://data.vlaanderen.be/ns/besluit#geplandeStart>
+          <http://data.vlaanderen.be/ns/besluit#isGehoudenDoor>
         }`
       ,
       ` ?ss a <http://data.vlaanderen.be/ns/besluit#Zitting>;
