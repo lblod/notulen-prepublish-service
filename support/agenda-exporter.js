@@ -120,11 +120,12 @@ async function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
           <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar>
           <http://data.vlaanderen.be/ns/besluit#Agendapunt.type>
         }`
-      ,
-      ` ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
-        BIND ( <http://data.vlaanderen.be/ns/besluit#heeftNotulen> AS ?p )
-        BIND ( ${sparqlEscapeUri(doc.uri)} AS ?o )
-      `
+      // , // We skip this query for now, as we will only publish these
+      //   // Meeting Minutes after the meeting was held
+      // ` ?s a <http://data.vlaanderen.be/ns/besluit#Zitting>.
+      //   BIND ( <http://data.vlaanderen.be/ns/besluit#heeftNotulen> AS ?p )
+      //   BIND ( ${sparqlEscapeUri(doc.uri)} AS ?o )
+      // `
       // , // We skipped this query. It should insert the contents, but
       //   // that should be handled by a separate INSERT DATA query.
       // ` ?ss <http://data.vlaanderen.be/ns/besluit#heeftAgenda> ?s.
