@@ -30,7 +30,7 @@ app.post('/publish/notule/:documentIdentifier', async function(req, res) {
     await importNotuleFromDoc( doc.getTopDomNode(), doc.getDom(), doc );
 
     doc.resetDom();
-    await importDecisionsFromDoc( doc.getTopDomNode(), doc.getDom(), doc );
+    await importDecisionsFromDoc( doc.getTopDomNode(), doc.getDom() );
     res.send( { success: true } );
   } catch (err) {
     res
