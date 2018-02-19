@@ -2,7 +2,7 @@
  * Importer for agenda from Meeting Minutes
  */
 
-import { update,
+import { query, update,
          sparqlEscapeUri,
          uuid } from 'mu';
 
@@ -29,9 +29,39 @@ async function importAgendaFromDoc( doc ) {
   removeBlankNodes( graph );
 
   await saveGraphInTriplestore( graph, graphName );
-  await importAgendaTriplesFromDoc( graphName, doc, node );
-  await ensureGlobalUuidsForAgendaImport( graphName );
-  await cleanTempGraph( graphName );
+
+  if( await tempGraphHasAgenda( graphName ) ) {
+    await importAgendaTriplesFromDoc( graphName, doc, node );
+    await ensureGlobalUuidsForAgendaImport( graphName );
+    await cleanTempGraph( graphName );
+  } else {
+    await cleanTempGraph( graphName );
+    throw "Document did not contain Agenda";
+  }
+}
+
+/**
+ * Returns a truethy value from its promise iff the temporary graph
+ * contained an agenda
+ *
+ * @method tempGraphHasAgenda
+ *
+ * @param {string} graphName Name of the temp graph which we'll search
+ * through.
+ *
+ * @return {Promise} Promise which returns truethy iff the temporary
+ * graph contained an agenda.
+ */
+async function tempGraphHasAgenda( graphName ) {
+  const queryResponse = await query(`SELECT ?uri
+    WHERE {
+      GRAPH ${sparqlEscapeUri( graphName )} {
+        ?uri a <http://data.vlaanderen.be/ns/besluit#Agenda>.
+      }
+    } LIMIT 1
+  `);
+
+  return queryResponse.results.bindings.length > 0;
 }
 
 /**
@@ -112,7 +142,9 @@ async function importAgendaTriplesFromDoc( tempGraph, doc, domNode ) {
           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
         }`
       ,
-      ` ?ss <http://data.vlaanderen.be/ns/besluit#heeftAgendapunt> ?s.
+      ` ?ss a <http://data.vlaanderen.be/ns/besluit#Zitting>;
+            <http://data.vlaanderen.be/ns/besluit#heeftAgenda>/<http://data.vlaanderen.be/ns/besluit#heeftAgendapunt>
+              ?s.
         ?s ?p ?o.
         VALUES ?p {
           <http://purl.org/dc/terms/title>
