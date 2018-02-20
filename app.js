@@ -36,7 +36,7 @@ app.post('/publish/decision/:documentIdentifier', async function(req, res) {
   } catch (err) {
     res
       .status(400)
-      .send( { message: `An error occurred while publishing minutes for ${req.params.documentIdentifier}`,
+      .send( { message: `An error occurred while publishing decisions for ${req.params.documentIdentifier}`,
                err: JSON.stringify( err ) } );
   }
 });
