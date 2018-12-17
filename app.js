@@ -3,7 +3,7 @@ import { app, uuid } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 
 import { importAgendaFromDoc } from './support/agenda-exporter';
-        
+import { preImportAgendaFromDoc } from './support/pre-importer';
 
 import { importCoreNotuleFromDoc,
          importDecisionsFromDoc,
@@ -20,6 +20,25 @@ app.post('/publish/agenda/:documentIdentifier', async function(req, res) {
     res
       .status(400)
       .send( { message: `An error occurred while publishing agenda ${req.params.documentIdentifier}`,
+               err: JSON.stringify(err) } );
+  }
+} );
+
+app.post('/prepublish/agenda/:documentIdentifier', async function(req, res) {
+  try {
+    console.log("look at me prepublishing");
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    console.log("I can has document");
+    await preImportAgendaFromDoc(doc);
+    res.send( { success: true } );
+  } catch (err) {
+
+    console.log("We had a booboo");
+    console.log(JSON.stringify(err));
+
+    res
+      .status(400)
+      .send( { message: `An error occurred while pre-publishing agenda ${req.params.documentIdentifier}`,
                err: JSON.stringify(err) } );
   }
 } );
