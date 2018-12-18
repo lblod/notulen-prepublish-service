@@ -3,7 +3,7 @@ import { app, uuid } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 
 import { importAgendaFromDoc } from './support/agenda-exporter';
-import { preImportAgendaFromDoc } from './support/pre-importer';
+import { preImportAgendaFromDoc, extractAgendaContentFromDoc } from './support/pre-importer';
 
 import { importCoreNotuleFromDoc,
          importDecisionsFromDoc,
@@ -42,6 +42,24 @@ app.post('/prepublish/agenda/:documentIdentifier', async function(req, res) {
                err: JSON.stringify(err) } );
   }
 } );
+
+app.get('/prepublish/agenda/:documentIdentifier', async function(req, res) {
+  try {
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const result = await extractAgendaContentFromDoc(doc);
+    res.send( { data: { attributes: { content: result }, type: "imported-agenda-contents" } } );
+  } catch (err) {
+
+    console.log("We had a booboo");
+    console.log(JSON.stringify(err));
+
+    res
+      .status(400)
+      .send( { message: `An error occurred while fetching contents for prepublished agenda ${req.params.documentIdentifier}`,
+               err: JSON.stringify(err) } );
+  }
+} );
+
 
 app.post('/publish/decision/:documentIdentifier', async function(req, res) {
   try {

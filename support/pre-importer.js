@@ -4,10 +4,24 @@ import {
 
 import { findAllNodesOfType } from './dom-helpers';
 
-async function preImportAgendaFromDoc( doc ) {
+/**
+ * Extracts the Agenda's content from the supplied document.
+ */
+async function extractAgendaContentFromDoc( doc ) {
   // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
   const agendapuntNodes = findAllNodesOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
-  const content = `<div class="agendapunten">${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}</div>`;
+  return `<div class="agendapunten">${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}</div>`;
+}
+
+/**
+ * Creates an agenda item in the triplestore which could be signed.
+ */
+async function preImportAgendaFromDoc( doc ) {
+  // TODO remove (or move) relationship between previously signable
+  // agenda, and the current agenda.
+
+  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+  const agendaContent = await extractAgendaContentFromDoc( doc );
   const agendaUuid = uuid();
   const agendaUri = `http://lblod.info/prepublished-agendas/${agendaUuid}`;
 
@@ -20,7 +34,7 @@ async function preImportAgendaFromDoc( doc ) {
     INSERT {
       ${sparqlEscapeUri(agendaUri)}
          a ext:PrePublishedAgenda;
-         ext:content ${sparqlEscapeString( content )};
+         ext:content ${sparqlEscapeString( agendaContent )};
          ext:editorDocumentContext ?context;
          mu:uuid ${sparqlEscapeString( agendaUuid )}.
       ?documentContainer ext:hasPrepublishedAgenda ${sparqlEscapeUri(agendaUri)}
@@ -33,4 +47,4 @@ async function preImportAgendaFromDoc( doc ) {
   return response; // should we return this?
 };
 
-export { preImportAgendaFromDoc };
+export { extractAgendaContentFromDoc, preImportAgendaFromDoc };
