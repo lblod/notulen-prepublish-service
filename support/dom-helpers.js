@@ -4,7 +4,7 @@
 
 import { analyse as analyseContexts,
          resolvePrefixes
-       } from '../marawa/rdfa-context-scanner';
+       } from '@lblod/marawa/rdfa-context-scanner';
 
 /**
  * Finds the first dom node with the supplied type

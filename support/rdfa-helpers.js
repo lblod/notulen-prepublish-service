@@ -3,7 +3,7 @@
  */
 
 import getRdfaGraph from 'graph-rdfa-processor';
-import { analyse as analyseContexts, resolvePrefixes } from '../marawa/rdfa-context-scanner';
+import { analyse as analyseContexts, resolvePrefixes } from '@lblod/marawa/rdfa-context-scanner';
 
 
 /**
