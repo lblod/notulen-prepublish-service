@@ -3,7 +3,7 @@ import { app, uuid } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 
 import { importAgendaFromDoc } from './support/agenda-exporter';
-import { signVersionedAgenda, preImportAgendaFromDoc, extractAgendaContentFromDoc } from './support/pre-importer';
+import { signVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/pre-importer';
 
 import { importCoreNotuleFromDoc,
          importDecisionsFromDoc,
@@ -32,7 +32,7 @@ app.post('/signing/agenda/sign/:documentIdentifier', async function(req, res) {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const preImportedAgendaUri = await preImportAgendaFromDoc(doc);
+    const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc);
     await signVersionedAgenda( preImportedAgendaUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     res.send( { success: true } );
   } catch (err) {

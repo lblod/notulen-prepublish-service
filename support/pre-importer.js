@@ -22,35 +22,52 @@ async function extractAgendaContentFromDoc( doc ) {
 /**
  * Creates an agenda item in the triplestore which could be signed.
  */
-async function preImportAgendaFromDoc( doc ) {
+async function ensureVersionedAgendaForDoc( doc ) {
   // TODO remove (or move) relationship between previously signable
   // agenda, and the current agenda.
 
-  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-  const agendaContent = await extractAgendaContentFromDoc( doc );
-  const agendaUuid = uuid();
-  const agendaUri = `http://lblod.info/prepublished-agendas/${agendaUuid}`;
-
-  // Create the new prepublished agenda, and dump it in to the store
-  await update( `
-    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+  const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
 
-    INSERT {
-      ${sparqlEscapeUri(agendaUri)}
+    SELECT ?agendaUri
+    WHERE {
+      ?agendaUri
          a ext:VersionedAgenda;
-         ext:content ${hackedSparqlEscapeString( agendaContent )};
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         mu:uuid ${hackedSparqlEscapeString( agendaUuid )}.
-      ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
-    } WHERE {
-      ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                  ext:editorDocumentContext ?context.
-    }`);
+         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)}.
+    } LIMIT 1`);
 
-  return agendaUri;
+  if( previousId.results.bindings.length ) {
+    const versionedAgendaId = previousId.results.bindings[0].agendaUri.value;
+    return versionedAgendaId;
+  } else {
+    // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+    const agendaContent = await extractAgendaContentFromDoc( doc );
+    const agendaUuid = uuid();
+    const agendaUri = `http://lblod.info/prepublished-agendas/${agendaUuid}`;
+
+    // Create the new prepublished agenda, and dump it in to the store
+    await update( `
+      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+      PREFIX pav: <http://purl.org/pav/>
+      PREFIX prov: <http://www.w3.org/ns/prov#>
+
+      INSERT {
+        ${sparqlEscapeUri(agendaUri)}
+           a ext:VersionedAgenda;
+           ext:content ${hackedSparqlEscapeString( agendaContent )};
+           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
+           mu:uuid ${hackedSparqlEscapeString( agendaUuid )}.
+        ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
+      } WHERE {
+        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
+                                    ext:editorDocumentContext ?context.
+      }`);
+
+    return agendaUri;
+  }
 };
 
 async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
@@ -97,4 +114,4 @@ async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus 
   return updatePromise;
 };
 
-export { extractAgendaContentFromDoc, signVersionedAgenda, preImportAgendaFromDoc };
+export { extractAgendaContentFromDoc, signVersionedAgenda, ensureVersionedAgendaForDoc };
