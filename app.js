@@ -1,9 +1,9 @@
-import { app, uuid } from 'mu';
+import { app } from 'mu';
 
 import { editorDocumentFromUuid } from './support/editor-document';
 
 import { importAgendaFromDoc } from './support/agenda-exporter';
-import { signVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/pre-importer';
+import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/pre-importer';
 
 import { importCoreNotuleFromDoc,
          importDecisionsFromDoc,
@@ -27,12 +27,12 @@ app.post('/publish/agenda/:documentIdentifier', async function(req, res) {
 /**
  * Makes the current user sign the agenda for the supplied document.
  */
-app.post('/signing/agenda/sign/:documentIdentifier', async function(req, res) {
+app.post('/signing/agenda/sign/:kind/:documentIdentifier', async function(req, res) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc);
+    const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc, req.params.kind);
     await signVersionedAgenda( preImportedAgendaUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     res.send( { success: true } );
   } catch (err) {
@@ -41,6 +41,31 @@ app.post('/signing/agenda/sign/:documentIdentifier', async function(req, res) {
     res
       .status(400)
       .send( { message: `An error occurred while pre-publishing agenda ${req.params.documentIdentifier}`,
+               err: JSON.stringify(err) } );
+  }
+} );
+
+/**
+ * Makes the current user sign the agenda for the supplied document.
+ */
+app.post('/signing/agenda/publish/:kind/:documentIdentifier', async function(req, res) {
+  // TODO this is 99% the same as
+  // /signing/agenda/sign/:kind/:documentIdentifier, it just uses the
+  // publishVersionedAgenda instead.  We can likely clean this up.
+
+  try {
+    // TODO: we now assume this is the first signature.  we should
+    // check and possibly support the second signature.
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc, req.params.kind);
+    await publishVersionedAgenda( preImportedAgendaUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+    res.send( { success: true } );
+  } catch (err) {
+    console.log("We had a booboo");
+    console.log(JSON.stringify(err));
+    res
+      .status(400)
+      .send( { message: `An error occurred while publishing the agenda ${req.params.documentIdentifier}`,
                err: JSON.stringify(err) } );
   }
 } );
