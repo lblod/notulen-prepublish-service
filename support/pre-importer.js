@@ -22,7 +22,9 @@ async function extractAgendaContentFromDoc( doc ) {
 /**
  * Creates an agenda item in the triplestore which could be signed.
  */
-async function ensureVersionedAgendaForDoc( doc ) {
+async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
+  // TODO: only create a versioned agenda if none exists yet.
+
   // TODO remove (or move) relationship between previously signable
   // agenda, and the current agenda.
 
@@ -35,13 +37,16 @@ async function ensureVersionedAgendaForDoc( doc ) {
     WHERE {
       ?agendaUri
          a ext:VersionedAgenda;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)}.
+         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
+         ext:agendaKind ${hackedSparqlEscapeString( agendaKind )}.
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
     const versionedAgendaId = previousId.results.bindings[0].agendaUri.value;
+    console.log(`Reusing versioned agenda ${versionedAgendaId}`);
     return versionedAgendaId;
   } else {
+    console.log("Creating new VersionedAgenda");
     // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
     const agendaContent = await extractAgendaContentFromDoc( doc );
     const agendaUuid = uuid();
@@ -59,7 +64,8 @@ async function ensureVersionedAgendaForDoc( doc ) {
            a ext:VersionedAgenda;
            ext:content ${hackedSparqlEscapeString( agendaContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${hackedSparqlEscapeString( agendaUuid )}.
+           mu:uuid ${hackedSparqlEscapeString( agendaUuid )};
+           ext:agendaKind ${hackedSparqlEscapeString( agendaKind )}.
         ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
       } WHERE {
         ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
@@ -70,15 +76,16 @@ async function ensureVersionedAgendaForDoc( doc ) {
   }
 };
 
-async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  const signedResourceUuid = uuid();
-  const signedResourceUri = `http://lblod.info/signed-resources/${signedResourceUuid}`;
+async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targetStatus ) {
+  const newResourceUuid = uuid();
+  const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
+  const newResourceUri = `http://lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
 
   // TODO: get correct signatorySecret from ACMIDM
 
   const query = `
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core>
+    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX sign: <http://mu.semte.ch/vocabularies/ext/signing/>
     PREFIX publicationStatus: <http://mu.semte.ch/vocabularies/ext/signing/publication-status/>
@@ -89,15 +96,16 @@ async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus 
       ${sparqlEscapeUri(versionedAgendaUri)}
         ext:stateString ?state.
     } INSERT {
-      ${sparqlEscapeUri(signedResourceUri)}
-        a sign:SignedResource;
+      ${sparqlEscapeUri(newResourceUri)}
+        a ${resourceType};
+        mu:uuid ${hackedSparqlEscapeString(newResourceUuid)};
         sign:text ?content;
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(new Date())};
         sign:signatorySecret ?signatorySecret;
         sign:status publicationStatus:unpublished;
-        dct:subject ${sparqlEscapeUri(versionedAgendaUri)}.
+        ${type=='signature'?'ext:signsAgenda':'ext:publishesAgenda'} ${sparqlEscapeUri(versionedAgendaUri)}.
       ${sparqlEscapeUri(versionedAgendaUri)}
         ext:stateString ${hackedSparqlEscapeString(targetStatus)}.
     } WHERE {
@@ -114,4 +122,12 @@ async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus 
   return updatePromise;
 };
 
-export { extractAgendaContentFromDoc, signVersionedAgenda, ensureVersionedAgendaForDoc };
+async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
+  handleVersionedAgenda( "signature", versionedAgendaUri, sessionId, targetStatus );
+}
+
+async function publishVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
+  handleVersionedAgenda( "publication", versionedAgendaUri, sessionId, targetStatus );
+}
+
+export { extractAgendaContentFromDoc, signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc };
