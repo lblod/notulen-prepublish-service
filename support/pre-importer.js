@@ -105,6 +105,7 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
         dct:created ${sparqlEscapeDateTime(new Date())};
         sign:signatorySecret ?signatorySecret;
         sign:status publicationStatus:unpublished;
+        dct:subject ${sparqlEscapeUri(versionedAgendaUri)};
         ${type=='signature'?'ext:signsAgenda':'ext:publishesAgenda'} ${sparqlEscapeUri(versionedAgendaUri)}.
       ${sparqlEscapeUri(versionedAgendaUri)}
         ext:stateString ${hackedSparqlEscapeString(targetStatus)}.
