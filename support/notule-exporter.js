@@ -3,7 +3,7 @@ import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { ensureGlobalUuidsForTypes, insertUnionOfQueries } from './application-graph-helpers';
 import { saveGraphInTriplestore, cleanTempGraph } from './temporary-graph-helpers';
 
-import { findFirstNodeOfType, findAllNodesOfType } from './dom-helpers';
+import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 
 import { graphForDomNode, removeBlankNodes } from './rdfa-helpers';
 

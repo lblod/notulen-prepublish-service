@@ -4,11 +4,8 @@ import {
   query, update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid
 } from  'mu';
 
-import { findAllNodesOfType } from './dom-helpers';
+import { findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 
-function hackedSparqlEscapeString( string ) {
-  return '"""' + string.replace(/[\\"']/g, function(match) { return '\\' + match; }) + '"""';
-};
 
 /**
  * Extracts the Agenda's content from the supplied document.
@@ -38,7 +35,7 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       ?agendaUri
          a ext:VersionedAgenda;
          prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         ext:agendaKind ${hackedSparqlEscapeString( agendaKind )}.
+         ext:agendaKind ${sparqlEscapeString( agendaKind )}.
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -62,10 +59,10 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       INSERT {
         ${sparqlEscapeUri(agendaUri)}
            a ext:VersionedAgenda;
-           ext:content ${hackedSparqlEscapeString( agendaContent )};
+           ext:content ${sparqlEscapeString( agendaContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${hackedSparqlEscapeString( agendaUuid )};
-           ext:agendaKind ${hackedSparqlEscapeString( agendaKind )}.
+           mu:uuid ${sparqlEscapeString( agendaUuid )};
+           ext:agendaKind ${sparqlEscapeString( agendaKind )}.
         ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
       } WHERE {
         ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
@@ -98,7 +95,7 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
     } INSERT {
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
-        mu:uuid ${hackedSparqlEscapeString(newResourceUuid)};
+        mu:uuid ${sparqlEscapeString(newResourceUuid)};
         sign:text ?content;
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
@@ -108,7 +105,7 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
         dct:subject ${sparqlEscapeUri(versionedAgendaUri)};
         ${type=='signature'?'ext:signsAgenda':'ext:publishesAgenda'} ${sparqlEscapeUri(versionedAgendaUri)}.
       ${sparqlEscapeUri(versionedAgendaUri)}
-        ext:stateString ${hackedSparqlEscapeString(targetStatus)}.
+        ext:stateString ${sparqlEscapeString(targetStatus)}.
     } WHERE {
       ${sparqlEscapeUri(versionedAgendaUri)}
         ext:content ?content.
