@@ -1,10 +1,10 @@
 import mu from 'mu';
 
-import {
-  query, update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid
-} from  'mu';
+import {query, update} from 'mu';
+import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 
 import { findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
+import { extractNotulenContentFromDoc } from './notule-exporter';
 
 
 /**
@@ -20,8 +20,6 @@ async function extractAgendaContentFromDoc( doc ) {
  * Creates an agenda item in the triplestore which could be signed.
  */
 async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
-  // TODO: only create a versioned agenda if none exists yet.
-
   // TODO remove (or move) relationship between previously signable
   // agenda, and the current agenda.
 
@@ -73,7 +71,66 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
   }
 };
 
-async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targetStatus ) {
+function customEscapeString(string) {
+  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
+}
+
+/**
+ * Creates an notulen item in the triplestore which could be signed.
+ */
+async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
+  // TODO remove (or move) relationship between previously signable
+  // notulen, and the current notulen.
+
+  const previousId = await query(`
+    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+    PREFIX pav: <http://purl.org/pav/>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
+
+    SELECT ?notulenUri
+    WHERE {
+      ?notulenUri
+         a ext:VersionedNotulen;
+         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
+         ext:notulenKind ${sparqlEscapeString( notulenKind )}.
+    } LIMIT 1`);
+
+  if( previousId.results.bindings.length ) {
+    const versionedNotulenId = previousId.results.bindings[0].notulenUri.value;
+    console.log(`Reusing versioned notulen ${versionedNotulenId}`);
+    return versionedNotulenId;
+  } else {
+    console.log("Creating new VersionedNotulen");
+    // Find all notulenpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+    const notulenContent = await extractNotulenContentFromDoc( doc );
+    const notulenUuid = uuid();
+    const notulenUri = `http://lblod.info/prepublished-notulens/${notulenUuid}`;
+
+    // Create the new prepublished notulen, and dump it in to the store
+    await update( `
+      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+      PREFIX pav: <http://purl.org/pav/>
+      PREFIX prov: <http://www.w3.org/ns/prov#>
+
+      INSERT {
+        ${sparqlEscapeUri(notulenUri)}
+           a ext:VersionedNotulen;
+           ext:content ${customEscapeString(notulenContent)};
+           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
+           mu:uuid ${sparqlEscapeString( notulenUuid )};
+           ext:notulenKind ${sparqlEscapeString( notulenKind )}.
+        ?documentContainer ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
+      } WHERE {
+        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
+                                    ext:editorDocumentContext ?context.
+      }`);
+
+    return notulenUri;
+  }
+};
+async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
   const newResourceUri = `http://lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
@@ -90,7 +147,7 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
     PREFIX dct: <http://purl.org/dc/terms/>
 
     DELETE {
-      ${sparqlEscapeUri(versionedAgendaUri)}
+      ${sparqlEscapeUri(versionedUri)}
         ext:stateString ?state.
     } INSERT {
       ${sparqlEscapeUri(newResourceUri)}
@@ -102,12 +159,12 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
         dct:created ${sparqlEscapeDateTime(new Date())};
         sign:signatorySecret ?signatorySecret;
         sign:status publicationStatus:unpublished;
-        dct:subject ${sparqlEscapeUri(versionedAgendaUri)};
-        ${type=='signature'?'ext:signsAgenda':'ext:publishesAgenda'} ${sparqlEscapeUri(versionedAgendaUri)}.
-      ${sparqlEscapeUri(versionedAgendaUri)}
+        ${customSignaturePredicate ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};` : ''}
+        dct:subject ${sparqlEscapeUri(versionedUri)}.
+      ${sparqlEscapeUri(versionedUri)}
         ext:stateString ${sparqlEscapeString(targetStatus)}.
     } WHERE {
-      ${sparqlEscapeUri(versionedAgendaUri)}
+      ${sparqlEscapeUri(versionedUri)}
         ext:content ?content.
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
@@ -121,11 +178,29 @@ async function handleVersionedAgenda( type, versionedAgendaUri, sessionId, targe
 };
 
 async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  handleVersionedAgenda( "signature", versionedAgendaUri, sessionId, targetStatus );
+  await handleVersionedResource( "signature", versionedAgendaUri, sessionId, targetStatus, 'ext:signsAgenda');
 }
 
 async function publishVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  handleVersionedAgenda( "publication", versionedAgendaUri, sessionId, targetStatus );
+  await handleVersionedResource( "publication", versionedAgendaUri, sessionId, targetStatus, 'ext:publishesAgenda');
 }
 
-export { extractAgendaContentFromDoc, signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc };
+
+async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
+  await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen');
+}
+
+async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
+  await handleVersionedResource( "publication", versionedNotulenUri, sessionId, targetStatus, 'ext:publishesNotulen');
+}
+
+
+export {
+  extractAgendaContentFromDoc,
+  signVersionedAgenda,
+  publishVersionedAgenda,
+  signVersionedNotulen,
+  publishVersionedNotulen,
+  ensureVersionedAgendaForDoc,
+  ensureVersionedNotulenForDoc
+};

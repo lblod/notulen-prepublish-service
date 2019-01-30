@@ -12,7 +12,19 @@ import { graphForDomNode, removeBlankNodes } from './rdfa-helpers';
  */
 
 
+
 // NOTULEN
+/**
+ * Extracts the notulen content from the supplied document.
+ */
+async function extractNotulenContentFromDoc( doc ) {
+  // Find all zitting nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+  var prefix = "";
+  for( var key of Object.keys(doc.context.prefix) )
+    prefix += `${key}: ${doc.context.prefix[key]} `;
+  return `<div class="notulen" prefix="${prefix}">${node.outerHTML}</div>`;
+}
 
 async function importCoreNotuleFromDoc( node, dom, doc ){
   // Store session in temporary graph
@@ -20,7 +32,7 @@ async function importCoreNotuleFromDoc( node, dom, doc ){
   const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
   const tmpGraph = graphForDomNode( sessionNode, dom, "https://besluit.edu" );
   removeBlankNodes( tmpGraph );
-  
+
   // Find outerHTML of session
   const outerHtml = sessionNode.outerHTML;
 
@@ -40,7 +52,7 @@ async function importCoreNotuleFromDoc( node, dom, doc ){
         ?s a besluit:Zitting.
         ?s ?p ?o
         VALUES ?p {
-          rdf:type 
+          rdf:type
           besluit:isGehoudenDoor
           besluit:geplandeStart
           ext:behandelt
@@ -84,7 +96,7 @@ async function importDecisionsFromDoc( node, dom ){
       }
     `);
     const bvapUri = queryResult.results.bindings[0].uri.value;
-    
+
     await insertUnionOfQueries( {
       prefix: `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
                PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
@@ -145,7 +157,7 @@ async function importDecisionsFromDoc( node, dom ){
     await update(`
       INSERT DATA {
         GRAPH <http://mu.semte.ch/application> {
-          ${sparqlEscapeUri( bvapUri )} 
+          ${sparqlEscapeUri( bvapUri )}
             <http://purl.org/pav/derivedFrom>
               ""${sparqlEscapeString( outerHtml )}""
         }
@@ -193,7 +205,7 @@ async function importFullNotuleFromDoc( node, dom, doc ){
   const tmpGraphName = `http://notule-importer.mu/${uuid()}`;
   const tmpGraph = graphForDomNode( sessionNode, dom, "https://besluit.edu" );
   removeBlankNodes( tmpGraph );
-  
+
   // Find outerHTML of session
   const outerHtml = sessionNode.outerHTML;
 
@@ -210,7 +222,7 @@ async function importFullNotuleFromDoc( node, dom, doc ){
     }
   `);
   const sessionUri = queryResult.results.bindings[0].uri.value;
-  
+
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
@@ -224,7 +236,7 @@ async function importFullNotuleFromDoc( node, dom, doc ){
         ?s a besluit:Zitting.
         ?s ?p ?o
         VALUES ?p {
-          rdf:type 
+          rdf:type
           prov:atLocation
           prov:startedAtTime
           prov:endedAtTime
@@ -247,4 +259,4 @@ async function importFullNotuleFromDoc( node, dom, doc ){
   await cleanTempGraph( tmpGraphName );
 }
 
-export { importCoreNotuleFromDoc, importDecisionsFromDoc, importFullNotuleFromDoc };
+export { importCoreNotuleFromDoc, importDecisionsFromDoc, importFullNotuleFromDoc, extractNotulenContentFromDoc};
