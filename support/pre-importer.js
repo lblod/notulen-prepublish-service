@@ -57,7 +57,7 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       INSERT {
         ${sparqlEscapeUri(agendaUri)}
            a ext:VersionedAgenda;
-           ext:content ${sparqlEscapeString( agendaContent )};
+           ext:content ${hackedSparqlEscapeString( agendaContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( agendaUuid )};
            ext:agendaKind ${sparqlEscapeString( agendaKind )}.
@@ -71,9 +71,10 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
   }
 };
 
-function customEscapeString(string) {
-  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
-}
+function hackedSparqlEscapeString( string ) {
+  return '"""' + string.replace(/[\\"']/g, function(match) { return '\\' + match; }) + '"""';
+};
+
 
 /**
  * Creates an notulen item in the triplestore which could be signed.
@@ -117,7 +118,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
       INSERT {
         ${sparqlEscapeUri(notulenUri)}
            a ext:VersionedNotulen;
-           ext:content ${customEscapeString(notulenContent)};
+           ext:content ${hackedSparqlEscapeString(notulenContent)};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( notulenUuid )};
            ext:notulenKind ${sparqlEscapeString( notulenKind )}.
