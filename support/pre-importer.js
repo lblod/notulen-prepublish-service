@@ -72,7 +72,7 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
 };
 
 function hackedSparqlEscapeString( string ) {
-  return '"""' + string.replace(/[\\"']/g, function(match) { return '\\' + match; }) + '"""';
+  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
 };
 
 
