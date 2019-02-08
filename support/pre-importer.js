@@ -3,8 +3,67 @@ import mu from 'mu';
 import {query, update} from 'mu';
 import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 
-import { findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
+import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
+import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+
 import { extractNotulenContentFromDoc } from './notule-exporter';
+
+
+function wrapZittingInfo(doc, html) {
+  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+  if (node) {
+    const zittingUri = node.getAttribute('resource');
+    const cleanParent = node.cloneNode(false);
+    cleanParent.innerHTML = html;
+    const contexts = analyse( node ).map((c) => c.context);
+    const triples = Array.concat(...contexts).filter((t) => t.subject === zittingUri);
+    const interestingpredicates = ['http://data.vlaanderen.be/ns/besluit#geplandeStart',
+     'http://www.w3.org/ns/prov#startedAtTime',
+     'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor'
+                 ];
+    for (const predicate of interestingpredicates) {
+      const triple = triples.find((t) => t.predicate === predicate);
+      if (triple) {
+        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}></span> ${cleanParent.innerHTML}`;
+      }
+    }
+    return cleanParent.outerHTML;
+  }
+  else {
+    console.log(`no zitting information found for editordocument ${doc.id}`);
+    return html;
+  }
+}
+
+/**
+ * Extracts the besluitenlijst from the supplied document.
+ * besluitenlijst == titel & korte beschrijving
+ */
+function extractBesluitenLijstContentFromDoc( doc ) {
+  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+  if (node){
+    const contexts = analyse( node ).map((c) => c.context);
+    const triples = Array.concat(...contexts);
+    const besluiten = new Set(triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject));
+    var besluitenHTML = '';
+    for (const besluit of besluiten) {
+      const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
+      const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
+      besluitenHTML = `${besluitenHTML}
+                         <div resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
+                           <h3 property="dct:title">${title ? title.object : ''}</h3>
+                           <p property="eli:description">${description ? description.object : ''}</p>
+                        </div>
+                      `;
+    }
+  }
+  console.log('besluiten!!');
+  var prefix = "";
+  for( var key of Object.keys(doc.context.prefix) )
+    prefix += `${key}: ${doc.context.prefix[key]} `;
+  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div`;
+}
 
 
 /**
@@ -12,8 +71,13 @@ import { extractNotulenContentFromDoc } from './notule-exporter';
  */
 async function extractAgendaContentFromDoc( doc ) {
   // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-  const agendapuntNodes = findAllNodesOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
-  return `<div class="agendapunten">${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}</div>`;
+  var prefix = "";
+  for( var key of Object.keys(doc.context.prefix) )
+    prefix += `${key}: ${doc.context.prefix[key]} `;
+  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+  const agendapuntNodes = findAllNodesOfType( node , 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
+  const innerHTML = `${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}`;
+  return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(doc, innerHTML)}</div`;
 }
 
 /**
@@ -203,5 +267,6 @@ export {
   signVersionedNotulen,
   publishVersionedNotulen,
   ensureVersionedAgendaForDoc,
-  ensureVersionedNotulenForDoc
+  ensureVersionedNotulenForDoc,
+  extractBesluitenLijstContentFromDoc
 };

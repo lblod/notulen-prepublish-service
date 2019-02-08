@@ -7,7 +7,8 @@ import { signVersionedAgenda,
          extractAgendaContentFromDoc,
          publishVersionedNotulen,
          signVersionedNotulen,
-         ensureVersionedNotulenForDoc
+         ensureVersionedNotulenForDoc,
+         extractBesluitenLijstContentFromDoc
        } from './support/pre-importer';
 
 import { importCoreNotuleFromDoc,
@@ -124,6 +125,21 @@ app.get('/prepublish/agenda/:documentIdentifier', async function(req, res) {
                err: JSON.stringify(err) } );
   }
 } );
+
+app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, res) {
+  try {
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const result = extractBesluitenLijstContentFromDoc(doc);
+    console.log(result);
+    res.send( { data: { attributes: { content: result }, type: "imported-besluitenlijst-contents" } } );
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .send( { message: `An error occurred while fetching contents for prepublished notulen ${req.params.documentIdentifier}`,
+               err: JSON.stringify(err) } );
+  }
+});
 
 app.get('/prepublish/notulen/:documentIdentifier', async function(req, res) {
   try {
