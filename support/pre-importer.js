@@ -35,6 +35,14 @@ function wrapZittingInfo(doc, html) {
   }
 }
 
+function cleanupTriples(triples) {
+  const cleantriples = {};
+  for (const triple of triples) {
+    const hash = JSON.stringify(triple);
+    cleantriples[hash]=triple;
+  }
+  return Object.keys(cleantriples).map( (k) => cleantriples[k]);
+}
 /**
  * Extracts the besluitenlijst from the supplied document.
  * besluitenlijst == titel & korte beschrijving
@@ -44,18 +52,29 @@ function extractBesluitenLijstContentFromDoc( doc ) {
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
   if (node){
     const contexts = analyse( node ).map((c) => c.context);
-    const triples = Array.concat(...contexts);
-    const besluiten = new Set(triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject));
+    const triples = cleanupTriples(Array.concat(...contexts));
+    const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
     var besluitenHTML = '';
     for (const besluit of besluiten) {
       const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
       const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
-      besluitenHTML = `${besluitenHTML}
-                         <div resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
-                           <h3 property="dct:title">${title ? title.object : ''}</h3>
-                           <p property="eli:description">${description ? description.object : ''}</p>
-                        </div>
-                      `;
+      const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
+      const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.object === behandeling.subject);
+      const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.object === behandeling.subject);
+      var besluitHTML = `<h3 class="h4" property="dct:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+      if (behandeling) {
+        besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
+                          ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" ></span>` : ''}
+                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye-slash"></i></span>` : ''}
+                          <div property="prov:generated" resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
+                          ${besluitHTML}
+                          </div>
+                       </div>`;
+      }
+      else {
+        besluitHTML = `<div resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">${besluitHTML}</div>`;
+      }
+      besluitenHTML = `${besluitenHTML}${besluitHTML}`;
     }
   }
   var prefix = "";
