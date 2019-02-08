@@ -130,7 +130,6 @@ app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, re
   try {
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const result = extractBesluitenLijstContentFromDoc(doc);
-    console.log(result);
     res.send( { data: { attributes: { content: result }, type: "imported-besluitenlijst-contents" } } );
   } catch (err) {
     console.log(err);

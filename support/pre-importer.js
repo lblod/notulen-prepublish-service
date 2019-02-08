@@ -58,7 +58,6 @@ function extractBesluitenLijstContentFromDoc( doc ) {
                       `;
     }
   }
-  console.log('besluiten!!');
   var prefix = "";
   for( var key of Object.keys(doc.context.prefix) )
     prefix += `${key}: ${doc.context.prefix[key]} `;
