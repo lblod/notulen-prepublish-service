@@ -1,21 +1,10 @@
 import { app } from 'mu';
 
 import { editorDocumentFromUuid } from './support/editor-document';
-import { signVersionedAgenda,
-         publishVersionedAgenda,
-         ensureVersionedAgendaForDoc,
-         extractAgendaContentFromDoc,
-         publishVersionedNotulen,
-         signVersionedNotulen,
-         ensureVersionedNotulenForDoc,
-         extractBesluitenLijstContentFromDoc
-       } from './support/pre-importer';
+import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
+import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
+import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
-import { importCoreNotuleFromDoc,
-         importDecisionsFromDoc,
-         importFullNotuleFromDoc,
-         extractNotulenContentFromDoc
-       } from './support/notule-exporter';
 
 /**
  * Makes the current user sign the agenda for the supplied document.
@@ -30,7 +19,7 @@ app.post('/signing/agenda/sign/:kind/:documentIdentifier', async function(req, r
     res.send( { success: true } );
   } catch (err) {
     console.log("We had a booboo");
-    console.log(JSON.stringify(err));
+    console.log(err);
     res
       .status(400)
       .send( { message: `An error occurred while pre-publishing agenda ${req.params.documentIdentifier}`,
@@ -58,6 +47,29 @@ app.post('/signing/notulen/sign/:kind/:documentIdentifier', async function(req, 
                err: err } );
   }
 } );
+
+
+/**
+ * Makes the current user sign the besluitenlijst for the supplied document.
+ */
+app.post('/signing/besluitenlijst/sign/:documentIdentifier', async function(req, res) {
+  try {
+    // TODO: we now assume this is the first signature.  we should
+    // check and possibly support the second signature.
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const preImportedAgendaUri = await ensureVersionedBesluitenLijstForDoc(doc);
+    await signVersionedBesluitenlijst( preImportedAgendaUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
+    res.send( { success: true } );
+  } catch (err) {
+    console.log("We had a booboo");
+    console.log(err);
+    res
+      .status(400)
+      .send( { message: `An error occurred while pre-publishing agenda ${req.params.documentIdentifier}`,
+               err: err } );
+  }
+} );
+
 
 /**
  * Makes the current user publish the agenda for the supplied document.
@@ -108,6 +120,33 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
                err: JSON.stringify(err) } );
   }
 } );
+
+
+/**
+ * Makes the current user publish the besluitenlijst for the supplied document.
+ */
+app.post('/signing/besluitenlijst/publish/:documentIdentifier', async function(req, res) {
+  // TODO this is 99% the same as
+  // /signing/agenda/sign/:kind/:documentIdentifier, it just uses the
+  // publishVersionedAgenda instead.  We can likely clean this up.
+
+  try {
+    // TODO: we now assume this is the first signature.  we should
+    // check and possibly support the second signature.
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const preImportedAgendaUri = await ensureVersionedBesluitenLijstForDoc(doc);
+    await publishVersionedBesluitenlijst( preImportedAgendaUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+    res.send( { success: true } );
+  } catch (err) {
+    console.log("We had a booboo");
+    console.log(err);
+    res
+      .status(400)
+      .send( { message: `An error occurred while publishing the agenda ${req.params.documentIdentifier}`,
+               err: JSON.stringify(err) } );
+  }
+} );
+
 
 app.get('/prepublish/agenda/:documentIdentifier', async function(req, res) {
   try {

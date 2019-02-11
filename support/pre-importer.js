@@ -6,9 +6,6 @@ import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  '
 import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 
-import { extractNotulenContentFromDoc } from './notule-exporter';
-
-
 function wrapZittingInfo(doc, html) {
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
   if (node) {
@@ -43,176 +40,11 @@ function cleanupTriples(triples) {
   }
   return Object.keys(cleantriples).map( (k) => cleantriples[k]);
 }
-/**
- * Extracts the besluitenlijst from the supplied document.
- * besluitenlijst == titel & korte beschrijving
- */
-function extractBesluitenLijstContentFromDoc( doc ) {
-  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  if (node){
-    const contexts = analyse( node ).map((c) => c.context);
-    const triples = cleanupTriples(Array.concat(...contexts));
-    const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-    var besluitenHTML = '';
-    for (const besluit of besluiten) {
-      const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
-      const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
-      const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
-      const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.object === behandeling.subject);
-      const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.object === behandeling.subject);
-      var besluitHTML = `<h3 class="h4" property="dct:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
-      if (behandeling) {
-        besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
-                          ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" ></span>` : ''}
-                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye-slash"></i></span>` : ''}
-                          <div property="prov:generated" resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
-                          ${besluitHTML}
-                          </div>
-                       </div>`;
-      }
-      else {
-        besluitHTML = `<div resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">${besluitHTML}</div>`;
-      }
-      besluitenHTML = `${besluitenHTML}${besluitHTML}`;
-    }
-  }
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
-  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div`;
-}
-
-
-/**
- * Extracts the Agenda's content from the supplied document.
- */
-async function extractAgendaContentFromDoc( doc ) {
-  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  const agendapuntNodes = findAllNodesOfType( node , 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
-  const innerHTML = `${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}`;
-  return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(doc, innerHTML)}</div`;
-}
-
-/**
- * Creates an agenda item in the triplestore which could be signed.
- */
-async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
-  // TODO remove (or move) relationship between previously signable
-  // agenda, and the current agenda.
-
-  const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-    PREFIX pav: <http://purl.org/pav/>
-    PREFIX prov: <http://www.w3.org/ns/prov#>
-
-    SELECT ?agendaUri
-    WHERE {
-      ?agendaUri
-         a ext:VersionedAgenda;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         ext:agendaKind ${sparqlEscapeString( agendaKind )}.
-    } LIMIT 1`);
-
-  if( previousId.results.bindings.length ) {
-    const versionedAgendaId = previousId.results.bindings[0].agendaUri.value;
-    console.log(`Reusing versioned agenda ${versionedAgendaId}`);
-    return versionedAgendaId;
-  } else {
-    console.log("Creating new VersionedAgenda");
-    // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-    const agendaContent = await extractAgendaContentFromDoc( doc );
-    const agendaUuid = uuid();
-    const agendaUri = `http://lblod.info/prepublished-agendas/${agendaUuid}`;
-
-    // Create the new prepublished agenda, and dump it in to the store
-    await update( `
-      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-      PREFIX pav: <http://purl.org/pav/>
-      PREFIX prov: <http://www.w3.org/ns/prov#>
-
-      INSERT {
-        ${sparqlEscapeUri(agendaUri)}
-           a ext:VersionedAgenda;
-           ext:content ${hackedSparqlEscapeString( agendaContent )};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${sparqlEscapeString( agendaUuid )};
-           ext:agendaKind ${sparqlEscapeString( agendaKind )}.
-        ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
-      } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
-      }`);
-
-    return agendaUri;
-  }
-};
 
 function hackedSparqlEscapeString( string ) {
   return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
 };
 
-
-/**
- * Creates an notulen item in the triplestore which could be signed.
- */
-async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
-  // TODO remove (or move) relationship between previously signable
-  // notulen, and the current notulen.
-
-  const previousId = await query(`
-    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-    PREFIX pav: <http://purl.org/pav/>
-    PREFIX prov: <http://www.w3.org/ns/prov#>
-
-    SELECT ?notulenUri
-    WHERE {
-      ?notulenUri
-         a ext:VersionedNotulen;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         ext:notulenKind ${sparqlEscapeString( notulenKind )}.
-    } LIMIT 1`);
-
-  if( previousId.results.bindings.length ) {
-    const versionedNotulenId = previousId.results.bindings[0].notulenUri.value;
-    console.log(`Reusing versioned notulen ${versionedNotulenId}`);
-    return versionedNotulenId;
-  } else {
-    console.log("Creating new VersionedNotulen");
-    // Find all notulenpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-    const notulenContent = await extractNotulenContentFromDoc( doc );
-    const notulenUuid = uuid();
-    const notulenUri = `http://lblod.info/prepublished-notulens/${notulenUuid}`;
-
-    // Create the new prepublished notulen, and dump it in to the store
-    await update( `
-      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-      PREFIX pav: <http://purl.org/pav/>
-      PREFIX prov: <http://www.w3.org/ns/prov#>
-
-      INSERT {
-        ${sparqlEscapeUri(notulenUri)}
-           a ext:VersionedNotulen;
-           ext:content ${hackedSparqlEscapeString(notulenContent)};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${sparqlEscapeString( notulenUuid )};
-           ext:notulenKind ${sparqlEscapeString( notulenKind )}.
-        ?documentContainer ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
-      } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
-      }`);
-
-    return notulenUri;
-  }
-};
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
@@ -260,31 +92,9 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
   return updatePromise;
 };
 
-async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", versionedAgendaUri, sessionId, targetStatus, 'ext:signsAgenda');
-}
-
-async function publishVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", versionedAgendaUri, sessionId, targetStatus, 'ext:publishesAgenda');
-}
-
-
-async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen');
-}
-
-async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", versionedNotulenUri, sessionId, targetStatus, 'ext:publishesNotulen');
-}
-
-
 export {
-  extractAgendaContentFromDoc,
-  signVersionedAgenda,
-  publishVersionedAgenda,
-  signVersionedNotulen,
-  publishVersionedNotulen,
-  ensureVersionedAgendaForDoc,
-  ensureVersionedNotulenForDoc,
-  extractBesluitenLijstContentFromDoc
+  wrapZittingInfo,
+  hackedSparqlEscapeString,
+  handleVersionedResource,
+  cleanupTriples
 };
