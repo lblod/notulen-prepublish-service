@@ -22,7 +22,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
       const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.object === behandeling.subject);
       const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.object === behandeling.subject);
-      var besluitHTML = `<h3 class="h4" property="dct:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+      var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
       if (behandeling) {
         besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
                           ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" ></span>` : ''}
