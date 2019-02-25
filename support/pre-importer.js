@@ -23,7 +23,7 @@ function wrapZittingInfo(doc, html) {
     for (const predicate of interestingpredicates) {
       const triple = triples.find((t) => t.predicate === predicate);
       if (triple) {
-        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}></span> ${cleanParent.innerHTML}`;
+        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
       }
     }
     return cleanParent.outerHTML;
