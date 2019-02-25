@@ -3,7 +3,7 @@ import mu from 'mu';
 import {query, update} from 'mu';
 import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
-import {wrapZittingInfo, handleVersionedResource} from './pre-importer';
+import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 
 /**
  * Extracts the Agenda's content from the supplied document.
@@ -60,7 +60,7 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       INSERT {
         ${sparqlEscapeUri(agendaUri)}
            a ext:VersionedAgenda;
-           ext:content ${sparqlEscapeString( agendaContent )};
+           ext:content ${hackedSparqlEscapeString( agendaContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( agendaUuid )};
            ext:agendaKind ${sparqlEscapeString( agendaKind )}.

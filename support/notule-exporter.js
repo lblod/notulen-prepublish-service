@@ -1,6 +1,6 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
-import {wrapZittingInfo, handleVersionedResource} from './pre-importer';
+import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
@@ -73,7 +73,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
       INSERT {
         ${sparqlEscapeUri(notulenUri)}
            a ext:VersionedNotulen;
-           ext:content ${sparqlEscapeString(notulenContent)};
+           ext:content ${hackedSparqlEscapeString(notulenContent)};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( notulenUuid )};
            ext:notulenKind ${sparqlEscapeString( notulenKind )}.
