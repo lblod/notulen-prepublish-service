@@ -48,7 +48,7 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
     // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
     const agendaContent = await extractAgendaContentFromDoc( doc );
     const agendaUuid = uuid();
-    const agendaUri = `http://lblod.info/prepublished-agendas/${agendaUuid}`;
+    const agendaUri = `http://data.lblod.info/prepublished-agendas/${agendaUuid}`;
 
     // Create the new prepublished agenda, and dump it in to the store
     await update( `

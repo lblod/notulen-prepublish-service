@@ -48,7 +48,7 @@ function hackedSparqlEscapeString( string ) {
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
-  const newResourceUri = `http://lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
+  const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
 
   // TODO: get correct signatorySecret from ACMIDM
 

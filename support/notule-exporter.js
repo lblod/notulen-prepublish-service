@@ -61,7 +61,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
     // Find all notulenpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
     const notulenContent = await extractNotulenContentFromDoc( doc );
     const notulenUuid = uuid();
-    const notulenUri = `http://lblod.info/prepublished-notulens/${notulenUuid}`;
+    const notulenUri = `http://data.lblod.info/prepublished-notulens/${notulenUuid}`;
 
     // Create the new prepublished notulen, and dump it in to the store
     await update( `

@@ -73,7 +73,7 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     // Find all besluitenLijstpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
     const besluitenLijstContent = await extractBesluitenLijstContentFromDoc( doc );
     const besluitenLijstUuid = uuid();
-    const besluitenLijstUri = `http://lblod.info/prepublished-besluitenLijsts/${besluitenLijstUuid}`;
+    const besluitenLijstUri = `http://data.lblod.info/prepublished-besluitenLijsts/${besluitenLijstUuid}`;
 
     // Create the new prepublished besluitenLijst, and dump it in to the store
     await update( `
