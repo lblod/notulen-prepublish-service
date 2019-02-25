@@ -1,5 +1,5 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
+import {wrapZittingInfo, handleVersionedResource, cleanupTriples} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 
@@ -85,7 +85,7 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
       INSERT {
         ${sparqlEscapeUri(besluitenLijstUri)}
            a ext:VersionedBesluitenLijst;
-           ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
+           ext:content ${sparqlEscapeString( besluitenLijstContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
         ?documentContainer ext:hasVersionedBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.

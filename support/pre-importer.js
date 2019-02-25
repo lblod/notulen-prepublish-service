@@ -43,10 +43,6 @@ function cleanupTriples(triples) {
   return Object.keys(cleantriples).map( (k) => cleantriples[k]);
 }
 
-function hackedSparqlEscapeString( string ) {
-  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
-};
-
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
@@ -96,7 +92,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
 
 export {
   wrapZittingInfo,
-  hackedSparqlEscapeString,
   handleVersionedResource,
   cleanupTriples
 };
