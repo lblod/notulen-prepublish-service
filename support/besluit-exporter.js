@@ -1,5 +1,5 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
+import {wrapZittingInfo, handleVersionedResource, cleanupTriples} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 
@@ -22,7 +22,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
       const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.object === behandeling.subject);
       const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.object === behandeling.subject);
-      var besluitHTML = `<h3 class="h4" property="dct:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+      var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
       if (behandeling) {
         besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
                           ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" ></span>` : ''}
@@ -85,7 +85,7 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
       INSERT {
         ${sparqlEscapeUri(besluitenLijstUri)}
            a ext:VersionedBesluitenLijst;
-           ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
+           ext:content ${sparqlEscapeString( besluitenLijstContent )};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
         ?documentContainer ext:hasVersionedBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.

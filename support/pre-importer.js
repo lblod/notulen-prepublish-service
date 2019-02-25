@@ -14,14 +14,16 @@ function wrapZittingInfo(doc, html) {
     cleanParent.innerHTML = html;
     const contexts = analyse( node ).map((c) => c.context);
     const triples = Array.concat(...contexts).filter((t) => t.subject === zittingUri);
-    const interestingpredicates = ['http://data.vlaanderen.be/ns/besluit#geplandeStart',
-     'http://www.w3.org/ns/prov#startedAtTime',
-     'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor'
-                 ];
+    const interestingpredicates = [
+      'http://data.vlaanderen.be/ns/besluit#geplandeStart',
+      'http://www.w3.org/ns/prov#startedAtTime',
+      'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor',
+      'http://www.w3.org/ns/prov#atLocation'
+    ];
     for (const predicate of interestingpredicates) {
       const triple = triples.find((t) => t.predicate === predicate);
       if (triple) {
-        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}></span> ${cleanParent.innerHTML}`;
+        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
       }
     }
     return cleanParent.outerHTML;
@@ -40,10 +42,6 @@ function cleanupTriples(triples) {
   }
   return Object.keys(cleantriples).map( (k) => cleantriples[k]);
 }
-
-function hackedSparqlEscapeString( string ) {
-  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
-};
 
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
   const newResourceUuid = uuid();
@@ -94,7 +92,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
 
 export {
   wrapZittingInfo,
-  hackedSparqlEscapeString,
   handleVersionedResource,
   cleanupTriples
 };
