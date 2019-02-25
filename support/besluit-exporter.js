@@ -22,11 +22,13 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
       const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.object === behandeling.subject);
       const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.object === behandeling.subject);
+      const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.object === behandeling.subject);
       var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
       if (behandeling) {
         besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
-                          ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" ></span>` : ''}
-                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye-slash"></i></span>` : ''}
+                          ${ agendapunt ? `<span property="dct:subject" resource="${agendapunt.object}" > </span>` : ''}
+                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye-slash"> </i></span>` : ''}
+                          ${ gebeurtNa ? `<span property="besluit:gebeurtNa" resource="${gebeurtNa.object}"> </span>` : ''}
                           <div property="prov:generated" resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
                           ${besluitHTML}
                           </div>
