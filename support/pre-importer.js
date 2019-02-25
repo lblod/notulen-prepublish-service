@@ -14,10 +14,12 @@ function wrapZittingInfo(doc, html) {
     cleanParent.innerHTML = html;
     const contexts = analyse( node ).map((c) => c.context);
     const triples = Array.concat(...contexts).filter((t) => t.subject === zittingUri);
-    const interestingpredicates = ['http://data.vlaanderen.be/ns/besluit#geplandeStart',
-     'http://www.w3.org/ns/prov#startedAtTime',
-     'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor'
-                 ];
+    const interestingpredicates = [
+      'http://data.vlaanderen.be/ns/besluit#geplandeStart',
+      'http://www.w3.org/ns/prov#startedAtTime',
+      'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor',
+      'http://www.w3.org/ns/prov#atLocation'
+    ];
     for (const predicate of interestingpredicates) {
       const triple = triples.find((t) => t.predicate === predicate);
       if (triple) {
