@@ -43,7 +43,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
   var prefix = "";
   for( var key of Object.keys(doc.context.prefix) )
     prefix += `${key}: ${doc.context.prefix[key]} `;
-  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div`;
+  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
 }
 
 
