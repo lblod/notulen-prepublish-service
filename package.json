@@ -1,6 +1,6 @@
 {
   "name": "notulen-prepublish-service",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "mu-semtech service to extract knowledge from documents",
   "main": "app.js",
   "dependencies": {
