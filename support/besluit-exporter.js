@@ -3,13 +3,12 @@ import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEs
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 
-
 /**
  * Extracts the besluitenlijst from the supplied document.
- * besluitenlijst == titel & korte beschrijving
+ * Returns an HTML+RDFa snippet containing the zitting with its behandeling van agendapunten and generated besluiten
+ * Besluitenlijst == titel & korte beschrijving
  */
 function extractBesluitenLijstContentFromDoc( doc ) {
-  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
   if (node){
     const contexts = analyse( node ).map((c) => c.context);
@@ -39,16 +38,20 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       }
       besluitenHTML = `${besluitenHTML}${besluitHTML}`;
     }
+
+    // TODO add helper function for prefixes    
+    var prefix = "";
+    for( var key of Object.keys(doc.context.prefix) )
+      prefix += `${key}: ${doc.context.prefix[key]} `;
+    return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
+  } else {
+    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
   }
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
-  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
 }
 
-
 /**
- * Creates an agenda item in the triplestore which could be signed.
+ * Creates a versioned besluitenlijst item in the triplestore which could be signed. 
+ * The versioned besluitenlijst are attached to the document container.
  */
 async function ensureVersionedBesluitenLijstForDoc( doc ) {
   // TODO remove (or move) relationship between previously signable
@@ -71,13 +74,11 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
     return versionedBesluitenLijstId;
   } else {
-    console.log("Creating new VersionedBesluitenLijst");
-    // Find all besluitenLijstpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+    console.log(`Creating a new versioned besluitenlijst for ${doc.uri}`);    
     const besluitenLijstContent = await extractBesluitenLijstContentFromDoc( doc );
     const besluitenLijstUuid = uuid();
-    const besluitenLijstUri = `http://data.lblod.info/prepublished-besluitenLijsts/${besluitenLijstUuid}`;
+    const besluitenLijstUri = `http://data.lblod.info/prepublished-besluiten-lijsten/${besluitenLijstUuid}`;
 
-    // Create the new prepublished besluitenLijst, and dump it in to the store
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>

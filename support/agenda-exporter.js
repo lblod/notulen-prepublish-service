@@ -1,30 +1,38 @@
-import mu from 'mu';
-
-import {query, update} from 'mu';
-import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
+import {query, update, sparqlEscapeUri, sparqlEscapeString, uuid} from  'mu';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 
 /**
- * Extracts the Agenda's content from the supplied document.
+ * This file contains helpers for exporting, signing and publishing content from the agenda.
+ */
+
+/**
+ * Extracts the Agenda's content from the supplied document
+ * Returns an HTML+RDFa snippet containing the zitting with its agendapunten
  */
 async function extractAgendaContentFromDoc( doc ) {
-  // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  const agendapuntNodes = findAllNodesOfType( node , 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
-  const innerHTML = `${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}`;
-  return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(doc, innerHTML)}</div`;
+
+  if (node) {
+    // TODO add helper function for prefixes    
+    var prefix = "";
+    for( var key of Object.keys(doc.context.prefix) )
+      prefix += `${key}: ${doc.context.prefix[key]} `;
+    
+    const agendapuntNodes = findAllNodesOfType( node , 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
+    const innerHTML = `${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}`;
+    return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(doc, innerHTML)}</div>`;
+  } else {
+    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
+  }
 }
 
 /**
- * Creates an agenda item in the triplestore which could be signed.
+ * Creates a versioned agenda item in the triplestore which could be signed. 
+ * The versioned agenda are attached to the document container.
  */
 async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
-  // TODO remove (or move) relationship between previously signable
-  // agenda, and the current agenda.
+  // TODO remove (or move) relationship between previously signable agenda, and the current agenda.
 
   const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -44,13 +52,11 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
     console.log(`Reusing versioned agenda ${versionedAgendaId}`);
     return versionedAgendaId;
   } else {
-    console.log("Creating new VersionedAgenda");
-    // Find all agendapunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+    console.log(`Creating a new versioned agenda for ${doc.uri}`);
     const agendaContent = await extractAgendaContentFromDoc( doc );
     const agendaUuid = uuid();
     const agendaUri = `http://data.lblod.info/prepublished-agendas/${agendaUuid}`;
 
-    // Create the new prepublished agenda, and dump it in to the store
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>

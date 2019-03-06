@@ -6,19 +6,22 @@ import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from
  * This file contains helpers for exporting, signing and publishing content from the notule.
  */
 
-
-
-// NOTULEN
 /**
- * Extracts the notulen content from the supplied document.
+ * Extracts the Notulen content from the supplied document
+ * Returns an HTML+RDFa snippet containing the zitting content
  */
 async function extractNotulenContentFromDoc( doc ) {
-  // Find all zitting nodes, wrap them in a separate node, and push the information onto the DocumentContainer
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
-  return `<div class="notulen" prefix="${prefix}">${node.outerHTML}</div>`;
+
+  if (node) {
+    // TODO add helper function for prefixes
+    var prefix = "";
+    for( var key of Object.keys(doc.context.prefix) )
+      prefix += `${key}: ${doc.context.prefix[key]} `;
+    return `<div class="notulen" prefix="${prefix}">${node.outerHTML}</div>`;
+  } else {
+    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
+  }  
 }
 
 
@@ -32,11 +35,11 @@ async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetSt
 
 
 /**
- * Creates an notulen item in the triplestore which could be signed.
+ * Creates a versioned notulen item in the triplestore which could be signed. 
+ * The versioned notulen are attached to the document container.
  */
 async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
-  // TODO remove (or move) relationship between previously signable
-  // notulen, and the current notulen.
+  // TODO remove (or move) relationship between previously signable notulen, and the current notulen.
 
   const previousId = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -57,13 +60,11 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
     console.log(`Reusing versioned notulen ${versionedNotulenId}`);
     return versionedNotulenId;
   } else {
-    console.log("Creating new VersionedNotulen");
-    // Find all notulenpunt nodes, wrap them in a separate node, and push the information onto the DocumentContainer
+    console.log(`Creating a new versioned notulen for ${doc.uri}`);    
     const notulenContent = await extractNotulenContentFromDoc( doc );
     const notulenUuid = uuid();
-    const notulenUri = `http://data.lblod.info/prepublished-notulens/${notulenUuid}`;
+    const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
 
-    // Create the new prepublished notulen, and dump it in to the store
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -87,4 +88,4 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind ) {
   }
 };
 
-export { ensureVersionedNotulenForDoc, extractNotulenContentFromDoc, signVersionedNotulen, publishVersionedNotulen};
+export { ensureVersionedNotulenForDoc, extractNotulenContentFromDoc, signVersionedNotulen, publishVersionedNotulen };

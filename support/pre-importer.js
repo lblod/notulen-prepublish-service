@@ -1,8 +1,4 @@
-import mu from 'mu';
-
-import {query, update} from 'mu';
-import {sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
-
+import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 
@@ -23,6 +19,7 @@ function wrapZittingInfo(doc, html) {
     for (const predicate of interestingpredicates) {
       const triple = triples.find((t) => t.predicate === predicate);
       if (triple) {
+        // TODO remove spaces in spans once MARAWA supports nodes without children
         cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
       }
     }
@@ -44,7 +41,7 @@ function cleanupTriples(triples) {
 }
 
 function hackedSparqlEscapeString( string ) {
-  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return '' }).replace(/\r/g, function(match) { return ''}))}""`;
+  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return ''; }).replace(/\r/g, function(match) { return '';}))}""`;
 };
 
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
