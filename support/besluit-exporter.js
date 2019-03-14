@@ -26,7 +26,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       if (behandeling) {
         besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
                           ${ agendapunt ? `<span property="http://purl.org/dc/terms/subject" resource="${agendapunt.object}" > </span>` : ''}
-                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye-slash"> </i></span>` : ''}
+                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye${ openbaar.object === "true" ? "" : "-slash"}"> </i></span>` : ''}
                           ${ gebeurtNa ? `<span property="besluit:gebeurtNa" resource="${gebeurtNa.object}"> </span>` : ''}
                           <div property="prov:generated" resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">
                           ${besluitHTML}
