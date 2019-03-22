@@ -39,7 +39,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
       besluitenHTML = `${besluitenHTML}${besluitHTML}`;
     }
 
-    // TODO add helper function for prefixes    
+    // TODO add helper function for prefixes
     var prefix = "";
     for( var key of Object.keys(doc.context.prefix) )
       prefix += `${key}: ${doc.context.prefix[key]} `;

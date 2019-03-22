@@ -3,6 +3,7 @@ import { app, errorHandler } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
+import { extractBehandelingVanAgendapuntenFromDoc } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 
@@ -164,6 +165,28 @@ app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, re
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    error.status = 500;
+    return next(error);
+  }
+});
+
+
+/**
+ * Prepublish besluiten as HTML+RDFa snippet for a given document
+ * The snippets are note persisted in the store
+ */
+app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res, next) {
+  try {
+    console.log('woo');
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const results = (await extractBehandelingVanAgendapuntenFromDoc(doc)).map((r) => {
+      return { attributes: r, type: "imported-behandeling-contents"};
+    });
+    return res.send( { data: results}).end();
+  }
+  catch (err) {
+    console.log(err);
+    const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
     error.status = 500;
     return next(error);
   }
