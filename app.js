@@ -3,7 +3,7 @@ import { app, errorHandler } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
-import { extractBehandelingVanAgendapuntenFromDoc } from './support/behandeling-exporter';
+import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 
@@ -45,6 +45,27 @@ app.post('/signing/besluitenlijst/sign/:documentIdentifier', async function(req,
   }
 });
 
+
+/**
+ * Makes the current user sign the provided behandeling for the supplied document.
+ * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
+ */
+app.post('/signing/behandeling/sign/:documentIdentifier/:behandelingUri', async function(req, res, next) {
+  try {
+    // TODO: we now assume this is the first signature.  we should
+    // check and possibly support the second signature.
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const behandelingUri = decodeURIComponent(req.params.behandelingUri);
+    const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, behandelingUri);
+    await signVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
+    return res.send( { success: true } ).end();
+  } catch (err) {
+    console.log(err);
+    const error = new Error(`An error occurred while signing the behandeling ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    return next(error);
+  }
+});
+
 /**
  * Makes the current user sign the notulen for the supplied document.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
@@ -76,8 +97,6 @@ app.post('/signing/agenda/publish/:kind/:documentIdentifier', async function(req
   // publishVersionedAgenda instead.  We can likely clean this up.
 
   try {
-    // TODO: we now assume this is the first signature.  we should
-    // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc, req.params.kind);
     await publishVersionedAgenda( preImportedAgendaUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
@@ -99,8 +118,6 @@ app.post('/signing/besluitenlijst/publish/:documentIdentifier', async function(r
   // publishVersionedBesluitenlijst instead.  We can likely clean this up.
 
   try {
-    // TODO: we now assume this is the first signature.  we should
-    // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForDoc(doc);
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
@@ -112,8 +129,27 @@ app.post('/signing/besluitenlijst/publish/:documentIdentifier', async function(r
   }
 } );
 
+
 /**
- * Makes the current user publish the agenda for the supplied document.
+ * Makes the current user publish the provided behandeling for the supplied document.
+ * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
+ */
+app.post('/signing/behandeling/publish/:documentIdentifier/:behandelingUri', async function(req, res, next) {
+  try {
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const behandelingUri = decodeURIComponent(req.params.behandelingUri);
+    const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, behandelingUri);
+    await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+    return res.send( { success: true } ).end();
+  } catch (err) {
+    console.log(err);
+    const error = new Error(`An error occurred while publishing the behandeling ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    return next(error);
+  }
+});
+
+/**
+ * Makes the current user publish the notulen for the supplied document.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
 app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(req, res, next) {
@@ -122,8 +158,6 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
   // publishVersionedNotulen instead.  We can likely clean this up.
 
   try {
-    // TODO: we now assume this is the first signature.  we should
-    // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind);
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
@@ -171,13 +205,13 @@ app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, re
 });
 
 
+
 /**
  * Prepublish besluiten as HTML+RDFa snippet for a given document
  * The snippets are note persisted in the store
  */
 app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res, next) {
   try {
-    console.log('woo');
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
     const results = (await extractBehandelingVanAgendapuntenFromDoc(doc)).map((r) => {
       return { attributes: r, type: "imported-behandeling-contents"};

@@ -50,7 +50,7 @@ function extractBesluitenLijstContentFromDoc( doc ) {
 }
 
 /**
- * Creates a versioned besluitenlijst item in the triplestore which could be signed. 
+ * Creates a versioned besluitenlijst item in the triplestore which could be signed.
  * The versioned besluitenlijst are attached to the document container.
  */
 async function ensureVersionedBesluitenLijstForDoc( doc ) {
@@ -74,7 +74,7 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
     return versionedBesluitenLijstId;
   } else {
-    console.log(`Creating a new versioned besluitenlijst for ${doc.uri}`);    
+    console.log(`Creating a new versioned besluitenlijst for ${doc.uri}`);
     const besluitenLijstContent = await extractBesluitenLijstContentFromDoc( doc );
     const besluitenLijstUuid = uuid();
     const besluitenLijstUri = `http://data.lblod.info/prepublished-besluiten-lijsten/${besluitenLijstUuid}`;

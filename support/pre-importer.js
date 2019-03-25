@@ -50,7 +50,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
   const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
 
   // TODO: get correct signatorySecret from ACMIDM
-
   const query = `
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
