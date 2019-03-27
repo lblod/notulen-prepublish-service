@@ -11,16 +11,16 @@ function wrapZittingInfo(doc, html) {
     const contexts = analyse( node ).map((c) => c.context);
     const triples = Array.concat(...contexts).filter((t) => t.subject === zittingUri);
     const interestingpredicates = [
-      'http://data.vlaanderen.be/ns/besluit#geplandeStart',
-      'http://www.w3.org/ns/prov#startedAtTime',
-      'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor',
-      'http://www.w3.org/ns/prov#atLocation'
+      { uri: 'http://data.vlaanderen.be/ns/besluit#geplandeStart', range: 'literal' },
+      { uri: 'http://www.w3.org/ns/prov#startedAtTime', range: 'literal' },
+      { uri: 'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor', range: 'uri' },
+      { uri: 'http://www.w3.org/ns/prov#atLocation', range: 'literal' }
     ];
     for (const predicate of interestingpredicates) {
-      const triple = triples.find((t) => t.predicate === predicate);
+      const triple = triples.find((t) => t.predicate === predicate.uri);
       if (triple) {
         // TODO remove spaces in spans once MARAWA supports nodes without children
-        cleanParent.innerHTML = `<span property="${predicate}" content="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
+        cleanParent.innerHTML = `<span property="${predicate.uri}" ${predicate.range == 'uri' ? 'resource' : 'content'}="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
       }
     }
     return cleanParent.outerHTML;
