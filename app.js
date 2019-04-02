@@ -6,6 +6,11 @@ import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVers
 import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
+/***
+ *
+ *  SIGNING ENDPOINTS
+ *
+ */
 
 /**
  * Makes the current user sign the agenda for the supplied document.
@@ -75,7 +80,7 @@ app.post('/signing/notulen/sign/:kind/:documentIdentifier', async function(req, 
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind);
+    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind, 'signature');
     await signVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
@@ -86,6 +91,11 @@ app.post('/signing/notulen/sign/:kind/:documentIdentifier', async function(req, 
 });
 
 
+/***
+ *
+ *  PUBLICATION ENDPOINTS
+ *
+ */
 
 /**
  * Makes the current user publish the agenda for the supplied document.
@@ -158,8 +168,9 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
   // publishVersionedNotulen instead.  We can likely clean this up.
 
   try {
+    const publicBehandelingUris = req.body['public-behandeling-uris'];
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind);
+    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind, 'publication', publicBehandelingUris);
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
@@ -169,6 +180,12 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
   }
 } );
 
+
+/***
+ *
+ * PREPUBLICATION ENDPOINTS
+ *
+ */
 
 /**
 * Prepublish an agenda as HTML+RDFa snippet for a given document
@@ -204,11 +221,9 @@ app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, re
   }
 });
 
-
-
 /**
  * Prepublish besluiten as HTML+RDFa snippet for a given document
- * The snippets are note persisted in the store
+ * The snippets are not persisted in the store
  */
 app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res, next) {
   try {
