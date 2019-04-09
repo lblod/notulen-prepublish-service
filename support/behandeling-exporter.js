@@ -35,13 +35,18 @@ async function findVersionedBehandeling(uri) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(doc, behandeling) {
+function createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo) {
   const behandelingNodes = findAllNodesOfType( doc.getTopDomNode(), "http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt" ).filter((node) => node.getAttribute('resource') === behandeling);
   if (behandelingNodes.length > 0 ) {
     var prefix = "";
     for( var key of Object.keys(doc.context.prefix) )
       prefix += `${key}: ${doc.context.prefix[key]} `;
-    const body = `<div class="behandeling" prefix="${prefix}">${wrapZittingInfo(doc, behandelingNodes[0].outerHTML)}</div>`;
+    let body = "";
+    if (isWrappedInZittingInfo) {
+      body = `<div class="behandeling" prefix="${prefix}">${wrapZittingInfo(doc, behandelingNodes[0].outerHTML)}</div>`;
+    } else {
+      body = `<div class="behandeling" prefix="${prefix}">${behandelingNodes[0].outerHTML}</div>`;
+    }
     return { body, behandeling };
   }
   throw "Behandeling not found";
@@ -89,7 +94,7 @@ async function ensureVersionedBehandelingForDoc(doc, behandelingUri) {
  * NOTE: this is different from other extractions!
  * Returns an array of behandeling extractions
  */
-async function extractBehandelingVanAgendapuntenFromDoc( doc ) {
+async function extractBehandelingVanAgendapuntenFromDoc( doc, isWrappedInZittingInfo ) {
   const zitting = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
   if (zitting) {
     const contexts = analyse( zitting ).map((c) => c.context);
@@ -103,7 +108,7 @@ async function extractBehandelingVanAgendapuntenFromDoc( doc ) {
         extracts.push(existingExtract);
       }
       else {
-        const newExtract = createBehandelingExtract(doc, behandeling);
+        const newExtract = createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo);
         console.log(`creating temporary behandeling extract for ${doc.uri}`);
         extracts.push(newExtract);
       }

@@ -228,7 +228,7 @@ app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, re
 app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res, next) {
   try {
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const results = (await extractBehandelingVanAgendapuntenFromDoc(doc)).map((r) => {
+    const results = (await extractBehandelingVanAgendapuntenFromDoc(doc, true)).map((r) => {
       return { attributes: r, type: "imported-behandeling-contents"};
     });
     return res.send( { data: results}).end();
@@ -236,6 +236,26 @@ app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res
   catch (err) {
     console.log(err);
     const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    error.status = 500;
+    return next(error);
+  }
+});
+
+/**
+ * Prepublish besluiten for notulen as HTML+RDFa snippet for a given document
+ * The snippets are not persisted in the store
+ */
+app.get('/prepublish/notulen/behandelingen/:documentIdentifier', async function(req, res, next) {
+  try {
+    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+    const results = (await extractBehandelingVanAgendapuntenFromDoc(doc, false)).map((r) => {
+      return { attributes: r, type: "imported-behandeling-contents" };
+    });
+    return res.send({ data: results }).end();
+  }
+  catch (err) {
+    console.log(err);
+    const error = new Error(`An error occured while fetching contents for prepublished notulen besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
     error.status = 500;
     return next(error);
   }
