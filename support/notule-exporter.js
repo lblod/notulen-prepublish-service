@@ -94,7 +94,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehan
                                     ext:editorDocumentContext ?context.
       }`);
 
-    if (type == 'publication')    
+    if (type == 'publication')
       addPublicContentOnVersionedNotulen(doc, notulenUri, publicBehandelingUris);
 
     return notulenUri;
@@ -106,7 +106,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehan
 */
 async function addPublicContentOnVersionedNotulen(doc, notulenUri, publicBehandelingUris) {
   console.log(`Enriching versioned notulen ${notulenUri} with public content only publishing behandelingen ${JSON.stringify(publicBehandelingUris)}`);
-  
+
   let publicBehandelingUrisStatement = '';
   if (publicBehandelingUris && publicBehandelingUris.length) {
     const uris = publicBehandelingUris.map(uri => sparqlEscapeUri(uri)).join(', ');
@@ -145,16 +145,30 @@ function removePrivateBehandelingenFromZitting( node, publicBehandelingUris ) {
   behandelingNodes.forEach(function(behandeling) {
     const uri = behandeling.attributes['resource'] && behandeling.attributes['resource'].value;
     if (!publicBehandelingUris.includes(uri)) {
+      const besluit = behandeling.querySelector(`[property='prov:generated']`);
+
+      if (besluit) {
+        let besluitHtml = [
+          'eli:title',
+          'eli:description'
+        ].map(prop => besluit.querySelector(`[property='${prop}']`))
+            .filter(n => n != null)
+            .map(n => n.outerHTML)
+            .join('');
+        besluit.innerHTML = besluitHtml;
+      }
+
       let behandelingHtml = [
         'besluit:gebeurtNa',
         'besluit:openbaar',
-        'dc:subject'
+        'dc:subject',
+        'prov:generated' // content of the Besluit div has been filtered before
       ].map(prop => behandeling.querySelector(`[property='${prop}']`))
           .filter(n => n != null)
           .map(n => n.outerHTML)
           .join('');
       behandelingHtml += `<span property="ext:isPrivateBehandeling" content="true" dataType="xsd:boolean">&nbsp;</span>`;
-      
+
       console.log(`Inner HTML of private behandeling ${uri} will be replaced with ${behandelingHtml}`);
       behandeling.innerHTML = behandelingHtml;
     }
