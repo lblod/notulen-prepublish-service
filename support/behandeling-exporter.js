@@ -35,7 +35,7 @@ async function findVersionedBehandeling(uri) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo) {
+function createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo = true) {
   const behandelingNodes = findAllNodesOfType( doc.getTopDomNode(), "http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt" ).filter((node) => node.getAttribute('resource') === behandeling);
   if (behandelingNodes.length > 0 ) {
     var prefix = "";
