@@ -3,7 +3,7 @@ import { app, errorHandler } from 'mu';
 import { editorDocumentFromUuid } from './support/editor-document';
 import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
-import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
+import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, ensureBehandelingPublicationStatus, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 /***
@@ -159,17 +159,25 @@ app.post('/signing/behandeling/publish/:documentIdentifier/:behandelingUri', asy
 });
 
 /**
- * Makes the current user publish the notulen for the supplied document.
+ * Makes the current user publish the notulen for the supplied document as well as the un-published uittreksels.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
 app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(req, res, next) {
   // TODO this is 99% the same as
   // /signing/notulen/sign/:kind/:documentIdentifier, it just uses the
   // publishVersionedNotulen instead.  We can likely clean this up.
-
   try {
     const publicBehandelingUris = req.body['public-behandeling-uris'];
     const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
+
+    for(let publicBehandelingUri of publicBehandelingUris) {
+      const isBehandelingPublished = await ensureBehandelingPublicationStatus(publicBehandelingUri);
+      if(!isBehandelingPublished) {
+        const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, publicBehandelingUri);
+        await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      }
+    }
+
     const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind, 'publication', publicBehandelingUris);
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
