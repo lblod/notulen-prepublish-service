@@ -134,9 +134,8 @@ async function isPublished( behandelingUri ) {
       {
         ?versionedBehandeling a ext:VersionedBehandeling;
                   ext:behandeling ${sparqlEscapeUri(behandelingUri)}.
-        FILTER EXISTS { ?versionedBehandeling ext:publishesBehandeling ?publishedResource }.
-        LIMIT 1
-      }
+        FILTER EXISTS { ?publishedResource ext:publishesBehandeling ?versionedBehandeling }.
+      } LIMIT 1
   `);
   return r.results.bindings.length > 0;
 }
