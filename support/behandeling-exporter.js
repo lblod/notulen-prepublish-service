@@ -122,7 +122,7 @@ async function extractBehandelingVanAgendapuntenFromDoc( doc, isWrappedInZitting
  * Checks if a behandeling has already been published or not.
  * Returns true if published, false if not.
  */
-async function ensureBehandelingPublicationStatus( behandelingUri ) {
+async function isPublished( behandelingUri ) {
   const r = await query(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -135,13 +135,10 @@ async function ensureBehandelingPublicationStatus( behandelingUri ) {
         ?versionedBehandeling a ext:VersionedBehandeling;
                   ext:behandeling ${sparqlEscapeUri(behandelingUri)}.
         FILTER EXISTS { ?versionedBehandeling ext:publishesBehandeling ?publishedResource }.
+        LIMIT 1
       }
   `);
-  const bindings = r.results.bindings;
-  if (bindings.length > 0)
-    return true;
-  else
-    return false;
+  return r.results.bindings.length > 0;
 }
 
 async function signVersionedBehandeling( versionedBehandelingUri, sessionId, targetStatus ) {
@@ -152,4 +149,4 @@ async function publishVersionedBehandeling( versionedBehandelingUri, sessionId, 
   await handleVersionedResource( "publication", versionedBehandelingUri, sessionId, targetStatus, 'ext:publishesBehandeling');
 }
 
-export { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, ensureBehandelingPublicationStatus, signVersionedBehandeling, publishVersionedBehandeling }
+export { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
