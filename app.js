@@ -1,7 +1,13 @@
 import { app, errorHandler } from 'mu';
-
+import { getZitting} from "./support/agenda-queries";
 import { editorDocumentFromUuid } from './support/editor-document';
-import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
+import {
+  signVersionedAgenda,
+  publishVersionedAgenda,
+  ensureVersionedAgendaForDoc,
+  extractAgendaContentFromDoc,
+  buildAgendaContentFromZitting
+} from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
@@ -196,17 +202,31 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
 * Prepublish an agenda as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-app.get('/prepublish/agenda/:documentIdentifier', async function(req, res, next) {
+app.get("/prepublish/agenda/:zittingIdentifier", async function (
+  req,
+  res,
+  next
+) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const result = await extractAgendaContentFromDoc(doc);
-    return res.send( { data: { attributes: { content: result }, type: "imported-agenda-contents" } } ).end();
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    console.log(zitting);
+    const result = await buildAgendaContentFromZitting(zitting);
+    console.log(result);
+    return res
+      .send({
+        data: {attributes: {content: result}, type: "imported-agenda-contents"},
+      })
+      .end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished agenda ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(
+      `An error occurred while fetching contents for prepublished agenda ${
+        req.params.zittingIdentifier
+      }: ${JSON.stringify(err)}`
+    );
     error.status = 500;
     return next(error);
-  };
+  }
 });
 
 /**

@@ -4,9 +4,10 @@
   "description": "mu-semtech service to extract knowledge from documents",
   "main": "app.js",
   "dependencies": {
+    "@lblod/marawa": "0.0.8",
     "graph-rdfa-processor": "^1.3.0",
-    "jsdom": "^11.6.2",
-    "@lblod/marawa": "0.0.8"
+    "handlebars": "^4.7.6",
+    "jsdom": "^11.6.2"
   },
   "devDependencies": {},
   "scripts": {
