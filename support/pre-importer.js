@@ -1,6 +1,7 @@
 import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import {prefixMap} from "./prefixes";
 
 function wrapZittingInfo(doc, html) {
   const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
@@ -44,24 +45,26 @@ function hackedSparqlEscapeString( string ) {
   return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return ''; }).replace(/\r/g, function(match) { return '';}))}""`;
 };
 
-async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate ) {
+async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
   const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
-
+  const statePredicate = customStatePredicate || "ext:stateString";
+  const contentPredicate = customContentPredicate || "ext:content";
   // TODO: get correct signatorySecret from ACMIDM
   const query = `
-    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-    PREFIX pav: <http://purl.org/pav/>
-    PREFIX sign: <http://mu.semte.ch/vocabularies/ext/signing/>
-    PREFIX publicationStatus: <http://mu.semte.ch/vocabularies/ext/signing/publication-status/>
-    PREFIX muSession: <http://mu.semte.ch/vocabularies/session/>
-    PREFIX dct: <http://purl.org/dc/terms/>
+    ${prefixMap.get("bv").toSparqlString()}
+    ${prefixMap.get("ext").toSparqlString()}
+    ${prefixMap.get("mu").toSparqlString()}
+    ${prefixMap.get("pav").toSparqlString()}
+    ${prefixMap.get("sign").toSparqlString()}
+    ${prefixMap.get("publicationStatus").toSparqlString()}
+    ${prefixMap.get("muSession").toSparqlString()}
+    ${prefixMap.get("dct").toSparqlString()}
 
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
-        ext:stateString ?state.
+        ${statePredicate} ?state.
     } INSERT {
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
@@ -75,10 +78,10 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         ${customSignaturePredicate ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};` : ''}
         dct:subject ${sparqlEscapeUri(versionedUri)}.
       ${sparqlEscapeUri(versionedUri)}
-        ext:stateString ${sparqlEscapeString(targetStatus)}.
+        ${statePredicate} ${sparqlEscapeString(targetStatus)}.
     } WHERE {
       ${sparqlEscapeUri(versionedUri)}
-        ext:content ?content.
+        ${contentPredicate} ?content.
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
       ${sparqlEscapeUri(sessionId)}

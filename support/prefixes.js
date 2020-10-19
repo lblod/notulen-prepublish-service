@@ -30,12 +30,16 @@ class Prefix {
 
 const prefixMap = new Map([
   ["ext", new Prefix("ext", "http://mu.semte.ch/vocabularies/ext/")],
+  ["mu", new Prefix("mu", "http://mu.semte.ch/vocabularies/core/")],
+  ["muSession", new Prefix("muSession", "http://mu.semte.ch/vocabularies/session/")],
   ["tmp", new Prefix("tmp", "http://mu.semte.ch/vocabularies/tmp/")],
   ["besluit", new Prefix("besluit", "http://data.vlaanderen.be/ns/besluit#")],
+  ["bv", new Prefix("bv", "http://data.vlaanderen.be/ns/besluitvorming#")],
   ["mandaat", new Prefix("mandaat", "http://data.vlaanderen.be/ns/mandaat#")],
   ["persoon", new Prefix("persoon", "http://data.vlaanderen.be/ns/persoon#")],
   ["generiek", new Prefix("generiek", "http://data.vlaanderen.be/ns/generiek#")],
   ["mobiliteit", new Prefix("mobiliteit", "https://data.vlaanderen.be/ns/mobiliteit#")],
+  ["publicationStatus", new Prefix("publicationStatus", "http://mu.semte.ch/vocabularies/ext/signing/publication-status/")],
   ["eli", new Prefix("eli", "http://data.europa.eu/eli/ontology#")],
   ["m8g", new Prefix("m8g", "http://data.europa.eu/m8g/")],
   ["dct", new Prefix("dct", "http://purl.org/dc/terms/")],
