@@ -44,7 +44,6 @@ async function getZitting(uuid) {
             )}
      }`
   );
-  console.log("Queryresult: ", queryResult);
   if (queryResult.results.bindings.length === 0)
     throw `No content found for EditorDocument ${uuid}`;
   const {

@@ -31,12 +31,10 @@ app.post("/signing/agenda/sign/:kind/:zittingIdentifier", async function (
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
     const zitting = await getZitting(req.params.zittingIdentifier);
-    console.warn("AGENDATYPE",req.params.kind)
     const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
       zitting,
       req.params.kind
     );
-    console.warn("AGENDA_URI", prepublishedAgendaUri);
     await signVersionedAgenda(
       prepublishedAgendaUri,
       req.header("MU-SESSION-ID"),
