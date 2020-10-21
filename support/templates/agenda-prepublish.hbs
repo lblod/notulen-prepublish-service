@@ -1,17 +1,15 @@
 <div class="agendapunten" prefix="{{prefixes}}">
 
     <div about="{{zitting.uri}}" typeof="besluit:Zitting">
-    <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
-          resource="{{zitting.bestuursorgaan}}"> </span>
+        <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+              resource="{{zitting.bestuursorgaan}}"> </span>
         <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
               content="{{zitting.geplandeStart}}"
-              datatype="http://www.w3.org/2001/XMLSchema#dateTime"
-        > </span>
-    </div>
-    {{#each zitting.agendapunten as |agendapunt|}}
-        <span property="besluit:behandelt"
-              resource="{{agendapunt.uri}}"
-              typeof="besluit:Agendapunt">
+              datatype="http://www.w3.org/2001/XMLSchema#dateTime"> </span>
+        {{#each zitting.agendapunten as |agendapunt|}}
+            <span property="besluit:behandelt"
+                  resource="{{agendapunt.uri}}"
+                  typeof="besluit:Agendapunt">
             <span property="dc:subject">Agendapunt -</span>&nbsp;
             <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapunt.geplandOpenbaar}}">
                 {{#if agendapunt.geplandOpenbaar}}
@@ -24,5 +22,6 @@
                 {{agendapunt.titel}}
             </p>
         </span>
-    {{/each}}
+        {{/each}}
+    </div>
 </div>
