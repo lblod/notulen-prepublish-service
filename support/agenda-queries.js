@@ -21,10 +21,9 @@ async function getZitting(uuid) {
    * @typedef { "uri"
    * | "agendapunten"
    * | "bestuursorgaan"
-   * | "geplandeStart"
-   * | "gestartOpTijdstip"
-   * | "geeindigdOpTijdstip" } QVars
+   * | "geplandeStart" } QVars
    */
+
   /**
    * @type {Support.QueryResult<QVars>}
    */
@@ -37,21 +36,16 @@ async function getZitting(uuid) {
             besluit:behandelt ?agendapunten;
             besluit:isGehoudenDoor ?bestuursorgaan;
             besluit:geplandeStart ?geplandeStart;
-            prov:startedAtTime ?gestartOpTijdstip;
-            prov:endedAtTime ?geeindigdOpTijdstip;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
             )}
      }`
   );
-  if (queryResult.results.bindings.length === 0)
-    throw `No content found for EditorDocument ${uuid}`;
-  const {
-    bestuursorgaan,
-    uri,
-    gestartOpTijdstip,
-    geplandeStart,
-  } = queryResult.results.bindings[0];
+  if (queryResult.results.bindings.length === 0) {
+    throw `Zitting with uuid: ${uuid} not found`;
+  }
+
+  const {bestuursorgaan, uri, geplandeStart} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
     (b) => b.agendapunten.value
@@ -81,7 +75,6 @@ async function getZitting(uuid) {
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
-    gestartOpTijdstip: gestartOpTijdstip.value,
     uri: uri.value,
     agendapunten,
   };

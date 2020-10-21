@@ -7,7 +7,6 @@ declare module Support {
 
   export interface Zitting {
     geplandeStart: any;
-    gestartOpTijdstip: any;
     bestuursorgaan: any;
     opLocatie: any;
     agendapunten: AgendaPunt[];
