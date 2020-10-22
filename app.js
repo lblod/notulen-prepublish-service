@@ -1,7 +1,13 @@
 import { app, errorHandler } from 'mu';
-
+import { getZitting} from "./support/agenda-queries";
 import { editorDocumentFromUuid } from './support/editor-document';
-import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForDoc, extractAgendaContentFromDoc } from './support/agenda-exporter';
+import {
+  signVersionedAgenda,
+  publishVersionedAgenda,
+  ensureVersionedAgendaForDoc,
+  extractAgendaContentFromDoc,
+  buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
+} from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
@@ -16,17 +22,32 @@ import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFro
  * Makes the current user sign the agenda for the supplied document.
  * Ensures the prepublished agenda that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/agenda/sign/:kind/:documentIdentifier', async function(req, res, next) {
+app.post("/signing/agenda/sign/:kind/:zittingIdentifier", async function (
+  req,
+  res,
+  next
+) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedAgendaUri = await ensureVersionedAgendaForDoc(doc, req.params.kind);
-    await signVersionedAgenda( prepublishedAgendaUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
-    return res.send( { success: true } ).end();
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
+      zitting,
+      req.params.kind
+    );
+    await signVersionedAgenda(
+      prepublishedAgendaUri,
+      req.header("MU-SESSION-ID"),
+      "eerste handtekening"
+    );
+    return res.send({success: true}).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while signing the agenda ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(
+      `An error occurred while signing the agenda ${
+        req.params.documentIdentifier
+      }: ${JSON.stringify(err)}`
+    );
     return next(error);
   }
 });
@@ -101,19 +122,32 @@ app.post('/signing/notulen/sign/:kind/:documentIdentifier', async function(req, 
  * Makes the current user publish the agenda for the supplied document.
  * Ensures the prepublished agenda that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/agenda/publish/:kind/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(req, res, next) {
   // TODO this is 99% the same as
   // /signing/agenda/sign/:kind/:documentIdentifier, it just uses the
   // publishVersionedAgenda instead.  We can likely clean this up.
 
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const preImportedAgendaUri = await ensureVersionedAgendaForDoc(doc, req.params.kind);
-    await publishVersionedAgenda( preImportedAgendaUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
-    return res.send( { success: true } ).end();
+    // TODO: we now assume this is the first signature.  we should
+    // check and possibly support the second signature.
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
+        zitting,
+        req.params.kind
+    );
+    await publishVersionedAgenda(
+        prepublishedAgendaUri,
+        req.header("MU-SESSION-ID"),
+        "gepubliceerd"
+    );
+    return res.send({success: true}).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the agenda ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(
+        `An error occurred while publishing the agenda ${
+            req.params.zittingIdentifier
+        }: ${JSON.stringify(err)}`
+    );
     return next(error);
   }
 } );
@@ -196,17 +230,29 @@ app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(re
 * Prepublish an agenda as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-app.get('/prepublish/agenda/:documentIdentifier', async function(req, res, next) {
+app.get("/prepublish/agenda/:zittingIdentifier", async function (
+  req,
+  res,
+  next
+) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const result = await extractAgendaContentFromDoc(doc);
-    return res.send( { data: { attributes: { content: result }, type: "imported-agenda-contents" } } ).end();
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const result = await buildAgendaContentFromZitting(zitting);
+    return res
+      .send({
+        data: {attributes: {content: result}, type: "imported-agenda-contents"},
+      })
+      .end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished agenda ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(
+      `An error occurred while fetching contents for prepublished agenda ${
+        req.params.zittingIdentifier
+      }: ${JSON.stringify(err)}`
+    );
     error.status = 500;
     return next(error);
-  };
+  }
 });
 
 /**

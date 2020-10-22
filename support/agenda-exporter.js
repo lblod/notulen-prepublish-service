@@ -1,37 +1,120 @@
-import {query, update, sparqlEscapeUri, sparqlEscapeString, uuid} from  'mu';
-import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
-import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import {query, update, sparqlEscapeUri, sparqlEscapeString, uuid} from "mu";
+import {
+  findFirstNodeOfType,
+  findAllNodesOfType,
+} from "@lblod/marawa/dist/dom-helpers";
+import {
+  wrapZittingInfo,
+  handleVersionedResource,
+  hackedSparqlEscapeString,
+} from "./pre-importer";
+import * as path from "path";
+import * as fs from "fs";
+import Handlebars from "handlebars";
+import {prefixes, prefixMap} from "./prefixes";
+
+/**
+ * @typedef {import("./types.d.ts").Support}
+ */
 
 /**
  * This file contains helpers for exporting, signing and publishing content from the agenda.
+ * @param {Support.Zitting} zitting
+ * @returns {string}
  */
+async function buildAgendaContentFromZitting(zitting) {
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/agenda-prepublish.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  return template({zitting, prefixes: prefixes.join(" ")});
+}
 
 /**
  * Extracts the Agenda's content from the supplied document
  * Returns an HTML+RDFa snippet containing the zitting with its agendapunten
  */
-async function extractAgendaContentFromDoc( doc ) {
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
+async function extractAgendaContentFromDoc(doc) {
+  const node = findFirstNodeOfType(
+    doc.getTopDomNode(),
+    "http://data.vlaanderen.be/ns/besluit#Zitting"
+  );
 
   if (node) {
-    // TODO add helper function for prefixes    
+    // TODO add helper function for prefixes
     var prefix = "";
-    for( var key of Object.keys(doc.context.prefix) )
+    for (var key of Object.keys(doc.context.prefix))
       prefix += `${key}: ${doc.context.prefix[key]} `;
-    
-    const agendapuntNodes = findAllNodesOfType( node , 'http://data.vlaanderen.be/ns/besluit#Agendapunt' );
-    const innerHTML = `${agendapuntNodes.map( (n) => n.outerHTML ).join("\n")}`;
-    return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(doc, innerHTML)}</div>`;
+
+    const agendapuntNodes = findAllNodesOfType(
+      node,
+      "http://data.vlaanderen.be/ns/besluit#Agendapunt"
+    );
+    const innerHTML = `${agendapuntNodes.map((n) => n.outerHTML).join("\n")}`;
+    return `<div class="agendapunten" prefix="${prefix}">${wrapZittingInfo(
+      doc,
+      innerHTML
+    )}</div>`;
   } else {
-    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
+    throw new Error(
+      `Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`
+    );
   }
 }
 
 /**
- * Creates a versioned agenda item in the triplestore which could be signed. 
+ *
+ * @param {Support.Zitting} zitting
+ * @param {string} agendaKind
+ * @return {Promise<string>}
+ */
+async function ensureVersionedAgendaForZitting(zitting, agendaKind) {
+  /** @type {Support.QueryResult<"agendaUri">} */
+  const previousId = await query(`
+    ${prefixMap.get("bv").toSparqlString()}
+    SELECT ?agendaUri
+    WHERE {
+      ?agendaUri
+         a bv:Agenda;
+         bv:isAgendaVoor ${sparqlEscapeUri(zitting.uri)};
+         bv:agendaType ${sparqlEscapeString(agendaKind)}.
+    } LIMIT 1`);
+
+  if (previousId.results.bindings.length) {
+    const versionedAgendaId = previousId.results.bindings[0].agendaUri.value;
+    console.log(`Reusing versioned agenda ${versionedAgendaId}`);
+    return versionedAgendaId;
+  } else {
+    console.log(`Creating a new versioned agenda for ${zitting.uri}`);
+    const agendaContent = await buildAgendaContentFromZitting(zitting);
+    const agendaUuid = uuid();
+    const agendaUri = `http://data.lblod.info/id/agendas/${agendaUuid}`;
+
+    await update(`
+      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+      PREFIX bv: <http://data.vlaanderen.be/ns/besluitvorming#>
+      PREFIX pav: <http://purl.org/pav/>
+      PREFIX prov: <http://www.w3.org/ns/prov#>
+
+      INSERT DATA {
+        ${sparqlEscapeUri(agendaUri)}
+           a bv:Agenda;
+           ext:renderedContent ${hackedSparqlEscapeString(agendaContent)};
+           bv:isAgendaVoor ${sparqlEscapeUri(zitting.uri)};
+           mu:uuid ${sparqlEscapeString(agendaUuid)};
+           bv:agendaType ${sparqlEscapeString(agendaKind)}.
+      }`);
+
+    return agendaUri;
+  }
+}
+
+/**
+ * Creates a versioned agenda item in the triplestore which could be signed.
  * The versioned agenda are attached to the document container.
  */
-async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
+async function ensureVersionedAgendaForDoc(doc, agendaKind) {
   // TODO remove (or move) relationship between previously signable agenda, and the current agenda.
 
   const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -44,20 +127,20 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       ?agendaUri
          a ext:VersionedAgenda;
          prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         ext:agendaKind ${sparqlEscapeString( agendaKind )}.
+         ext:agendaKind ${sparqlEscapeString(agendaKind)}.
     } LIMIT 1`);
 
-  if( previousId.results.bindings.length ) {
+  if (previousId.results.bindings.length) {
     const versionedAgendaId = previousId.results.bindings[0].agendaUri.value;
     console.log(`Reusing versioned agenda ${versionedAgendaId}`);
     return versionedAgendaId;
   } else {
     console.log(`Creating a new versioned agenda for ${doc.uri}`);
-    const agendaContent = await extractAgendaContentFromDoc( doc );
+    const agendaContent = await extractAgendaContentFromDoc(doc);
     const agendaUuid = uuid();
     const agendaUri = `http://data.lblod.info/prepublished-agendas/${agendaUuid}`;
 
-    await update( `
+    await update(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>
@@ -66,10 +149,10 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
       INSERT {
         ${sparqlEscapeUri(agendaUri)}
            a ext:VersionedAgenda;
-           ext:content ${hackedSparqlEscapeString( agendaContent )};
+           ext:content ${hackedSparqlEscapeString(agendaContent)};
            prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${sparqlEscapeString( agendaUuid )};
-           ext:agendaKind ${sparqlEscapeString( agendaKind )}.
+           mu:uuid ${sparqlEscapeString(agendaUuid)};
+           ext:agendaKind ${sparqlEscapeString(agendaKind)}.
         ?documentContainer ext:hasVersionedAgenda ${sparqlEscapeUri(agendaUri)}.
       } WHERE {
         ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
@@ -78,20 +161,45 @@ async function ensureVersionedAgendaForDoc( doc, agendaKind ) {
 
     return agendaUri;
   }
-};
-
-
-async function signVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", versionedAgendaUri, sessionId, targetStatus, 'ext:signsAgenda');
 }
 
-async function publishVersionedAgenda( versionedAgendaUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", versionedAgendaUri, sessionId, targetStatus, 'ext:publishesAgenda');
+async function signVersionedAgenda(
+  versionedAgendaUri,
+  sessionId,
+  targetStatus
+) {
+  await handleVersionedResource(
+    "signature",
+    versionedAgendaUri,
+    sessionId,
+    targetStatus,
+    "ext:signsAgenda",
+    "bv:agendaStatus",
+    "ext:renderedContent"
+  );
+}
+
+async function publishVersionedAgenda(
+  versionedAgendaUri,
+  sessionId,
+  targetStatus
+) {
+  await handleVersionedResource(
+    "publication",
+    versionedAgendaUri,
+    sessionId,
+    targetStatus,
+    "ext:publishesAgenda",
+    "bv:agendaStatus",
+    "ext:renderedContent"
+  );
 }
 
 export {
   signVersionedAgenda,
   publishVersionedAgenda,
   extractAgendaContentFromDoc,
-  ensureVersionedAgendaForDoc
-}
+  ensureVersionedAgendaForDoc,
+  ensureVersionedAgendaForZitting,
+  buildAgendaContentFromZitting,
+};
