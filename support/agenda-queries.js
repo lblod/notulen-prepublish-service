@@ -1,4 +1,4 @@
-import {query, sparqlEscapeString} from "mu";
+import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 
 /**
@@ -34,6 +34,7 @@ async function getZitting(uuid) {
      SELECT * WHERE {
        ?uri a besluit:Zitting;
             besluit:behandelt ?agendapunten;
+
             besluit:isGehoudenDoor ?bestuursorgaan;
             besluit:geplandeStart ?geplandeStart;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
@@ -54,21 +55,31 @@ async function getZitting(uuid) {
     query(`
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("dct").toSparqlString()}
+     ${prefixMap.get("ext").toSparqlString()}
+     ${prefixMap.get("pav").toSparqlString()}
       SELECT * 
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
           <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
           <${uri}> dct:title ?titel.
+          ?bva dct:subject ${sparqlEscapeUri(uri)}.
+          ?bva ext:hasDocumentContainer ?document.
+          ?document pav:hasCurrentVersion ?editorDocument.
+          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid 
           } `)
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, bva, editorDocumentUuid} = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
       titel: titel.value,
+      behandeling: {
+        uri: bva.value,
+        documentUuid: editorDocumentUuid.value
+      }
     };
   });
 

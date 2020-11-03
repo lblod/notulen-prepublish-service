@@ -259,14 +259,23 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
 * Prepublish a besluitenlijst as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-app.get('/prepublish/besluitenlijst/:documentIdentifier', async function(req, res, next) {
+app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const result = extractBesluitenLijstContentFromDoc(doc);
-    return res.send( { data: { attributes: { content: result }, type: "imported-besluitenlijst-contents" } } ).end();
+    console.log(req.params.zittingIdentifier)
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const agendapunten = zitting.agendapunten;
+    const besluiten = []
+    for(let agendapunt of agendapunten) {
+      const behandeling = agendapunt.behandeling
+      const doc = await editorDocumentFromUuid( behandeling.documentUuid );
+      console.log(agendapunt)
+      const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
+      besluiten.push(besluit)
+    }
+    return res.send( { data: { attributes: { content: besluiten.join('') }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     error.status = 500;
     return next(error);
   }
