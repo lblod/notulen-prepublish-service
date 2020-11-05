@@ -2,6 +2,7 @@ import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import { editorDocumentFromUuid } from './editor-document';
 
 /**
  * Extracts the besluitenlijst from the supplied document.
@@ -37,11 +38,23 @@ function extractBesluitenLijstContentFromDoc( doc, agendapunt, openbaar, behande
   return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
 }
 
+async function buildBesluitenLijstForZitting(zitting) {
+  const agendapunten = zitting.agendapunten;
+  const besluiten = [];
+  for(let agendapunt of agendapunten) {
+    const behandeling = agendapunt.behandeling;
+    const doc = await editorDocumentFromUuid( behandeling.documentUuid );
+    const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
+    besluiten.push(besluit);
+  }
+  return besluiten.join('');
+}
+
 /**
  * Creates a versioned besluitenlijst item in the triplestore which could be signed.
  * The versioned besluitenlijst are attached to the document container.
  */
-async function ensureVersionedBesluitenLijstForDoc( doc ) {
+async function ensureVersionedBesluitenLijstForZitting( zitting ) {
   // TODO remove (or move) relationship between previously signable
   // besluitenLijst, and the current besluitenLijst.
 
@@ -53,8 +66,8 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     SELECT ?besluitenLijstUri
     WHERE {
       ?besluitenLijstUri
-         a ext:VersionedBesluitenLijst;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)}.
+        a ext:BesluitenLijst.
+      ${sparqlEscapeUri(zitting.uri)} ext:hasBesluitenLijst ?besluitenLijstUri
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -62,10 +75,10 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
     return versionedBesluitenLijstId;
   } else {
-    console.log(`Creating a new versioned besluitenlijst for ${doc.uri}`);
-    const besluitenLijstContent = await extractBesluitenLijstContentFromDoc( doc );
+    console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
+    const besluitenLijstContent = await buildBesluitenLijstForZitting( zitting );
     const besluitenLijstUuid = uuid();
-    const besluitenLijstUri = `http://data.lblod.info/prepublished-besluiten-lijsten/${besluitenLijstUuid}`;
+    const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;
 
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -73,16 +86,12 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
       PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
 
-      INSERT {
+      INSERT DATA{
         ${sparqlEscapeUri(besluitenLijstUri)}
-           a ext:VersionedBesluitenLijst;
-           ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
-        ?documentContainer ext:hasVersionedBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.
-      } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
+          a ext:BesluitenLijst;
+          ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
+          mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
+        ${sparqlEscapeUri(zitting.uri)} ext:hasBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
     return besluitenLijstUri;
@@ -98,4 +107,4 @@ async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessi
 }
 
 
-export { extractBesluitenLijstContentFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc };
+export { extractBesluitenLijstContentFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };

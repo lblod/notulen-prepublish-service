@@ -8,7 +8,7 @@ import {
   extractAgendaContentFromDoc,
   buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
 } from './support/agenda-exporter';
-import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc, extractBesluitenLijstContentFromDoc } from './support/besluit-exporter';
+import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, extractBesluitenLijstContentFromDoc, buildBesluitenLijstForZitting } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
@@ -56,12 +56,12 @@ app.post("/signing/agenda/sign/:kind/:zittingIdentifier", async function (
  * Makes the current user sign the besluitenlijst for the supplied document.
  * Ensures the prepublished besluitenlijst that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/besluitenlijst/sign/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(req, res, next) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForDoc(doc);
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
     await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
@@ -156,19 +156,19 @@ app.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(req,
  * Makes the current user publish the besluitenlijst for the supplied document.
  * Ensures the prepublished besluitenlijst that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/besluitenlijst/publish/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function(req, res, next) {
   // TODO this is 99% the same as
   // /signing/besluitenlijst/sign/:kind/:documentIdentifier, it just uses the
   // publishVersionedBesluitenlijst instead.  We can likely clean this up.
 
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForDoc(doc);
+    const zitting = await getZitting(req.params.zittingIdentifier);
+    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     return next(error);
   }
 } );
@@ -261,18 +261,9 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
 */
 app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
   try {
-    console.log(req.params.zittingIdentifier)
     const zitting = await getZitting(req.params.zittingIdentifier);
-    const agendapunten = zitting.agendapunten;
-    const besluiten = []
-    for(let agendapunt of agendapunten) {
-      const behandeling = agendapunt.behandeling
-      const doc = await editorDocumentFromUuid( behandeling.documentUuid );
-      console.log(agendapunt)
-      const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
-      besluiten.push(besluit)
-    }
-    return res.send( { data: { attributes: { content: besluiten.join('') }, type: "imported-besluitenlijst-contents" } } ).end();
+    const besluitenlijst = await buildBesluitenLijstForZitting(zitting)
+    return res.send( { data: { attributes: { content: besluitenlijst }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
