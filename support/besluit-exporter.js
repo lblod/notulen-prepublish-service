@@ -46,12 +46,10 @@ async function buildBesluitenLijstForZitting(zitting) {
     const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
     besluiten.push(besluit);
   }
-  console.log(zitting)
   return wrapZittingInfo(besluiten.join(''), zitting);
 }
 
 async function wrapZittingInfo(besluitenlijst, zitting) {
-  console.log(besluitenlijst)
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
     .toString();
