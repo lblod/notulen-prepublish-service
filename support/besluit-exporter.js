@@ -1,15 +1,19 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
+import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 import { editorDocumentFromUuid } from './editor-document';
+import * as path from "path";
+import * as fs from "fs";
+import Handlebars from "handlebars";
+import {prefixes, prefixMap} from "./prefixes";
 
 /**
  * Extracts the besluitenlijst from the supplied document.
  * Returns an HTML+RDFa snippet containing the zitting with its behandeling van agendapunten and generated besluiten
  * Besluitenlijst == titel & korte beschrijving
  */
-function extractBesluitenLijstContentFromDoc( doc, agendapunt, openbaar, behandeling ) {
+function extractBesluitenLijstContentFromDoc( doc, agendapunt, openbaar, behandeling, zitting ) {
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
   const triples = cleanupTriples(Array.concat(...contexts));
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
@@ -30,12 +34,7 @@ function extractBesluitenLijstContentFromDoc( doc, agendapunt, openbaar, behande
                     </div>`;
     besluitenHTML = `${besluitenHTML}${besluitHTML}`;
   }
-
-  // TODO add helper function for prefixes
-  var prefix = "";
-  for( var key of Object.keys(doc.context.prefix) )
-    prefix += `${key}: ${doc.context.prefix[key]} `;
-  return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
+  return besluitenHTML;
 }
 
 async function buildBesluitenLijstForZitting(zitting) {
@@ -44,10 +43,20 @@ async function buildBesluitenLijstForZitting(zitting) {
   for(let agendapunt of agendapunten) {
     const behandeling = agendapunt.behandeling;
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
-    const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
+    const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
     besluiten.push(besluit);
   }
-  return besluiten.join('');
+  console.log(zitting)
+  return wrapZittingInfo(besluiten.join(''), zitting);
+}
+
+async function wrapZittingInfo(besluitenlijst, zitting) {
+  console.log(besluitenlijst)
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  return template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
 }
 
 /**
