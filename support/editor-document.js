@@ -77,8 +77,10 @@ async function editorDocumentFromUuid( uuid ){
        }
      }`);
   
-  if( queryResult.results.bindings.length === 0 )
-    throw `No content found for EditorDocument ${uuid}`;
+  if( queryResult.results.bindings.length === 0 ) {
+    console.log(`No content found for EditorDocument ${uuid} returning null`)
+    return null;
+  }
   const result = queryResult.results.bindings[0];
 
   const doc = new EditorDocument({

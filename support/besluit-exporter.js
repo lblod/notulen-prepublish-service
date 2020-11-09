@@ -42,7 +42,9 @@ async function buildBesluitenLijstForZitting(zitting) {
   const besluiten = [];
   for(let agendapunt of agendapunten) {
     const behandeling = agendapunt.behandeling;
+    if(!behandeling.documentUuid) continue
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
+    if(!doc) continue
     const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
     besluiten.push(besluit);
   }
