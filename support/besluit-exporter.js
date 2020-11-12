@@ -9,11 +9,10 @@ import Handlebars from "handlebars";
 import {prefixes, prefixMap} from "./prefixes";
 
 /**
- * Extracts the besluitenlijst from the supplied document.
- * Returns an HTML+RDFa snippet containing the zitting with its behandeling van agendapunten and generated besluiten
- * Besluitenlijst == titel & korte beschrijving
+ * Extracts the besluiten from the supplied document.
+ * Returns an HTML+RDFa snippet containing the behandeling van agendapunten and generated besluiten
  */
-function extractBesluitenLijstContentFromDoc( doc, agendapunt, openbaar, behandeling, zitting ) {
+function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, zitting ) {
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
   const triples = cleanupTriples(Array.concat(...contexts));
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
@@ -45,7 +44,7 @@ async function buildBesluitenLijstForZitting(zitting) {
     if(!behandeling.documentUuid) continue
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
     if(!doc) continue
-    const besluit = extractBesluitenLijstContentFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
+    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
     besluiten.push(besluit);
   }
   return wrapZittingInfo(besluiten.join(''), zitting);
@@ -71,12 +70,13 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
+    PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 
     SELECT ?besluitenLijstUri
     WHERE {
       ?besluitenLijstUri
-        a ext:BesluitenLijst.
-      ${sparqlEscapeUri(zitting.uri)} ext:hasBesluitenLijst ?besluitenLijstUri
+        a ext:VersionedBesluitenLijst.
+      ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -94,13 +94,14 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
+      PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 
       INSERT DATA{
         ${sparqlEscapeUri(besluitenLijstUri)}
-          a ext:BesluitenLijst;
+          a ext:VersionedBesluitenLijst;
           ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
           mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
-        ${sparqlEscapeUri(zitting.uri)} ext:hasBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.
+        ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
     return besluitenLijstUri;
@@ -116,4 +117,4 @@ async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessi
 }
 
 
-export { extractBesluitenLijstContentFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };
+export { extractBesluitenFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };

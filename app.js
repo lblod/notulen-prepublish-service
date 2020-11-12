@@ -1,5 +1,6 @@
 import { app, errorHandler } from 'mu';
-import { getZitting} from "./support/agenda-queries";
+import { getZittingForAgenda} from "./support/agenda-queries";
+import {getZittingForBesluitenlijst} from './support/besluit-queries';
 import { editorDocumentFromUuid } from './support/editor-document';
 import {
   signVersionedAgenda,
@@ -30,7 +31,7 @@ app.post("/signing/agenda/sign/:kind/:zittingIdentifier", async function (
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
     const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
       zitting,
       req.params.kind
@@ -60,7 +61,7 @@ app.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(req, 
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
     const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
     await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
@@ -130,7 +131,7 @@ app.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(req,
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
     const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
         zitting,
         req.params.kind
@@ -162,7 +163,7 @@ app.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function(re
   // publishVersionedBesluitenlijst instead.  We can likely clean this up.
 
   try {
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
     const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
@@ -236,7 +237,7 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
   next
 ) {
   try {
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
     const result = await buildAgendaContentFromZitting(zitting);
     return res
       .send({
@@ -261,7 +262,7 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
 */
 app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
   try {
-    const zitting = await getZitting(req.params.zittingIdentifier);
+    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
     const besluitenlijst = await buildBesluitenLijstForZitting(zitting)
     return res.send( { data: { attributes: { content: besluitenlijst }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
