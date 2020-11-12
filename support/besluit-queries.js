@@ -16,7 +16,7 @@ import {prefixMap} from "./prefixes";
  * @return {Promise<Support.Zitting>} Promise which resolves to an object representing
  * the zitting
  */
-async function getZittingForAgenda(uuid) {
+async function getZittingForBesluitenlijst(uuid) {
   /**
    * @typedef { "uri"
    * | "agendapunten"
@@ -39,7 +39,7 @@ async function getZittingForAgenda(uuid) {
             besluit:geplandeStart ?geplandeStart;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
-            )}.
+            )}
      }`
   );
   if (queryResult.results.bindings.length === 0) {
@@ -55,21 +55,31 @@ async function getZittingForAgenda(uuid) {
     query(`
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("dct").toSparqlString()}
+     ${prefixMap.get("ext").toSparqlString()}
+     ${prefixMap.get("pav").toSparqlString()}
       SELECT * 
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
           <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
           <${uri}> dct:title ?titel.
+          ?bva dct:subject ${sparqlEscapeUri(uri)}.
+          ?bva ext:hasDocumentContainer ?document.
+          ?document pav:hasCurrentVersion ?editorDocument.
+          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid 
           } `)
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, bva, editorDocumentUuid} = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
       titel: titel.value,
+      behandeling: {
+        uri: bva.value,
+        documentUuid: editorDocumentUuid.value
+      }
     };
   });
 
@@ -81,4 +91,4 @@ async function getZittingForAgenda(uuid) {
   };
 }
 
-export {getZittingForAgenda};
+export {getZittingForBesluitenlijst};

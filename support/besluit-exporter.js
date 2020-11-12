@@ -1,60 +1,68 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
+import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import { editorDocumentFromUuid } from './editor-document';
+import * as path from "path";
+import * as fs from "fs";
+import Handlebars from "handlebars";
+import {prefixes, prefixMap} from "./prefixes";
 
 /**
- * Extracts the besluitenlijst from the supplied document.
- * Returns an HTML+RDFa snippet containing the zitting with its behandeling van agendapunten and generated besluiten
- * Besluitenlijst == titel & korte beschrijving
+ * Extracts the besluiten from the supplied document.
+ * Returns an HTML+RDFa snippet containing the behandeling van agendapunten and generated besluiten
  */
-function extractBesluitenLijstContentFromDoc( doc ) {
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  if (node){
-    const contexts = analyse( node ).map((c) => c.context);
-    const triples = cleanupTriples(Array.concat(...contexts));
-    const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-    var besluitenHTML = '';
-    for (const besluit of besluiten) {
-      const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
-      const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
-      const behandeling = triples.find((t) => t.predicate === 'http://www.w3.org/ns/prov#generated' && t.object === besluit);
-      const agendapunt = triples.find((t) => t.predicate === 'http://purl.org/dc/terms/subject' && t.subject === behandeling.subject);
-      const openbaar = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#openbaar' && t.subject === behandeling.subject);
-      const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
-      const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
-      var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
-      if (behandeling) {
-        besluitHTML = `<div resource="${behandeling.subject}" typeof="besluit:BehandelingVanAgendapunt">
-                          ${ agendapunt ? `<span property="http://purl.org/dc/terms/subject" resource="${agendapunt.object}" > </span>` : ''}
-                          ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar.object}" class="annotation--agendapunt--${ openbaar.object === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye${ openbaar.object === "true" ? "" : "-slash"}"> </i></span>` : ''}
-                          ${ gebeurtNa ? `<span property="besluit:gebeurtNa" resource="${gebeurtNa.object}"> </span>` : ''}
-                          <div property="prov:generated" resource="${besluit}" typeof="${besluitTypes.join(' ')}">
-                          ${besluitHTML}
-                          </div>
-                       </div>`;
-      }
-      else {
-        besluitHTML = `<div resource="${besluit}" typeof="http://data.vlaanderen.be/ns/besluit#Besluit">${besluitHTML}</div>`;
-      }
-      besluitenHTML = `${besluitenHTML}${besluitHTML}`;
-    }
-
-    // TODO add helper function for prefixes
-    var prefix = "";
-    for( var key of Object.keys(doc.context.prefix) )
-      prefix += `${key}: ${doc.context.prefix[key]} `;
-    return `<div class="besluiten" prefix="${prefix}">${wrapZittingInfo(doc, besluitenHTML)}</div>`;
-  } else {
-    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
+function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, zitting ) {
+  const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
+  const triples = cleanupTriples(Array.concat(...contexts));
+  const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
+  var besluitenHTML = '';
+  for (const besluit of besluiten) {
+    const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
+    const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
+    const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
+    const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
+    var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+    besluitHTML = `<div resource="${behandeling}" typeof="besluit:BehandelingVanAgendapunt">
+                      ${ agendapunt ? `<span property="http://purl.org/dc/terms/subject" resource="${agendapunt}" > </span>` : ''}
+                      ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar}" class="annotation--agendapunt--${ openbaar === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye${ openbaar === "true" ? "" : "-slash"}"> </i></span>` : ''}
+                      ${ gebeurtNa ? `<span property="besluit:gebeurtNa" resource="${gebeurtNa.object}"> </span>` : ''}
+                      <div property="prov:generated" resource="${besluit}" typeof="${besluitTypes.join(' ')}">
+                      ${besluitHTML}
+                      </div>
+                    </div>`;
+    besluitenHTML = `${besluitenHTML}${besluitHTML}`;
   }
+  return besluitenHTML;
+}
+
+async function buildBesluitenLijstForZitting(zitting) {
+  const agendapunten = zitting.agendapunten;
+  const besluiten = [];
+  for(let agendapunt of agendapunten) {
+    const behandeling = agendapunt.behandeling;
+    if(!behandeling.documentUuid) continue
+    const doc = await editorDocumentFromUuid( behandeling.documentUuid );
+    if(!doc) continue
+    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
+    besluiten.push(besluit);
+  }
+  return wrapZittingInfo(besluiten.join(''), zitting);
+}
+
+async function wrapZittingInfo(besluitenlijst, zitting) {
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  return template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
 }
 
 /**
  * Creates a versioned besluitenlijst item in the triplestore which could be signed.
  * The versioned besluitenlijst are attached to the document container.
  */
-async function ensureVersionedBesluitenLijstForDoc( doc ) {
+async function ensureVersionedBesluitenLijstForZitting( zitting ) {
   // TODO remove (or move) relationship between previously signable
   // besluitenLijst, and the current besluitenLijst.
 
@@ -62,12 +70,13 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
+    PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 
     SELECT ?besluitenLijstUri
     WHERE {
       ?besluitenLijstUri
-         a ext:VersionedBesluitenLijst;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)}.
+        a ext:VersionedBesluitenLijst.
+      ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -75,27 +84,24 @@ async function ensureVersionedBesluitenLijstForDoc( doc ) {
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
     return versionedBesluitenLijstId;
   } else {
-    console.log(`Creating a new versioned besluitenlijst for ${doc.uri}`);
-    const besluitenLijstContent = await extractBesluitenLijstContentFromDoc( doc );
+    console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
+    const besluitenLijstContent = await buildBesluitenLijstForZitting( zitting );
     const besluitenLijstUuid = uuid();
-    const besluitenLijstUri = `http://data.lblod.info/prepublished-besluiten-lijsten/${besluitenLijstUuid}`;
+    const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;
 
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
+      PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
 
-      INSERT {
+      INSERT DATA{
         ${sparqlEscapeUri(besluitenLijstUri)}
-           a ext:VersionedBesluitenLijst;
-           ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-           mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
-        ?documentContainer ext:hasVersionedBesluitenLijst ${sparqlEscapeUri(besluitenLijstUri)}.
-      } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
+          a ext:VersionedBesluitenLijst;
+          ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
+          mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
+        ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
     return besluitenLijstUri;
@@ -111,4 +117,4 @@ async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessi
 }
 
 
-export { extractBesluitenLijstContentFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForDoc };
+export { extractBesluitenFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };
