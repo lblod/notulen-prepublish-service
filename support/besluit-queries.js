@@ -57,11 +57,13 @@ async function getZittingForBesluitenlijst(uuid) {
      ${prefixMap.get("dct").toSparqlString()}
      ${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get("schema").toSparqlString()}
       SELECT * 
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
           <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
           <${uri}> dct:title ?titel.
+          ${sparqlEscapeUri(uri)} schema:position ?position.
           ?bva dct:subject ${sparqlEscapeUri(uri)}.
           ?bva ext:hasDocumentContainer ?document.
           ?document pav:hasCurrentVersion ?editorDocument.
@@ -70,11 +72,13 @@ async function getZittingForBesluitenlijst(uuid) {
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
+
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel, bva, editorDocumentUuid} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, bva, editorDocumentUuid, position} = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
+      position: position.value,
       titel: titel.value,
       behandeling: {
         uri: bva.value,
@@ -83,11 +87,14 @@ async function getZittingForBesluitenlijst(uuid) {
     };
   });
 
+  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1)
+
+
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
     uri: uri.value,
-    agendapunten,
+    agendapunten: agendapuntenSorted,
   };
 }
 
