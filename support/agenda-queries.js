@@ -55,29 +55,34 @@ async function getZittingForAgenda(uuid) {
     query(`
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("dct").toSparqlString()}
+     ${prefixMap.get("schema").toSparqlString()}
       SELECT * 
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
           <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
           <${uri}> dct:title ?titel.
+          ${sparqlEscapeUri(uri)} schema:position ?position.
           } `)
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, position} = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
       titel: titel.value,
+      position: position.value
     };
   });
+
+  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1);
 
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
     uri: uri.value,
-    agendapunten,
+    agendapunten: agendapuntenSorted,
   };
 }
 
