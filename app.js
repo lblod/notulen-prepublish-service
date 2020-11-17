@@ -1,6 +1,7 @@
 import { app, errorHandler } from 'mu';
 import { getZittingForAgenda} from "./support/agenda-queries";
 import {getZittingForBesluitenlijst} from './support/besluit-queries';
+import {getZittingForBehandeling} from './support/behandeling-queries';
 import { editorDocumentFromUuid } from './support/editor-document';
 import {
   signVersionedAgenda,
@@ -10,7 +11,7 @@ import {
   buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
 } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, extractBesluitenLijstContentFromDoc, buildBesluitenLijstForZitting } from './support/besluit-exporter';
-import { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
+import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 /***
@@ -277,13 +278,12 @@ app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res
  * Prepublish besluiten as HTML+RDFa snippet for a given document
  * The snippets are not persisted in the store
  */
-app.get('/prepublish/behandelingen/:documentIdentifier', async function(req, res, next) {
+app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const results = (await extractBehandelingVanAgendapuntenFromDoc(doc, true)).map((r) => {
-      return { attributes: r, type: "imported-behandeling-contents"};
-    });
-    return res.send( { data: results}).end();
+    const zitting = await getZittingForBehandeling(req.params.zittingIdentifier);
+    console.log(zitting)
+    const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting)
+    return res.send( { data: { attributes: { content: behandeling }}}).end();
   }
   catch (err) {
     console.log(err);

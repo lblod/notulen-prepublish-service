@@ -1,7 +1,11 @@
 import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
-import {wrapZittingInfo, handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
+import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
 import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
 import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import * as path from "path";
+import * as fs from "fs";
+import Handlebars from "handlebars";
+import {prefixes, prefixMap} from "./prefixes";
 
 /**
  * Finds a versioned behandeling based on provided uri
@@ -35,21 +39,25 @@ async function findVersionedBehandeling(uri) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo = true) {
-  const behandelingNodes = findAllNodesOfType( doc.getTopDomNode(), "http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt" ).filter((node) => node.getAttribute('resource') === behandeling);
-  if (behandelingNodes.length > 0 ) {
-    var prefix = "";
-    for( var key of Object.keys(doc.context.prefix) )
-      prefix += `${key}: ${doc.context.prefix[key]} `;
-    let body = "";
-    if (isWrappedInZittingInfo) {
-      body = `<div class="behandeling" prefix="${prefix}">${wrapZittingInfo(doc, behandelingNodes[0].outerHTML)}</div>`;
-    } else {
-      body = `<div class="behandeling" prefix="${prefix}">${behandelingNodes[0].outerHTML}</div>`;
-    }
-    return { body, behandeling };
+function createBehandelingExtract(zitting, behandeling, isWrappedInZittingInfo = true) {
+  const behandelingHtml = generateBehandelingHTML(behandeling);
+  if (isWrappedInZittingInfo) {
+    return wrapZittingInfo(zitting, behandelingHtml)
+  } else {
+    return behandelingHtml;
   }
-  throw "Behandeling not found";
+}
+
+function wrapZittingInfo(zitting, behandelingHTML) {
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  return template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
+}
+
+function generateBehandelingHTML(behandeling) {
+  return 'behandeling'
 }
 
 /**
@@ -94,28 +102,15 @@ async function ensureVersionedBehandelingForDoc(doc, behandelingUri) {
  * NOTE: this is different from other extractions!
  * Returns an array of behandeling extractions
  */
-async function extractBehandelingVanAgendapuntenFromDoc( doc, isWrappedInZittingInfo ) {
-  const zitting = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  if (zitting) {
-    const contexts = analyse( zitting ).map((c) => c.context);
-    const triples = cleanupTriples(Array.concat(...contexts));
-    const behandelingen = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt").map( (b) => b.subject);
+async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedInZittingInfo ) {
+    const agendapunten = zitting.agendapunten
     const extracts = [];
-    for (const behandeling of behandelingen) {
-      const existingExtract = await findVersionedBehandeling(behandeling);
-      if (existingExtract) {
-        console.log(`returning existing behandeling for ${doc.uri}`);
-        extracts.push(existingExtract);
-      }
-      else {
-        const newExtract = createBehandelingExtract(doc, behandeling, isWrappedInZittingInfo);
-        console.log(`creating temporary behandeling extract for ${doc.uri}`);
-        extracts.push(newExtract);
-      }
+    for (const agendapunt of agendapunten) {
+      const newExtract = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
+      console.log(`creating temporary behandeling extract for ${zitting.uri}`);
+      extracts.push(newExtract);
     }
     return extracts;
-  }
-  return [];
 }
 
 /**
@@ -148,4 +143,4 @@ async function publishVersionedBehandeling( versionedBehandelingUri, sessionId, 
   await handleVersionedResource( "publication", versionedBehandelingUri, sessionId, targetStatus, 'ext:publishesBehandeling');
 }
 
-export { extractBehandelingVanAgendapuntenFromDoc, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
+export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
