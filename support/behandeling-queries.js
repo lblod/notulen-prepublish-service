@@ -58,6 +58,7 @@ async function getZittingForBehandeling(uuid) {
      ${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("pav").toSparqlString()}
      ${prefixMap.get("schema").toSparqlString()}
+     ${prefixMap.get("mu").toSparqlString()}
       SELECT * 
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
@@ -65,6 +66,7 @@ async function getZittingForBehandeling(uuid) {
           <${uri}> dct:title ?titel.
           ${sparqlEscapeUri(uri)} schema:position ?position.
           ?bva dct:subject ${sparqlEscapeUri(uri)}.
+          ?bva mu:uuid ?bvaUuid.
           ?bva ext:hasDocumentContainer ?document.
           ?document pav:hasCurrentVersion ?editorDocument.
           ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid 
@@ -74,7 +76,7 @@ async function getZittingForBehandeling(uuid) {
   const agendaResults = await Promise.all(agendaQueries);
 
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel, bva, editorDocumentUuid, position} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, bva, bvaUuid, editorDocumentUuid, position} = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
@@ -82,6 +84,7 @@ async function getZittingForBehandeling(uuid) {
       titel: titel.value,
       behandeling: {
         uri: bva.value,
+        uuid: bvaUuid.value,
         documentUuid: editorDocumentUuid.value
       }
     };

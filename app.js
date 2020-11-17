@@ -283,7 +283,7 @@ app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res,
     const zitting = await getZittingForBehandeling(req.params.zittingIdentifier);
     console.log(zitting)
     const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting)
-    return res.send( { data: { attributes: { content: behandeling }}}).end();
+    return res.send(behandeling).end();
   }
   catch (err) {
     console.log(err);

@@ -108,7 +108,14 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
     for (const agendapunt of agendapunten) {
       const newExtract = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
       console.log(`creating temporary behandeling extract for ${zitting.uri}`);
-      extracts.push(newExtract);
+      extracts.push({
+        data: {
+          attributes: {
+            content: newExtract,
+            behandeling: agendapunt.behandeling.uuid
+          }
+        }
+      });
     }
     return extracts;
 }
