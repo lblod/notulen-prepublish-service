@@ -11,7 +11,7 @@ import {
   buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
 } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, extractBesluitenLijstContentFromDoc, buildBesluitenLijstForZitting } from './support/besluit-exporter';
-import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
+import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 /***
@@ -78,18 +78,19 @@ app.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(req, 
  * Makes the current user sign the provided behandeling for the supplied document.
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/behandeling/sign/:documentIdentifier/:behandelingUri', async function(req, res, next) {
+app.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', async function(req, res, next) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const behandelingUri = decodeURIComponent(req.params.behandelingUri);
-    const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, behandelingUri);
+    const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
+    const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
+    const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
+    console.log(prepublishedBehandelingUri);
     await signVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while signing the behandeling ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${JSON.stringify(err)}`);
     return next(error);
   }
 });
@@ -180,16 +181,16 @@ app.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function(re
  * Makes the current user publish the provided behandeling for the supplied document.
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
  */
-app.post('/signing/behandeling/publish/:documentIdentifier/:behandelingUri', async function(req, res, next) {
+app.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', async function(req, res, next) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const behandelingUri = decodeURIComponent(req.params.behandelingUri);
-    const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, behandelingUri);
+    const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
+    const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
+    const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
     await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while publishing the behandeling ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while publishing the behandeling ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     return next(error);
   }
 });
@@ -281,7 +282,6 @@ app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res
 app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
   try {
     const zitting = await getZittingForBehandeling(req.params.zittingIdentifier);
-    console.log(zitting)
     const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting)
     return res.send(behandeling).end();
   }

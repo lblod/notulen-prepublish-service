@@ -61,7 +61,7 @@ const prefixMap = new Map([
   ["lblodmow", new Prefix("lblodmow", "http://data.lblod.info/vocabularies/mobiliteit/")],
   ["locn", new Prefix("locn", "http://www.w3.org/ns/locn#")],
   ["adres", new Prefix("adres", "https://data.vlaanderen.be/ns/adres#")],
-  ["lblodlg", new Prefix("lblodlg", "http://data.lblod.info/vocabularies/leidinggevenden/")],
+  ["persoon", new Prefix("persoon", "http://data.vlaanderen.be/ns/persoon#")],
 ]);
 
 export {prefixes, prefixMap};

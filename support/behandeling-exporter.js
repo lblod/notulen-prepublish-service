@@ -11,26 +11,25 @@ import {prefixes, prefixMap} from "./prefixes";
  * Finds a versioned behandeling based on provided uri
  * does not check if it's linked to the right container
  */
-async function findVersionedBehandeling(uri) {
+async function findVersionedBehandeling(uuid) {
   const r = await query(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
-      SELECT ?versionedBehandeling ?body ?uuid
+      SELECT ?versionedBehandeling ?body ?uuid ?behandeling
       WHERE
       {
         ?versionedBehandeling a ext:VersionedBehandeling;
                   mu:uuid ?uuid;
                   ext:content ?body;
-                  prov:wasDerivedFrom ?editorDocument;
-                  ext:behandeling ${sparqlEscapeUri(uri)}.
-        ?editorContainer pav:hasVersion ?editorDocument.
+                  ext:behandeling ?behandeling.
+        ?behandeling mu:uuid ${sparqlEscapeString(uuid)}.
       }
   `);
   const bindings = r.results.bindings;
   if (bindings.length > 0)
-    return { body: bindings[0].body.value, behandeling: uri, uuid: bindings[0].uuid.value, versionedBehandeling: bindings[0].versionedBehandeling.value };
+    return { body: bindings[0].body.value, behandeling: bindings[0].behandeling.value, uuid: bindings[0].uuid.value, versionedBehandeling: bindings[0].versionedBehandeling.value };
   else
     return null;
 }
@@ -39,8 +38,8 @@ async function findVersionedBehandeling(uri) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(zitting, behandeling, isWrappedInZittingInfo = true) {
-  const behandelingHtml = generateBehandelingHTML(behandeling);
+function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true) {
+  const behandelingHtml = generateBehandelingHTML(agendapunt);
   if (isWrappedInZittingInfo) {
     return wrapZittingInfo(zitting, behandelingHtml)
   } else {
@@ -50,29 +49,42 @@ function createBehandelingExtract(zitting, behandeling, isWrappedInZittingInfo =
 
 function wrapZittingInfo(zitting, behandelingHTML) {
   const templateStr = fs
-    .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
+    .readFileSync(path.join(__dirname, "templates/behandeling-prepublish.hbs"))
     .toString();
   const template = Handlebars.compile(templateStr);
   return template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
 }
 
-function generateBehandelingHTML(behandeling) {
-  return 'behandeling'
+function generateBehandelingHTML(agendapunt) {
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/behandeling-html.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  const behandelingUri = agendapunt.behandeling.uri;
+  const agendapuntUri = agendapunt;
+  const agendapuntTitle = agendapunt.title;
+  const openbaar = agendapunt.behandeling.openbaar;
+  const document = agendapunt.behandeling.document.content;
+  const presentMandatees = agendapunt.behandeling.presentMandatees;
+  const stemmings = agendapunt.behandeling.stemmings;
+  console.log(stemmings)
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, stemmings});
 }
 
 /**
  * Creates a versioned behandeling in the triple store which could be signed or published
  * The versioned behandeling is attached to the document container
  */
-async function ensureVersionedBehandelingForDoc(doc, behandelingUri) {
-  const versionedBehandeling = await findVersionedBehandeling(behandelingUri);
+async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
+  const versionedBehandeling = await findVersionedBehandeling(behandelingUuid);
   if (versionedBehandeling) {
-    console.log(`reusing versioned behandeling for document ${doc.uri} and behandeling ${behandelingUri}`);
+    console.log(`reusing versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
     return versionedBehandeling.versionedBehandeling;
   }
   else {
-    console.log(`creating a new versioned behandeling for document ${doc.uri} and behandeling ${behandelingUri}`);
-    const newExtract = createBehandelingExtract(doc, behandelingUri);
+    console.log(`creating a new versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
+    const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid)
+    const newExtract = createBehandelingExtract(zitting, agendapunt);
     const versionedBehandelingUuid = uuid();
     const versionedBehandelingUri = `http://data.lblod.info/prepublished-behandelingen/${versionedBehandelingUuid}`;
     await update(`
@@ -84,14 +96,12 @@ async function ensureVersionedBehandelingForDoc(doc, behandelingUri) {
       INSERT {
         ${sparqlEscapeUri(versionedBehandelingUri)}
            a ext:VersionedBehandeling;
-           ext:content ${hackedSparqlEscapeString( newExtract.body )};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
+           ext:content ${hackedSparqlEscapeString( newExtract )};
            mu:uuid ${sparqlEscapeString( versionedBehandelingUuid )};
-           ext:behandeling ${sparqlEscapeUri(behandelingUri)}.
-        ?documentContainer ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedBehandelingUri)}.
+           ext:behandeling ?behandeling.
+        ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedBehandelingUri)}.
       } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
+        ?behandeling mu:uuid ${sparqlEscapeString(behandelingUuid)}
       }`);
     return versionedBehandelingUri;
   }
@@ -150,4 +160,4 @@ async function publishVersionedBehandeling( versionedBehandelingUri, sessionId, 
   await handleVersionedResource( "publication", versionedBehandelingUri, sessionId, targetStatus, 'ext:publishesBehandeling');
 }
 
-export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForDoc, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
+export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
