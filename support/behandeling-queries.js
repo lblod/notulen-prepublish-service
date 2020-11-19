@@ -231,7 +231,7 @@ async function processStemming(stemming) {
   ${prefixMap.get("foaf").toSparqlString()}
   ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftTegenstander ?mandatarisUri.
+      ${sparqlEscapeUri(stemmingUri)} besluit:heeftOnthouder ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
       ?mandatarisUri org:holds ?roleUri.
       ?roleUri org:role ?bestuursfunctieCodeUri.
