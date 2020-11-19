@@ -41,7 +41,7 @@ async function findVersionedBehandeling(uuid) {
 function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true) {
   const behandelingHtml = generateBehandelingHTML(agendapunt);
   if (isWrappedInZittingInfo) {
-    return wrapZittingInfo(zitting, behandelingHtml)
+    return wrapZittingInfo(zitting, behandelingHtml);
   } else {
     return behandelingHtml;
   }
@@ -67,7 +67,6 @@ function generateBehandelingHTML(agendapunt) {
   const document = agendapunt.behandeling.document.content;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  console.log(stemmings)
   return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, stemmings});
 }
 
@@ -83,7 +82,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
   }
   else {
     console.log(`creating a new versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
-    const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid)
+    const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid);
     const newExtract = createBehandelingExtract(zitting, agendapunt);
     const versionedBehandelingUuid = uuid();
     const versionedBehandelingUri = `http://data.lblod.info/prepublished-behandelingen/${versionedBehandelingUuid}`;
@@ -113,7 +112,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
  * Returns an array of behandeling extractions
  */
 async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedInZittingInfo ) {
-    const agendapunten = zitting.agendapunten
+    const agendapunten = zitting.agendapunten;
     const extracts = [];
     for (const agendapunt of agendapunten) {
       const newExtract = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);

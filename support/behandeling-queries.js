@@ -96,8 +96,8 @@ async function getZittingForBehandeling(uuid) {
       personUri: mandatee.personUri.value,
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
-    }))
-    const stemmings = await fetchStemmings(agendapunten.bva.value)
+    }));
+    const stemmings = await fetchStemmings(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
