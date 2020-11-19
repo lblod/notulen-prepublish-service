@@ -5,8 +5,11 @@
   </span> 
   <h3 class="h4" resource={{agendapuntUri}} property="dc:subject"> {{agendapuntTitle}} </h3> 
   <h4 class="h6">Aanwezigen bij agendapunt</h4> 
+  <br />
   <div property="ext:aanwezigenTable">
-    <p>Members present:</p>
+    <p>
+      <strong>Aanwezige leden:</strong>
+    </p>
     {{#each presentMandatees}}
       <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezige">
         <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
@@ -20,18 +23,22 @@
       </span>
     {{/each}}
   </div>
-  <h4 class="h6">Stemmingen bij agendapunt</h4> 
+  <br />
+  <h4 class="h6">Stemmingen bij agendapunt</h4>
+  <br />
   <div property="ext:stemmingTable">
     {{#each stemmings}}
     <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource={{this.uri}} property="besluit:heeftStemming">
       <p datatype="xsd:boolean" content={{this.geheim}} property="besluit:geheim">
         {{this.geheimText}}
       </p>
+      <br />
       <p property="besluit:onderwerp">
         {{this.subject}}
       </p>
+      <br />
       <p>
-        Aanwezigen tijdens stemming
+        <strong>Aanwezigen tijdens stemming</strong>
       </p>
       <p>
         {{#each this.attendees}}
@@ -54,10 +61,13 @@
               )
             </span>
           </span>
+        {{else}}
+          Geen
         {{/each}}
       </p>
+      <br />
       <p>
-        Effectieve stemmers
+        <strong>Effectieve stemmers</strong>
       </p>
       <p>
         {{#each this.voters}}
@@ -80,8 +90,11 @@
               )
             </span>
           </span>
+        {{else}}
+          Geen
         {{/each}}
       </p>
+      <br />
       <p>
         Totaal aantal voorstanders: 
         <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content={{this.positiveVotes}}>
@@ -100,8 +113,9 @@
           {{this.abstentionVotes}}
         </span>
       </p>
+      <br />
       <p>
-        Voorstanders
+        <strong>Voorstanders</strong>
       </p>
       <p>
         {{#each this.positiveVoters}}
@@ -124,10 +138,13 @@
               )
             </span>
           </span>
+        {{else}}
+          Geen
         {{/each}}
       </p>
+      <br />
       <p>
-        Tegenstanders
+        <strong>Tegenstanders</strong>
       </p>
       <p>
         {{#each this.negativeVoters}}
@@ -150,10 +167,13 @@
               )
             </span>
           </span>
+        {{else}}
+          Geen
         {{/each}}
       </p>
+      <br />
       <p>
-        Onthoudingen, blanco of ongeldig
+        <strong>Onthoudingen, blanco of ongeldig</strong>
       </p>
       <p>
         {{#each this.abstentionVoters}}
@@ -176,8 +196,11 @@
               )
             </span>
           </span>
+        {{else}}
+          Geen
         {{/each}}
       </p>
+      <br />
       <p>
         Met als gevolg,
       </p>
@@ -185,5 +208,6 @@
       {{/each}}
     </div>
   </div>
+  <br />
   {{{document}}}
 </div>
