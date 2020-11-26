@@ -84,7 +84,7 @@ async function getZittingForBehandeling(uuid) {
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
     }));
-    const stemmings = await fetchStemmings(agendapunten.bva.value);
+    const stemmings = await fetchStemmingen(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
@@ -116,8 +116,8 @@ async function getZittingForBehandeling(uuid) {
   };
 }
 
-async function fetchStemmings(bvaUri) {
-  const stemmingsQuery = await query(`
+async function fetchStemmingen(bvaUri) {
+  const stemmingenQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(bvaUri)} besluit:heeftStemming ?stemmingUri.
@@ -129,7 +129,7 @@ async function fetchStemmings(bvaUri) {
         besluit:gevolg ?result.
     }
   `)
-  return await Promise.all(stemmingsQuery.results.bindings.map(processStemming))
+  return await Promise.all(stemmingenQuery.results.bindings.map(processStemming))
 }
 
 async function processStemming(stemming) {
