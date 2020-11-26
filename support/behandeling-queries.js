@@ -1,9 +1,6 @@
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 
-/**
- * @typedef {import("./types").Support}
- */
 
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
@@ -13,26 +10,16 @@ import {prefixMap} from "./prefixes";
  * @param {string} uuid UUID which is coupled to the Zitting
  * mu:uuid property.
  *
- * @return {Promise<Support.Zitting>} Promise which resolves to an object representing
+ * @return  Promise which resolves to an object representing
  * the zitting
  */
 async function getZittingForBehandeling(uuid) {
-  /**
-   * @typedef { "uri"
-   * | "agendapunten"
-   * | "bestuursorgaan"
-   * | "geplandeStart" } QVars
-   */
-
-  /**
-   * @type {Support.QueryResult<QVars>}
-   */
   const queryResult = await query(
     `${prefixMap.get("ext").toSparqlString()} 
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("prov").toSparqlString()}
      SELECT * WHERE {
-       ?uri a besluit:Zitting;
+      ?uri a besluit:Zitting;
             besluit:behandelt ?agendapunten;
 
             besluit:isGehoudenDoor ?bestuursorgaan;
@@ -40,7 +27,7 @@ async function getZittingForBehandeling(uuid) {
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
             )}
-     }`
+    }`
   );
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
@@ -97,7 +84,7 @@ async function getZittingForBehandeling(uuid) {
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
     }));
-    const stemmings = await fetchStemmings(agendapunten.bva.value);
+    const stemmings = await fetchStemmingen(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
@@ -116,7 +103,6 @@ async function getZittingForBehandeling(uuid) {
       }
     }
   });
-  /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendapunten = await Promise.all(agendaQueries);
 
   const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1)
@@ -130,8 +116,8 @@ async function getZittingForBehandeling(uuid) {
   };
 }
 
-async function fetchStemmings(bvaUri) {
-  const stemmingsQuery = await query(`
+async function fetchStemmingen(bvaUri) {
+  const stemmingenQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(bvaUri)} besluit:heeftStemming ?stemmingUri.
@@ -143,7 +129,7 @@ async function fetchStemmings(bvaUri) {
         besluit:gevolg ?result.
     }
   `)
-  return await Promise.all(stemmingsQuery.results.bindings.map(processStemming))
+  return await Promise.all(stemmingenQuery.results.bindings.map(processStemming))
 }
 
 async function processStemming(stemming) {
