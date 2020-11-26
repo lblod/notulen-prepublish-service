@@ -1,0 +1,11 @@
+<div class="behandeling" prefix="{{prefixes}}">
+
+    <div about="{{zitting.uri}}" typeof="besluit:Zitting">
+        <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+              resource="{{zitting.bestuursorgaan}}"></span>
+        <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
+              content="{{zitting.geplandeStart}}"
+              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+        {{{behandelingHTML}}}
+    </div>
+</div>
