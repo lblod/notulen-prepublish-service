@@ -3,7 +3,9 @@
     <em class="fa fa-eye-slash"></em>
     <span>Besloten behandeling van agendapunt</span>
   </span>
-  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> {{agendapuntTitle}} </h3>
+  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> 
+    <span property="dc:title">{{agendapuntTitle}} </span>
+  </h3>
   <h4 class="h6">Aanwezigen bij agendapunt</h4>
   <br />
   <div property="ext:aanwezigenTable">
