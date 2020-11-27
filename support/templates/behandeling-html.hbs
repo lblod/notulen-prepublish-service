@@ -1,18 +1,18 @@
-<div typeof="besluit:BehandelingVanAgendapunt" resource={{behandelingUri}} property="ext:behandelt"> 
-  <span content={{openbaar}} datatype="xsd:boolean" property="besluit:openbaar"> 
-    <em class="fa fa-eye-slash"></em> 
-    <span>Besloten behandeling van agendapunt</span> 
-  </span> 
-  <h3 class="h4" resource={{agendapuntUri}} property="dc:subject"> {{agendapuntTitle}} </h3> 
-  <h4 class="h6">Aanwezigen bij agendapunt</h4> 
+<div typeof="besluit:BehandelingVanAgendapunt" resource="{{behandelingUri}}" property="ext:behandelt">
+  <span content="{{openbaar}}" datatype="xsd:boolean" property="besluit:openbaar">
+    <em class="fa fa-eye-slash"></em>
+    <span>Besloten behandeling van agendapunt</span>
+  </span>
+  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> {{agendapuntTitle}} </h3>
+  <h4 class="h6">Aanwezigen bij agendapunt</h4>
   <br />
   <div property="ext:aanwezigenTable">
     <p>
       <strong>Aanwezige leden:</strong>
     </p>
     {{#each presentMandatees}}
-      <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezige">
-        <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+      <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
+        <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
           <span property="persoon:gebruikteVoornaam">
             {{this.name}}
           </span>
@@ -28,7 +28,7 @@
   <br />
   <div property="ext:stemmingTable">
     {{#each stemmings}}
-    <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource={{this.uri}} property="besluit:heeftStemming">
+    <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
       <p datatype="xsd:boolean" content={{this.geheim}} property="besluit:geheim">
         {{this.geheimText}}
       </p>
@@ -42,8 +42,8 @@
       </p>
       <p>
         {{#each this.attendees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezige">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
               </span>
@@ -52,7 +52,7 @@
               </span>
               (
                 <span property="org:holds">
-                  <span typeof="skos:Concept" resource={{this.roleUri}} property="org:role">
+                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
                     <span property="skos:prefLabel">
                       {{this.role}}
                     </span>
@@ -71,8 +71,8 @@
       </p>
       <p>
         {{#each this.voters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftStemmer">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftStemmer">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
               </span>
@@ -81,7 +81,7 @@
               </span>
               (
                 <span property="org:holds">
-                  <span typeof="skos:Concept" resource={{this.roleUri}} property="org:role">
+                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
                     <span property="skos:prefLabel">
                       {{this.role}}
                     </span>
@@ -96,20 +96,20 @@
       </p>
       <br />
       <p>
-        Totaal aantal voorstanders: 
-        <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content={{this.positiveVotes}}>
+        Totaal aantal voorstanders:
+        <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">
           {{this.positiveVotes}}
         </span>
       </p>
       <p>
-        Totaal aantal tegenstanders: 
-        <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content={{this.negativeVotes}}>
+        Totaal aantal tegenstanders:
+        <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">
           {{this.negativeVotes}}
         </span>
       </p>
       <p>
         Totaal aantal onthoudingen, blanco of ongeldig:
-        <span datatype="xsd:integer" property="besluit:aantalOnthouders" content={{this.abstentionVotes}}>
+        <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">
           {{this.abstentionVotes}}
         </span>
       </p>
@@ -119,8 +119,8 @@
       </p>
       <p>
         {{#each this.positiveVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftVoorstander">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftVoorstander">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
               </span>
@@ -129,7 +129,7 @@
               </span>
               (
                 <span property="org:holds">
-                  <span typeof="skos:Concept" resource={{this.roleUri}} property="org:role">
+                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
                     <span property="skos:prefLabel">
                       {{this.role}}
                     </span>
@@ -148,8 +148,8 @@
       </p>
       <p>
         {{#each this.negativeVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftTegenstanders">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftTegenstanders">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
               </span>
@@ -158,7 +158,7 @@
               </span>
               (
                 <span property="org:holds">
-                  <span typeof="skos:Concept" resource={{this.roleUri}} property="org:role">
+                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
                     <span property="skos:prefLabel">
                       {{this.role}}
                     </span>
@@ -177,8 +177,8 @@
       </p>
       <p>
         {{#each this.abstentionVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftOnthouders">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftOnthouders">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
               </span>
@@ -187,7 +187,7 @@
               </span>
               (
                 <span property="org:holds">
-                  <span typeof="skos:Concept" resource={{this.roleUri}} property="org:role">
+                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
                     <span property="skos:prefLabel">
                       {{this.role}}
                     </span>
