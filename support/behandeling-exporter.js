@@ -62,7 +62,7 @@ function generateBehandelingHTML(agendapunt) {
     .toString();
   const template = Handlebars.compile(templateStr);
   const behandelingUri = agendapunt.behandeling.uri;
-  const agendapuntUri = agendapunt;
+  const agendapuntUri = agendapunt.uri;
   const agendapuntTitle = agendapunt.title;
   const openbaar = agendapunt.behandeling.openbaar;
   const document = agendapunt.behandeling.document.content;
