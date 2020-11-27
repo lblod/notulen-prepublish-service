@@ -265,7 +265,7 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
 app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
   try {
     const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
-    const besluitenlijst = await buildBesluitenLijstForZitting(zitting)
+    const besluitenlijst = await buildBesluitenLijstForZitting(zitting);
     return res.send( { data: { attributes: { content: besluitenlijst }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
@@ -282,7 +282,7 @@ app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res
 app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
   try {
     const zitting = await getZittingForBehandeling(req.params.zittingIdentifier);
-    const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting)
+    const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting);
     return res.send(behandeling).end();
   }
   catch (err) {
