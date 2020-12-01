@@ -2,6 +2,7 @@ import { app, errorHandler } from 'mu';
 import { getZittingForAgenda} from "./support/agenda-queries";
 import {getZittingForBesluitenlijst} from './support/besluit-queries';
 import {getZittingForBehandeling} from './support/behandeling-queries';
+import {getZittingForNotulen} from './support/notulen-queries'
 import { editorDocumentFromUuid } from './support/editor-document';
 import {
   signVersionedAgenda,
@@ -10,9 +11,9 @@ import {
   extractAgendaContentFromDoc,
   buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
 } from './support/agenda-exporter';
-import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, extractBesluitenLijstContentFromDoc, buildBesluitenLijstForZitting } from './support/besluit-exporter';
+import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
-import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromDoc, ensureVersionedNotulenForDoc } from './support/notule-exporter';
+import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromZitting, ensureVersionedNotulenForDoc } from './support/notule-exporter';
 
 /***
  *
@@ -99,7 +100,7 @@ app.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', async 
  * Makes the current user sign the notulen for the supplied document.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
-app.post('/signing/notulen/sign/:kind/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/notulen/sign/:documentIdentifier', async function(req, res, next) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
@@ -199,25 +200,26 @@ app.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', asy
  * Makes the current user publish the notulen for the supplied document as well as the un-published uittreksels.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
-app.post('/signing/notulen/publish/:kind/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res, next) {
   try {
+    const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
     const publicBehandelingUris = req.body['public-behandeling-uris'];
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-
-    for(let publicBehandelingUri of publicBehandelingUris) {
-      const isBehandelingPublished = await isPublished(publicBehandelingUri);
-      if(!isBehandelingPublished) {
-        const prepublishedBehandelingUri = await ensureVersionedBehandelingForDoc(doc, publicBehandelingUri);
-        await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+    const zittingForBehandeling =  await getZittingForBehandeling(req.params.zittingIdentifier);
+    for(let agendapunt of zitting.agendapunten) {
+      if(publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
+        const isBehandelingPublished = await isPublished(agendapunt.behandeling.uri);
+        if(!isBehandelingPublished) {
+          const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zittingForBehandeling, agendapunt.behandeling.uuid);
+          await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+        }
       }
     }
-
-    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind, 'publication', publicBehandelingUris);
+    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(zitting, 'publication', publicBehandelingUris);
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while published the notulen ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
     return next(error);
   }
 } );
@@ -317,10 +319,10 @@ app.get('/prepublish/notulen/behandelingen/:documentIdentifier', async function(
 * Prepublish notulen as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-app.get('/prepublish/notulen/:documentIdentifier', async function(req, res, next) {
+app.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next) {
   try {
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const result = await extractNotulenContentFromDoc(doc);
+    const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
+    const result = await extractNotulenContentFromZitting(zitting);
     return res.send( { data: { attributes: { content: result }, type: "imported-notulen-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));

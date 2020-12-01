@@ -1,35 +1,49 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
 import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import { createBehandelingExtract } from './behandeling-exporter';
+import {prefixes, prefixMap} from "./prefixes";
+import * as path from "path";
+import * as fs from "fs";
+import Handlebars from "handlebars";
 
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
  */
 
 /**
- * Extracts the Notulen content from the supplied document
+ * Extracts the Notulen content from the supplied zitting
  * Returns an HTML+RDFa snippet containing the zitting content
  * If a list of publicBehandelingUris is passed, the snippet will contain only those behandelingen.
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
-async function extractNotulenContentFromDoc( doc, publicBehandelingUris ) {
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-
-  if (publicBehandelingUris != null) {
-    removePrivateBehandelingenFromZitting(node, publicBehandelingUris);
+async function extractNotulenContentFromZitting(zitting, skipBehandelings) {
+  let behandelingsHtml = ''
+  if(!skipBehandelings) {
+    behandelingsHtml = generateBehandelingHtml(zitting);
   }
-
-  if (node) {
-    // TODO add helper function for prefixes
-    var prefix = "";
-    for( var key of Object.keys(doc.context.prefix) )
-      prefix += `${key}: ${doc.context.prefix[key]} `;
-    return `<div class="notulen" prefix="${prefix}">${node.outerHTML}</div>`;
-  } else {
-    throw new Error(`Cannot find node of type 'http://data.vlaanderen.be/ns/besluit#Zitting' in document ${doc.uri}`);
-  }
+  const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
+  return generateNotulenHtml(notulenData)
 }
 
+function generateNotulenHtml(notulenData) {
+  console.log('called')
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/notulen-prepublish.hbs"))
+    .toString();
+  console.log('read')
+  const template = Handlebars.compile(templateStr);
+  console.log(templateStr)
+  return template(notulenData);
+}
+
+function generateBehandelingHtml(zitting) {
+  let behandelingHTML = ''
+  for(const agendapunt of zitting.agendapunten) {
+    behandelingHTML += createBehandelingExtract(zitting, agendapunt, false);
+  }
+  return behandelingHTML;
+}
 
 async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
   await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen');
@@ -46,7 +60,7 @@ async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetSt
  * Additionally, on publication the versioned notulen also gets a public-content property containing
  * only the behandelingen that are public.
  */
-async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehandelingUris ) {
+async function ensureVersionedNotulenForDoc( zitting, type, publicBehandelingUris ) {
   // TODO remove (or move) relationship between previously signable notulen, and the current notulen.
   const previousId = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -58,20 +72,19 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehan
     SELECT ?notulenUri
     WHERE {
       ?notulenUri
-         a ext:VersionedNotulen;
-         prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
-         ext:notulenKind ${sparqlEscapeString( notulenKind )}.
+        a ext:VersionedNotulen;
+      ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedNotulen  ?notulenUri.
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
     const versionedNotulenId = previousId.results.bindings[0].notulenUri.value;
     console.log(`Reusing versioned notulen ${versionedNotulenId}`);
     if (type == 'publication')
-      addPublicContentOnVersionedNotulen(doc, versionedNotulenId, publicBehandelingUris);
+      addPublicContentOnVersionedNotulen(zitting, versionedNotulenId, publicBehandelingUris);
     return versionedNotulenId;
   } else {
-    console.log(`Creating a new versioned notulen for ${doc.uri}`);
-    const notulenContent = await extractNotulenContentFromDoc( doc );
+    console.log(`Creating a new versioned notulen for ${zitting.uri}`);
+    const notulenContent = await extractNotulenContentFromZitting(zitting);
     const notulenUuid = uuid();
     const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
 
@@ -81,21 +94,16 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehan
       PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
 
-      INSERT {
+      INSERT DATA{
         ${sparqlEscapeUri(notulenUri)}
            a ext:VersionedNotulen;
            ext:content ${hackedSparqlEscapeString(notulenContent)};
-           prov:wasDerivedFrom ${sparqlEscapeUri(doc.uri)};
            mu:uuid ${sparqlEscapeString( notulenUuid )};
-           ext:notulenKind ${sparqlEscapeString( notulenKind )}.
-        ?documentContainer ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
-      } WHERE {
-        ${sparqlEscapeUri(doc.uri)} ^pav:hasVersion ?documentContainer;
-                                    ext:editorDocumentContext ?context.
+        ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
       }`);
 
     if (type == 'publication')
-      addPublicContentOnVersionedNotulen(doc, notulenUri, publicBehandelingUris);
+      addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris);
 
     return notulenUri;
   }
@@ -104,7 +112,7 @@ async function ensureVersionedNotulenForDoc( doc, notulenKind, type, publicBehan
 /**
  * Sets the public-content of a versioned notulen containing only the public behandeling of the Zitting
 */
-async function addPublicContentOnVersionedNotulen(doc, notulenUri, publicBehandelingUris) {
+async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris) {
   console.log(`Enriching versioned notulen ${notulenUri} with public content only publishing behandelingen ${JSON.stringify(publicBehandelingUris)}`);
 
   let publicBehandelingUrisStatement = '';
@@ -113,7 +121,7 @@ async function addPublicContentOnVersionedNotulen(doc, notulenUri, publicBehande
     publicBehandelingUrisStatement = `${sparqlEscapeUri(notulenUri)} ext:publicBehandeling ${uris} .`;
   }
 
-  const publicNotulenContent = await extractNotulenContentFromDoc( doc, publicBehandelingUris );
+  const publicNotulenContent = await extractNotulenContentFromZitting( zitting, true);
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 
@@ -176,4 +184,4 @@ function removePrivateBehandelingenFromZitting( node, publicBehandelingUris ) {
 }
 
 
-export { ensureVersionedNotulenForDoc, extractNotulenContentFromDoc, signVersionedNotulen, publishVersionedNotulen };
+export { ensureVersionedNotulenForDoc, extractNotulenContentFromZitting, signVersionedNotulen, publishVersionedNotulen };

@@ -184,4 +184,4 @@ async function updateDraftDecisionStatus(versionedBehandelingUri) {
   `)
 }
 
-export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
+export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling, createBehandelingExtract }

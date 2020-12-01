@@ -1,0 +1,67 @@
+<div class='notulen' prefix="{{prefixes}}">
+  <div resource={{zittingUri}} typeof='besluit:Zitting'>
+    <h1 property="dc:title">
+      Notulen van de/het
+      <span 
+        property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+        typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
+        resource={{bestuursorgaan.uri}}>
+          {{bestuursorgaan.name}}
+      </span>
+      , van 
+      <span content={{geplandeStart.value}} datatype="xsd:dateTime" property="besluit:geplandeStart">
+        {{geplandeStart.text}}
+      </span>
+    </h1>
+    <p>
+      Geplande start: 
+      <span content={{geplandeStart.value}} datatype="xsd:dateTime" property="besluit:geplandeStart">
+        {{geplandeStart.text}}
+      </span>
+    </p>
+    <p>
+      Locatie:
+      <span property="prov:atLocation">
+        {{location}}
+      </span>
+    </p>
+    <h2>Aanwezigen bij de zitting</h2>
+    <div property="ext:aanwezigenTable">
+      <p>
+        <strong>Aanwezige leden</strong>
+        {{#each presentMandatees}}
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
+            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{this.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{this.familyName}}
+              </span>
+            </span>
+          </span>
+        {{/each}}
+      </p>
+    </div>
+    <h2>Agenda overzicht</h2>
+    <div property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
+      {{#each agendapunten}}
+          <span typeof="besluit:Agendapunt" resource={{this.uri}} property="besluit:behandelt">
+            <span property="dc:subject">Agendapunt</span>
+            -
+            <span content={{this.geplandOpenbaar}} datatype="xsd:boolean" property="besluit:geplandOpenbaar">
+              <em class="fa fa-eye-slash"></em>
+              <span>{{this.geplandOpenbaarText}}</span>
+            </span>
+            <p datatype="xsd:string" property="dc:title">{{this.titel}}</p>
+            <p datatype="xsd:string" property="dc:description">{{this.description}}</p>
+          </span>
+        {{/each}}
+    </div>
+
+    <h2>Behandeling van de Agendapunten</h2>
+    <div property="http://mu.semte.ch/vocabularies/ext/behandelingVanAgendapuntenContainer">
+      {{{behandelingsHtml}}}
+    </div>
+  </div>
+</div>
