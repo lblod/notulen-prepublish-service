@@ -122,7 +122,8 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
         data: {
           attributes: {
             content: newExtract,
-            behandeling: agendapunt.behandeling.uuid
+            behandeling: agendapunt.behandeling.uri,
+            uuid: agendapunt.behandeling.uuid
           }
         }
       });

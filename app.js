@@ -13,7 +13,7 @@ import {
 } from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
-import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromZitting, ensureVersionedNotulenForDoc } from './support/notule-exporter';
+import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromZitting, ensureVersionedNotulenForZitting } from './support/notule-exporter';
 
 /***
  *
@@ -214,7 +214,7 @@ app.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res,
         }
       }
     }
-    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(zitting, 'publication', publicBehandelingUris);
+    const prepublishedNotulenUri = await ensureVersionedNotulenForZitting(zitting, 'publication', publicBehandelingUris);
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {

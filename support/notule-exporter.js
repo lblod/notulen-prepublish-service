@@ -27,13 +27,10 @@ async function extractNotulenContentFromZitting(zitting, skipBehandelings) {
 }
 
 function generateNotulenHtml(notulenData) {
-  console.log('called')
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/notulen-prepublish.hbs"))
     .toString();
-  console.log('read')
   const template = Handlebars.compile(templateStr);
-  console.log(templateStr)
   return template(notulenData);
 }
 
@@ -60,7 +57,7 @@ async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetSt
  * Additionally, on publication the versioned notulen also gets a public-content property containing
  * only the behandelingen that are public.
  */
-async function ensureVersionedNotulenForDoc( zitting, type, publicBehandelingUris ) {
+async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelingUris ) {
   // TODO remove (or move) relationship between previously signable notulen, and the current notulen.
   const previousId = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -72,10 +69,9 @@ async function ensureVersionedNotulenForDoc( zitting, type, publicBehandelingUri
     SELECT ?notulenUri
     WHERE {
       ?notulenUri
-        a ext:VersionedNotulen;
-      ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedNotulen  ?notulenUri.
+        a ext:VersionedNotulen.
+      ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen  ?notulenUri.
     } LIMIT 1`);
-
   if( previousId.results.bindings.length ) {
     const versionedNotulenId = previousId.results.bindings[0].notulenUri.value;
     console.log(`Reusing versioned notulen ${versionedNotulenId}`);
@@ -98,8 +94,8 @@ async function ensureVersionedNotulenForDoc( zitting, type, publicBehandelingUri
         ${sparqlEscapeUri(notulenUri)}
            a ext:VersionedNotulen;
            ext:content ${hackedSparqlEscapeString(notulenContent)};
-           mu:uuid ${sparqlEscapeString( notulenUuid )};
-        ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
+           mu:uuid ${sparqlEscapeString( notulenUuid )}.
+        ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
       }`);
 
     if (type == 'publication')
@@ -184,4 +180,4 @@ function removePrivateBehandelingenFromZitting( node, publicBehandelingUris ) {
 }
 
 
-export { ensureVersionedNotulenForDoc, extractNotulenContentFromZitting, signVersionedNotulen, publishVersionedNotulen };
+export { ensureVersionedNotulenForZitting, extractNotulenContentFromZitting, signVersionedNotulen, publishVersionedNotulen };

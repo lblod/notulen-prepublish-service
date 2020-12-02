@@ -13,16 +13,8 @@ import {prefixMap} from "./prefixes";
  * @param {string} uuid UUID which is coupled to the Zitting
  * mu:uuid property.
  *
- * @return {Promise<Support.Zitting>} Promise which resolves to an object representing
- * the zitting
  */
 async function getZittingForNotulen(uuid) {
-  /**
-   * @typedef { "uri"
-   * | "agendapunten"
-   * | "bestuursorgaan"
-   * | "geplandeStart" } QVars
-   */
 
   const queryResult = await query(
     `${prefixMap.get("ext").toSparqlString()} 
@@ -47,7 +39,6 @@ async function getZittingForNotulen(uuid) {
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-  console.log(queryResult.results.bindings[0])
   const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
@@ -101,7 +92,6 @@ async function getZittingForNotulen(uuid) {
       familyName: mandatee.familyName.value
     }));
     const stemmings = await fetchStemmings(agendapunten.bva.value);
-    console.log('Reaches here')
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
@@ -122,13 +112,22 @@ async function getZittingForNotulen(uuid) {
       }
     }
   });
-  /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendapunten = await Promise.all(agendaQueries);
 
-  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1)
+  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1);
+
+  const dateOptions = {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  }
+  const dateFormatter = new Intl.DateTimeFormat('nl', dateOptions)
+
 
   const presentMandatees = await fetchParticipationList(uri.value);
-
   return {
     bestuursorgaan: {
       uri: bestuursorgaanUri.value,
@@ -137,7 +136,7 @@ async function getZittingForNotulen(uuid) {
     location: queryResult.results.bindings[0].location ? queryResult.results.bindings[0].location.value : '',
     geplandeStart: {
       value: geplandeStart.value,
-      text: geplandeStart.value,
+      text: dateFormatter.format(new Date(geplandeStart.value)),
     },
     zittingUri: uri.value,
     presentMandatees,
