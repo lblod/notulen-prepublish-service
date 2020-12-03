@@ -1,8 +1,7 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
-import {wrapZittingInfo, handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';
-import {prefixes, prefixMap} from "./prefixes";
+import { prefixes } from "./prefixes";
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
@@ -23,7 +22,7 @@ async function extractNotulenContentFromZitting(zitting, skipBehandelings) {
     behandelingsHtml = generateBehandelingHtml(zitting);
   }
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
-  return generateNotulenHtml(notulenData)
+  return generateNotulenHtml(notulenData);
 }
 
 function generateNotulenHtml(notulenData) {
@@ -138,46 +137,6 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
     }
   `);
 };
-
-/**
- * Replaces the non-public behandelingen of a Zitting with annotated placeholder content.
- * The placeholder content only contains the strictly necessary RDFa annotations.
- */
-function removePrivateBehandelingenFromZitting( node, publicBehandelingUris ) {
-  const behandelingNodes = node.querySelectorAll("[typeof='besluit:BehandelingVanAgendapunt']");
-
-  behandelingNodes.forEach(function(behandeling) {
-    const uri = behandeling.attributes['resource'] && behandeling.attributes['resource'].value;
-    if (!publicBehandelingUris.includes(uri)) {
-      const besluit = behandeling.querySelector(`[property='prov:generated']`);
-
-      if (besluit) {
-        let besluitHtml = [
-          'eli:title',
-          'eli:description'
-        ].map(prop => besluit.querySelector(`[property='${prop}']`))
-            .filter(n => n != null)
-            .map(n => n.outerHTML)
-            .join('');
-        besluit.innerHTML = besluitHtml;
-      }
-
-      let behandelingHtml = [
-        'besluit:gebeurtNa',
-        'besluit:openbaar',
-        'dc:subject',
-        'prov:generated' // content of the Besluit div has been filtered before
-      ].map(prop => behandeling.querySelector(`[property='${prop}']`))
-          .filter(n => n != null)
-          .map(n => n.outerHTML)
-          .join('');
-      behandelingHtml += `<span property="ext:isPrivateBehandeling" content="true" dataType="xsd:boolean">&nbsp;</span>`;
-
-      console.log(`Inner HTML of private behandeling ${uri} will be replaced with ${behandelingHtml}`);
-      behandeling.innerHTML = behandelingHtml;
-    }
-  });
-}
 
 
 export { ensureVersionedNotulenForZitting, extractNotulenContentFromZitting, signVersionedNotulen, publishVersionedNotulen };

@@ -71,7 +71,7 @@ async function getZittingForBehandeling(uuid) {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
-      SELECT * WHERE {
+      SELECT DISTINCT * WHERE {
         ${sparqlEscapeUri(agendapunten.bva.value)} besluit:heeftAanwezige ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
@@ -84,6 +84,34 @@ async function getZittingForBehandeling(uuid) {
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
     }));
+    const notPresentQuery = await query(`
+    ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("mandaat").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
+    ${prefixMap.get("persoon").toSparqlString()}
+    ${prefixMap.get("org").toSparqlString()}
+      SELECT DISTINCT * WHERE {
+        ${sparqlEscapeUri(bestuursorgaan.value)} org:hasPost ?roleUri.
+        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
+        ?mandatarisUri org:holds ?roleUri.
+        ?personUri foaf:familyName ?familyName.
+        ?personUri persoon:gebruikteVoornaam ?name.
+        filter not exists { ${sparqlEscapeUri(agendapunten.bva.value)} besluit:heeftAanwezige ?mandatarisUri. }
+      }
+    `);
+    const notPresentMandatees = notPresentQuery.results.bindings.map(mandatee => ({
+      uri: mandatee.mandatarisUri.value,
+      personUri: mandatee.personUri.value,
+      name: mandatee.name.value,
+      familyName: mandatee.familyName.value
+    }));
+    console.log('----------------------------------')
+    console.log('----------------------------------')
+    console.log('----------------------------------')
+    console.log(notPresentMandatees)
+    console.log('----------------------------------')
+    console.log('----------------------------------')
+    console.log('----------------------------------')
     const stemmings = await fetchStemmingen(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
@@ -95,6 +123,7 @@ async function getZittingForBehandeling(uuid) {
         uuid: agendapunten.bvaUuid.value,
         openbaar: agendapunten.openbaar.value,
         presentMandatees,
+        notPresentMandatees,
         stemmings,
         document: {
           uuid: agendapunten.editorDocumentUuid.value,

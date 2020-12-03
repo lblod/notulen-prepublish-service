@@ -29,7 +29,22 @@
     <div property="ext:aanwezigenTable">
       <p>
         <strong>Aanwezige leden</strong>
-        {{#each presentMandatees}}
+        {{#each participationList.present}}
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
+            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{this.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{this.familyName}}
+              </span>
+            </span>
+          </span>
+        {{/each}}
+      </p>
+      <p>
+        <strong>Afwezige leden</strong>
+        {{#each participationList.notPresent}}
           <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
             <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">

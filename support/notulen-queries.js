@@ -1,10 +1,5 @@
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
-
-/**
- * @typedef {import("./types").Support}
- */
-
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
  *
@@ -127,7 +122,7 @@ async function getZittingForNotulen(uuid) {
   const dateFormatter = new Intl.DateTimeFormat('nl', dateOptions)
 
 
-  const presentMandatees = await fetchParticipationList(uri.value);
+  const participationList = await fetchParticipationList(uri.value, bestuursorgaanUri.value);
   return {
     bestuursorgaan: {
       uri: bestuursorgaanUri.value,
@@ -139,13 +134,13 @@ async function getZittingForNotulen(uuid) {
       text: dateFormatter.format(new Date(geplandeStart.value)),
     },
     zittingUri: uri.value,
-    presentMandatees,
+    participationList,
     agendapunten: agendapuntenSorted,
   };
 }
 
-async function fetchParticipationList(zittingUri) {
-  const participationListQuery = await query(`
+async function fetchParticipationList(zittingUri, bestuursorgaan) {
+  const presentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("org").toSparqlString()}
@@ -162,8 +157,27 @@ async function fetchParticipationList(zittingUri) {
         ?personUri persoon:gebruikteVoornaam ?name.
     }
   `)
-  const attendees = participationListQuery.results.bindings.map(processMandatee);
-  return attendees;
+  const present = presentQuery.results.bindings.map(processMandatee);
+  const notPresentQuery = await query(`
+    ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("mandaat").toSparqlString()}
+    ${prefixMap.get("org").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
+    ${prefixMap.get("persoon").toSparqlString()}
+    SELECT DISTINCT * WHERE {
+        ${sparqlEscapeUri(bestuursorgaan)} org:hasPost ?roleUri.
+        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
+        ?mandatarisUri org:holds ?roleUri.
+        ?roleUri org:role ?bestuursfunctieCodeUri.
+        ?bestuursfunctieCodeUri skos:prefLabel ?role.
+        ?personUri foaf:familyName ?familyName.
+        ?personUri persoon:gebruikteVoornaam ?name.
+        filter not exists { ${sparqlEscapeUri(zittingUri)} besluit:heeftAanwezigeBijStart ?mandatarisUri. }
+    }
+  `);
+  const notPresent = notPresentQuery.results.bindings.map(processMandatee);
+  return {present, notPresent};
 }
 
 async function fetchStemmings(bvaUri) {

@@ -67,8 +67,9 @@ function generateBehandelingHTML(agendapunt) {
   const openbaar = agendapunt.behandeling.openbaar;
   const document = agendapunt.behandeling.document.content;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
+  const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, stemmings});
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, notPresentMandatees, stemmings});
 }
 
 /**
