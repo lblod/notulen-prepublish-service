@@ -100,17 +100,17 @@ app.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', async 
  * Makes the current user sign the notulen for the supplied document.
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
-app.post('/signing/notulen/sign/:documentIdentifier', async function(req, res, next) {
+app.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res, next) {
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const doc = await editorDocumentFromUuid( req.params.documentIdentifier );
-    const prepublishedNotulenUri = await ensureVersionedNotulenForDoc(doc, req.params.kind, 'signature');
+    const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
+    const prepublishedNotulenUri = await ensureVersionedNotulenForZitting(zitting, 'publication');
     await signVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while signing the notulen ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while signing the notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     return next(error);
   }
 });
@@ -219,7 +219,7 @@ app.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res,
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the notulen ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while published the notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     return next(error);
   }
 } );
@@ -326,7 +326,7 @@ app.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next)
     return res.send( { data: { attributes: { content: result }, type: "imported-notulen-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
     error.status = 500;
     return next(error);
   }
