@@ -78,7 +78,7 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
       addPublicContentOnVersionedNotulen(zitting, versionedNotulenId, publicBehandelingUris);
     return versionedNotulenId;
   } else {
-    console.log(`Creating a new versioned notulen for ${zitting.uri}`);
+    console.log(`Creating a new versioned notulen for ${zitting.zittingUri}`);
     const notulenContent = await extractNotulenContentFromZitting(zitting, publicBehandelingUris);
     const notulenUuid = uuid();
     const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
