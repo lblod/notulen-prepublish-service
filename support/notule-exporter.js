@@ -16,11 +16,9 @@ import Handlebars from "handlebars";
  * If a list of publicBehandelingUris is passed, the snippet will contain only those behandelingen.
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
-async function extractNotulenContentFromZitting(zitting, skipBehandelings) {
+async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) {
   let behandelingsHtml = ''
-  if(!skipBehandelings) {
-    behandelingsHtml = generateBehandelingHtml(zitting);
-  }
+  behandelingsHtml = generateBehandelingHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   return generateNotulenHtml(notulenData);
 }
@@ -33,10 +31,12 @@ function generateNotulenHtml(notulenData) {
   return template(notulenData);
 }
 
-function generateBehandelingHtml(zitting) {
+function generateBehandelingHtml(zitting, publicBehandelingUris) {
   let behandelingHTML = ''
   for(const agendapunt of zitting.agendapunten) {
-    behandelingHTML += createBehandelingExtract(zitting, agendapunt, false);
+    if(!publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
+      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false);
+    }
   }
   return behandelingHTML;
 }
@@ -79,7 +79,7 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
     return versionedNotulenId;
   } else {
     console.log(`Creating a new versioned notulen for ${zitting.uri}`);
-    const notulenContent = await extractNotulenContentFromZitting(zitting);
+    const notulenContent = await extractNotulenContentFromZitting(zitting, publicBehandelingUris);
     const notulenUuid = uuid();
     const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
 

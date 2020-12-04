@@ -2,7 +2,7 @@ import { app, errorHandler } from 'mu';
 import { getZittingForAgenda} from "./support/agenda-queries";
 import {getZittingForBesluitenlijst} from './support/besluit-queries';
 import {getZittingForBehandeling} from './support/behandeling-queries';
-import {getZittingForNotulen} from './support/notulen-queries'
+import {getZittingForNotulen} from './support/notulen-queries';
 import { editorDocumentFromUuid } from './support/editor-document';
 import {
   signVersionedAgenda,
