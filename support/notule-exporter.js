@@ -17,7 +17,7 @@ import Handlebars from "handlebars";
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
 async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) {
-  let behandelingsHtml = ''
+  let behandelingsHtml = '';
   behandelingsHtml = generateBehandelingHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   return generateNotulenHtml(notulenData);
@@ -32,7 +32,7 @@ function generateNotulenHtml(notulenData) {
 }
 
 function generateBehandelingHtml(zitting, publicBehandelingUris) {
-  let behandelingHTML = ''
+  let behandelingHTML = '';
   for(const agendapunt of zitting.agendapunten) {
     if(!publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
       behandelingHTML += createBehandelingExtract(zitting, agendapunt, false);

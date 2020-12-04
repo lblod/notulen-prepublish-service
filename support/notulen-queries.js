@@ -66,7 +66,7 @@ async function getZittingForNotulen(uuid) {
           ?bva besluit:heeftVoorzitter ?voorzitter.
         }
       }
-    `)
+    `);
     const agendapunten = queryResults.results.bindings[0];
     const mandateesResults = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
@@ -79,7 +79,7 @@ async function getZittingForNotulen(uuid) {
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
       }
-    `)
+    `);
     const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
       personUri: mandatee.personUri.value,
@@ -118,8 +118,8 @@ async function getZittingForNotulen(uuid) {
     hour: 'numeric',
     minute: 'numeric',
     hour12: false,
-  }
-  const dateFormatter = new Intl.DateTimeFormat('nl', dateOptions)
+  };
+  const dateFormatter = new Intl.DateTimeFormat('nl', dateOptions);
 
 
   const participationList = await fetchParticipationList(uri.value, bestuursorgaanUri.value);
@@ -156,7 +156,7 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
+  `);
   const present = presentQuery.results.bindings.map(processMandatee);
   const notPresentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
@@ -192,8 +192,8 @@ async function fetchStemmings(bvaUri) {
         besluit:onderwerp ?subject;
         besluit:gevolg ?result.
     }
-  `)
-  return await Promise.all(stemmingsQuery.results.bindings.map(processStemming))
+  `);
+  return await Promise.all(stemmingsQuery.results.bindings.map(processStemming));
 }
 
 async function processStemming(stemming) {
@@ -214,8 +214,8 @@ async function processStemming(stemming) {
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
-  const attendees = attendeesQuery.results.bindings.map(processMandatee)
+  `);
+  const attendees = attendeesQuery.results.bindings.map(processMandatee);
   const votersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
   ${prefixMap.get("mandaat").toSparqlString()}
@@ -232,8 +232,8 @@ async function processStemming(stemming) {
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
-  const voters = votersQuery.results.bindings.map(processMandatee)
+  `);
+  const voters = votersQuery.results.bindings.map(processMandatee);
 
   const positiveVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -251,8 +251,8 @@ async function processStemming(stemming) {
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
-  const positiveVoters = positiveVotersQuery.results.bindings.map(processMandatee)
+  `);
+  const positiveVoters = positiveVotersQuery.results.bindings.map(processMandatee);
 
   const negativeVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -270,8 +270,8 @@ async function processStemming(stemming) {
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
-  const negativeVoters = negativeVotersQuery.results.bindings.map(processMandatee)
+  `);
+  const negativeVoters = negativeVotersQuery.results.bindings.map(processMandatee);
 
   const abstentionVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -289,8 +289,8 @@ async function processStemming(stemming) {
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
-  `)
-  const abstentionVoters = abstentionVotersQuery.results.bindings.map(processMandatee)
+  `);
+  const abstentionVoters = abstentionVotersQuery.results.bindings.map(processMandatee);
 
   return {
     uri: stemmingUri,
