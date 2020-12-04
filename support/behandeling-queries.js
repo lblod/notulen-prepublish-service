@@ -105,13 +105,6 @@ async function getZittingForBehandeling(uuid) {
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
     }));
-    console.log('----------------------------------')
-    console.log('----------------------------------')
-    console.log('----------------------------------')
-    console.log(notPresentMandatees)
-    console.log('----------------------------------')
-    console.log('----------------------------------')
-    console.log('----------------------------------')
     const stemmings = await fetchStemmingen(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
