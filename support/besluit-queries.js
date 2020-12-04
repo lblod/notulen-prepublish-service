@@ -87,7 +87,7 @@ async function getZittingForBesluitenlijst(uuid) {
     };
   });
 
-  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1)
+  const agendapuntenSorted = agendapunten.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1)
 
 
   return {
