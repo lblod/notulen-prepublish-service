@@ -1,3 +1,4 @@
+// @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
 import { analyse } from '@lblod/marawa/dist/rdfa-context-scanner';

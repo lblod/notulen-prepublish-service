@@ -1,3 +1,4 @@
+// @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';

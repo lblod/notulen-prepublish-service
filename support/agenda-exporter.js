@@ -1,3 +1,4 @@
+// @ts-ignore
 import {query, update, sparqlEscapeUri, sparqlEscapeString, uuid} from "mu";
 import {
   handleVersionedResource,
@@ -7,15 +8,13 @@ import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
 import {prefixes, prefixMap} from "./prefixes";
+import './types'
 
-/**
- * @typedef {import("./types.d.ts").Support}
- */
 
 /**
  * This file contains helpers for exporting, signing and publishing content from the agenda.
  * @param {Support.Zitting} zitting
- * @returns {string}
+ * @returns {Promise<string>}
  */
 async function buildAgendaContentFromZitting(zitting) {
   const templateStr = fs

@@ -1,3 +1,4 @@
+// @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 /**

@@ -1,3 +1,4 @@
+// @ts-ignore
 import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {prefixMap} from "./prefixes";
 

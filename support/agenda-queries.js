@@ -1,9 +1,6 @@
+// @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
-
-/**
- * @typedef {import("./types").Support}
- */
 
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
@@ -64,7 +61,6 @@ async function getZittingForAgenda(uuid) {
           ${sparqlEscapeUri(uri)} schema:position ?position.
           } `)
   );
-  /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
     const {agendaUri, geplandOpenbaar, titel, position} = rslt.results.bindings[0];
