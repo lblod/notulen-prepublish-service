@@ -4,13 +4,7 @@ import {getZittingForBesluitenlijst} from './support/besluit-queries';
 import {getZittingForBehandeling} from './support/behandeling-queries';
 import {getZittingForNotulen} from './support/notulen-queries';
 import { editorDocumentFromUuid } from './support/editor-document';
-import {
-  signVersionedAgenda,
-  publishVersionedAgenda,
-  ensureVersionedAgendaForDoc,
-  extractAgendaContentFromDoc,
-  buildAgendaContentFromZitting, ensureVersionedAgendaForZitting
-} from './support/agenda-exporter';
+import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForZitting} from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromZitting, ensureVersionedNotulenForZitting } from './support/notule-exporter';

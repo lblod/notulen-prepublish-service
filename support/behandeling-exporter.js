@@ -1,11 +1,9 @@
 import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
-import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
-import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
-import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';;
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
-import {prefixes, prefixMap} from "./prefixes";
+import {prefixes} from "./prefixes";
 
 const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06'
 /**

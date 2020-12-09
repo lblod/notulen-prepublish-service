@@ -1,18 +1,17 @@
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
-import {findFirstNodeOfType, findAllNodesOfType} from '@lblod/marawa/dist/dom-helpers';
-import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
+import { analyse } from '@lblod/marawa/dist/rdfa-context-scanner';
 import { editorDocumentFromUuid } from './editor-document';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
-import {prefixes, prefixMap} from "./prefixes";
+import {prefixes} from "./prefixes";
 
 /**
  * Extracts the besluiten from the supplied document.
  * Returns an HTML+RDFa snippet containing the behandeling van agendapunten and generated besluiten
  */
-function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, zitting ) {
+function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling ) {
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
   const triples = cleanupTriples(Array.concat(...contexts));
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
@@ -44,7 +43,7 @@ async function buildBesluitenLijstForZitting(zitting) {
     if(!behandeling.documentUuid) continue
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
     if(!doc) continue
-    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, zitting.uri);
+    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
     besluiten.push(besluit);
   }
   return wrapZittingInfo(besluiten.join(''), zitting);
