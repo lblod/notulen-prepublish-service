@@ -23,6 +23,11 @@
             <p property="dc:title">
                 {{agendapunt.titel}}
             </p>
+            {{#if agendapunt.beschrijving}}
+              <p property="dc:description">
+                {{agendapunt.beschrijving}}
+              </p>
+            {{/if}}
         </span>
         {{/each}}
     </div>

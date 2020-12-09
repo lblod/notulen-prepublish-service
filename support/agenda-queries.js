@@ -65,18 +65,22 @@ async function getZittingForAgenda(uuid) {
           OPTIONAL {
             ${sparqlEscapeUri(uri)} besluit:aangebrachtNa ?aangebrachtNa.
           }
+          OPTIONAL {
+            ${sparqlEscapeUri(uri)} dct:description ?beschrijving.
+          }
           } `)
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel, position, aangebrachtNa} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, position, aangebrachtNa, beschrijving } = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
       titel: titel.value,
       position: position.value,
-      aangebrachtNa: aangebrachtNa ? aangebrachtNa.value : null
+      aangebrachtNa: aangebrachtNa ? aangebrachtNa.value : null,
+      beschrijving: beschrijving ? beschrijving.value : null
     };
   });
 
