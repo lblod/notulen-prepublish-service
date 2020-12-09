@@ -1,3 +1,4 @@
+// @ts-ignore
 import { app, errorHandler } from 'mu';
 import { getZittingForAgenda} from "./support/agenda-queries";
 import {getZittingForBesluitenlijst} from './support/besluit-queries';
@@ -249,6 +250,7 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
         req.params.zittingIdentifier
       }: ${JSON.stringify(err)}`
     );
+    // @ts-ignore
     error.status = 500;
     return next(error);
   }
@@ -266,6 +268,7 @@ app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    // @ts-ignore
     error.status = 500;
     return next(error);
   }
@@ -284,6 +287,7 @@ app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res,
   catch (err) {
     console.log(err);
     const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    // @ts-ignore
     error.status = 500;
     return next(error);
   }
@@ -304,6 +308,7 @@ app.get('/prepublish/notulen/behandelingen/:documentIdentifier', async function(
   catch (err) {
     console.log(err);
     const error = new Error(`An error occured while fetching contents for prepublished notulen besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    // @ts-ignore
     error.status = 500;
     return next(error);
   }
@@ -321,6 +326,7 @@ app.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next)
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    // @ts-ignore
     error.status = 500;
     return next(error);
   }
