@@ -64,7 +64,7 @@ function generateBehandelingHTML(agendapunt) {
   const behandelingUri = agendapunt.behandeling.uri;
   const agendapuntUri = agendapunt.uri;
   const agendapuntTitle = agendapunt.title;
-  const openbaar = agendapunt.behandeling.openbaar;
+  const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
   const document = agendapunt.behandeling.document.content;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;

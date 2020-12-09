@@ -1,7 +1,12 @@
 <div typeof="besluit:BehandelingVanAgendapunt" resource="{{behandelingUri}}" property="ext:behandelt">
   <span content="{{openbaar}}" datatype="xsd:boolean" property="besluit:openbaar">
-    <em class="fa fa-eye-slash"></em>
-    <span>Besloten behandeling van agendapunt</span>
+    {{#if openbaar}}
+      <em class="fa fa-eye"></em>
+      <span>Openbare behandeling van agendapunt</span>
+    {{else}}
+      <em class="fa fa-eye-slash"></em>
+      <span>Besloten behandeling van agendapunt</span>
+    {{/if}}
   </span>
   <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> 
     <span property="dc:title">{{agendapuntTitle}} </span>
