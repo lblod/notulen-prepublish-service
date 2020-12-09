@@ -4,7 +4,7 @@ import {getZittingForBesluitenlijst} from './support/besluit-queries';
 import {getZittingForBehandeling} from './support/behandeling-queries';
 import {getZittingForNotulen} from './support/notulen-queries';
 import { editorDocumentFromUuid } from './support/editor-document';
-import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForZitting} from './support/agenda-exporter';
+import { signVersionedAgenda, publishVersionedAgenda, ensureVersionedAgendaForZitting, buildAgendaContentFromZitting} from './support/agenda-exporter';
 import { signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting } from './support/besluit-exporter';
 import { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling } from './support/behandeling-exporter';
 import { publishVersionedNotulen, signVersionedNotulen, extractNotulenContentFromZitting, ensureVersionedNotulenForZitting } from './support/notule-exporter';
@@ -200,7 +200,7 @@ app.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res,
     const publicBehandelingUris = req.body['public-behandeling-uris'];
     const zittingForBehandeling =  await getZittingForBehandeling(req.params.zittingIdentifier);
     for(let agendapunt of zitting.agendapunten) {
-      if(publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
+      if(publicBehandelingUris && publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
         const isBehandelingPublished = await isPublished(agendapunt.behandeling.uri);
         if(!isBehandelingPublished) {
           const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zittingForBehandeling, agendapunt.behandeling.uuid);
