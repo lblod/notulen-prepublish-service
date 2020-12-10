@@ -8,7 +8,6 @@ import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
 import {prefixes, prefixMap} from "./prefixes";
-import './types'
 
 
 /**
