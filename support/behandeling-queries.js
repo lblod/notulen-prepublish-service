@@ -65,6 +65,9 @@ async function getZittingForBehandeling(uuid) {
         }
       }
     `);
+    if (queryResults.results.bindings.length == 0 ) {
+      return null;
+    }
     const agendapunten = queryResults.results.bindings[0];
     const mandateesResults = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
@@ -127,7 +130,7 @@ async function getZittingForBehandeling(uuid) {
   });
   const agendapunten = await Promise.all(agendaQueries);
 
-  const agendapuntenSorted = agendapunten.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
+  const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
 
   return {

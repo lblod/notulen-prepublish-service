@@ -28,7 +28,7 @@ async function getZittingForAgenda(uuid) {
    * @type {Support.QueryResult<QVars>}
    */
   const queryResult = await query(
-    `${prefixMap.get("ext").toSparqlString()} 
+    `${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("prov").toSparqlString()}
      SELECT * WHERE {
@@ -56,23 +56,31 @@ async function getZittingForAgenda(uuid) {
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("dct").toSparqlString()}
      ${prefixMap.get("schema").toSparqlString()}
-      SELECT * 
+      SELECT *
       WHERE {
           BIND (<${uri}> AS ?agendaUri)
-          <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
-          <${uri}> dct:title ?titel.
+          ${sparqlEscapeUri(uri)} besluit:geplandOpenbaar ?geplandOpenbaar.
+          ${sparqlEscapeUri(uri)} dct:title ?titel.
           ${sparqlEscapeUri(uri)} schema:position ?position.
+          OPTIONAL {
+            ${sparqlEscapeUri(uri)} besluit:aangebrachtNa ?aangebrachtNa.
+          }
+          OPTIONAL {
+            ${sparqlEscapeUri(uri)} dct:description ?beschrijving.
+          }
           } `)
   );
   /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
   const agendapunten = agendaResults.map((rslt) => {
-    const {agendaUri, geplandOpenbaar, titel, position} = rslt.results.bindings[0];
+    const {agendaUri, geplandOpenbaar, titel, position, aangebrachtNa, beschrijving } = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
       geplandOpenbaar: geplandOpenbaar.value,
       titel: titel.value,
-      position: position.value
+      position: position.value,
+      aangebrachtNa: aangebrachtNa ? aangebrachtNa.value : null,
+      beschrijving: beschrijving ? beschrijving.value : null
     };
   });
 

@@ -1,5 +1,4 @@
 <div class="agendapunten" prefix="{{prefixes}}">
-
     <div about="{{zitting.uri}}" typeof="besluit:Zitting">
         <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
               resource="{{zitting.bestuursorgaan}}"> </span>
@@ -18,9 +17,17 @@
                     <i class="fa fa-eye-slash"></i> <span>Gepland besloten</span>
                 {{/if}}
             </span>
+            {{#if agendapunt.aangebrachtNa}}
+              <span property="besluit:aangebrachtNa" resource="{{agendapunt.aangebrachtNa}}"></span>
+            {{/if}}
             <p property="dc:title">
                 {{agendapunt.titel}}
             </p>
+            {{#if agendapunt.beschrijving}}
+              <p property="dc:description">
+                {{agendapunt.beschrijving}}
+              </p>
+            {{/if}}
         </span>
         {{/each}}
     </div>
