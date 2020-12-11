@@ -67,8 +67,9 @@ function generateBehandelingHTML(agendapunt) {
   const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
   const document = agendapunt.behandeling.document.content;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
+  const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, stemmings});
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, notPresentMandatees, stemmings});
 }
 
 /**
@@ -122,7 +123,8 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
         data: {
           attributes: {
             content: newExtract,
-            behandeling: agendapunt.behandeling.uuid
+            behandeling: agendapunt.behandeling.uri,
+            uuid: agendapunt.behandeling.uuid
           }
         }
       });
@@ -184,4 +186,4 @@ async function updateDraftDecisionStatus(versionedBehandelingUri) {
   `)
 }
 
-export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling }
+export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling, createBehandelingExtract }

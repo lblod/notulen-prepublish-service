@@ -29,6 +29,21 @@
         </span>
       </span>
     {{/each}}
+    <p>
+        <strong>Afwezige leden</strong>
+        {{#each notPresentMandatees}}
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
+            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{this.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{this.familyName}}
+              </span>
+            </span>
+          </span>
+        {{/each}}
+      </p>
   </div>
   <br />
   <h4 class="h6">Stemmingen bij agendapunt</h4>
