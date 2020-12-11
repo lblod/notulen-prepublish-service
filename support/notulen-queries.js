@@ -24,6 +24,8 @@ async function getZittingForNotulen(uuid) {
         besluit:behandelt ?agendapunten;
         besluit:isGehoudenDoor ?bestuursorgaanUri;
         besluit:geplandeStart ?geplandeStart;
+        prov:startedAtTime ?startedAt;
+        prov:endedAtTime ?endedAt;
         mu:uuid ${sparqlEscapeString(uuid)}.
       ?bestuursorgaanUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
       ?mainBestuursorgaanUri skos:prefLabel ?bestuursorgaanName.
@@ -35,7 +37,7 @@ async function getZittingForNotulen(uuid) {
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName} = queryResult.results.bindings[0];
+  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName, startedAt, endedAt} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
     (b) => b.agendapunten.value
@@ -68,6 +70,9 @@ async function getZittingForNotulen(uuid) {
         }
       }
     `);
+    if (queryResults.results.bindings.length == 0 ) {
+      return null;
+    }
     const agendapunten = queryResults.results.bindings[0];
     const mandateesResults = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
@@ -91,7 +96,6 @@ async function getZittingForNotulen(uuid) {
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
-      //TODO: Missing the geplandOpenbaarText
       position: agendapunten.position.value,
       titel: agendapunten.titel.value,
       description: agendapunten.description.value,
@@ -110,7 +114,7 @@ async function getZittingForNotulen(uuid) {
   });
   const agendapunten = await Promise.all(agendaQueries);
 
-  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1);
+  const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
   const dateOptions = {
     year: 'numeric',
@@ -133,6 +137,14 @@ async function getZittingForNotulen(uuid) {
     geplandeStart: {
       value: geplandeStart.value,
       text: dateFormatter.format(new Date(geplandeStart.value)),
+    },
+    startedAt: {
+      value: startedAt.value,
+      text: dateFormatter.format(new Date(startedAt.value)),
+    },
+    endedAt: {
+      value: endedAt.value,
+      text: dateFormatter.format(new Date(endedAt.value)),
     },
     zittingUri: uri.value,
     participationList,
