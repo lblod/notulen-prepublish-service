@@ -24,13 +24,13 @@ async function getZittingForNotulen(uuid) {
         besluit:behandelt ?agendapunten;
         besluit:isGehoudenDoor ?bestuursorgaanUri;
         besluit:geplandeStart ?geplandeStart;
-        prov:startedAtTime ?startedAt;
-        prov:endedAtTime ?endedAt;
         mu:uuid ${sparqlEscapeString(uuid)}.
       ?bestuursorgaanUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
       ?mainBestuursorgaanUri skos:prefLabel ?bestuursorgaanName.
       OPTIONAL {
-        ?uri prov:atLocation ?location.
+        ?uri prov:atLocation ?location;
+          prov:startedAtTime ?startedAt;
+          prov:endedAtTime ?endedAt.
       }
     }`
   );
@@ -59,14 +59,14 @@ async function getZittingForNotulen(uuid) {
         ${sparqlEscapeUri(uri)} schema:position ?position.
         ?bva dct:subject ${sparqlEscapeUri(uri)}.
         ?bva mu:uuid ?bvaUuid.
-        ?bva ext:hasDocumentContainer ?document.
         ?bva besluit:openbaar ?openbaar.
-        ?document pav:hasCurrentVersion ?editorDocument.
-        ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;
-          ext:editorDocumentContent ?documentContent.
         OPTIONAL {
           ?bva besluit:heeftSecretaris ?secretaris.
           ?bva besluit:heeftVoorzitter ?voorzitter.
+          ?bva ext:hasDocumentContainer ?document.
+          ?document pav:hasCurrentVersion ?editorDocument.
+          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;
+          ext:editorDocumentContent ?documentContent.
         }
       }
     `);
@@ -106,8 +106,8 @@ async function getZittingForNotulen(uuid) {
         presentMandatees,
         stemmings,
         document: {
-          uuid: agendapunten.editorDocumentUuid.value,
-          content: agendapunten.documentContent.value
+          uuid: agendapunten.editorDocumentUuid && agendapunten.editorDocumentUuid.value,
+          content: agendapunten.documentContent && agendapunten.documentContent.value
         }
       }
     }
@@ -135,16 +135,16 @@ async function getZittingForNotulen(uuid) {
     },
     location: queryResult.results.bindings[0].location ? queryResult.results.bindings[0].location.value : '',
     geplandeStart: {
-      value: geplandeStart.value,
-      text: dateFormatter.format(new Date(geplandeStart.value)),
+      value: geplandeStart && geplandeStart.value,
+      text: geplandeStart && dateFormatter.format(new Date(geplandeStart.value)),
     },
     startedAt: {
-      value: startedAt.value,
-      text: dateFormatter.format(new Date(startedAt.value)),
+      value: startedAt && startedAt.value,
+      text: startedAt && dateFormatter.format(new Date(startedAt.value)),
     },
     endedAt: {
-      value: endedAt.value,
-      text: dateFormatter.format(new Date(endedAt.value)),
+      value: endedAt && endedAt.value,
+      text: endedAt && dateFormatter.format(new Date(endedAt.value)),
     },
     zittingUri: uri.value,
     participationList,
