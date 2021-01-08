@@ -28,9 +28,13 @@ async function getZittingForNotulen(uuid) {
       ?bestuursorgaanUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
       ?mainBestuursorgaanUri skos:prefLabel ?bestuursorgaanName.
       OPTIONAL {
-        ?uri prov:atLocation ?location;
-          prov:startedAtTime ?startedAt;
-          prov:endedAtTime ?endedAt.
+        ?uri prov:atLocation ?location.
+      }
+      OPTIONAL {
+        ?uri prov:startedAtTime ?startedAt.
+      }
+      OPTIONAL {
+        ?uri prov:endedAtTime ?endedAt.
       }
     }`
   );
@@ -62,7 +66,11 @@ async function getZittingForNotulen(uuid) {
         ?bva besluit:openbaar ?openbaar.
         OPTIONAL {
           ?bva besluit:heeftSecretaris ?secretaris.
+        }
+        OPTIONAL{
           ?bva besluit:heeftVoorzitter ?voorzitter.
+        }
+        OPTIONAL {
           ?bva ext:hasDocumentContainer ?document.
           ?document pav:hasCurrentVersion ?editorDocument.
           ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;

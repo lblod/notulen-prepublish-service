@@ -62,6 +62,8 @@ async function getZittingForBehandeling(uuid) {
           ext:editorDocumentContent ?documentContent.
         OPTIONAL {
           ?bva besluit:heeftSecretaris ?secretaris.
+        }
+        OPTIONAL {
           ?bva besluit:heeftVoorzitter ?voorzitter.
         }
       }

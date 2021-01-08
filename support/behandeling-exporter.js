@@ -1,6 +1,6 @@
 // @ts-ignore
 import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
-import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';;
+import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
