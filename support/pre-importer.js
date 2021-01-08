@@ -1,36 +1,6 @@
+// @ts-ignore
 import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
-import { findFirstNodeOfType, findAllNodesOfType } from '@lblod/marawa/dist/dom-helpers';
-import { analyse, resolvePrefixes } from '@lblod/marawa/dist/rdfa-context-scanner';
 import {prefixMap} from "./prefixes";
-
-function wrapZittingInfo(doc, html) {
-  const node = findFirstNodeOfType( doc.getTopDomNode(), 'http://data.vlaanderen.be/ns/besluit#Zitting' );
-  if (node) {
-    const zittingUri = node.getAttribute('resource');
-    const cleanParent = node.cloneNode(false);
-    cleanParent.innerHTML = html;
-    const contexts = analyse( node ).map((c) => c.context);
-    const triples = Array.concat(...contexts).filter((t) => t.subject === zittingUri);
-    const interestingpredicates = [
-      { uri: 'http://data.vlaanderen.be/ns/besluit#geplandeStart', range: 'literal' },
-      { uri: 'http://www.w3.org/ns/prov#startedAtTime', range: 'literal' },
-      { uri: 'http://data.vlaanderen.be/ns/besluit#isGehoudenDoor', range: 'uri' },
-      { uri: 'http://www.w3.org/ns/prov#atLocation', range: 'literal' }
-    ];
-    for (const predicate of interestingpredicates) {
-      const triple = triples.find((t) => t.predicate === predicate.uri);
-      if (triple) {
-        // TODO remove spaces in spans once MARAWA supports nodes without children
-        cleanParent.innerHTML = `<span property="${predicate.uri}" ${predicate.range == 'uri' ? 'resource' : 'content'}="${triple.object}" ${triple.datatype ? `datatype="${triple.datatype}"` : ''}> </span> ${cleanParent.innerHTML}`;
-      }
-    }
-    return cleanParent.outerHTML;
-  }
-  else {
-    console.log(`no zitting information found for editordocument ${doc.id}`);
-    return html;
-  }
-}
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -94,7 +64,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
 };
 
 export {
-  wrapZittingInfo,
   hackedSparqlEscapeString,
   handleVersionedResource,
   cleanupTriples

@@ -1,3 +1,4 @@
+// @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';
@@ -96,9 +97,8 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
            mu:uuid ${sparqlEscapeString( notulenUuid )}.
         ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
       }`);
-
     if (type == 'publication')
-      addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris);
+      await addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris);
 
     return notulenUri;
   }
@@ -116,7 +116,7 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
     publicBehandelingUrisStatement = `${sparqlEscapeUri(notulenUri)} ext:publicBehandeling ${uris} .`;
   }
 
-  const publicNotulenContent = await extractNotulenContentFromZitting( zitting, true);
+  const publicNotulenContent = await extractNotulenContentFromZitting( zitting, publicBehandelingUris);
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 
@@ -124,8 +124,7 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
       ${sparqlEscapeUri(notulenUri)} ext:publicContent ?publicContent ;
                                      ext:publicBehandeling ?publicBehandeling .
     } WHERE {
-      ${sparqlEscapeUri(notulenUri)} a ext:VersionedNotulen ;
-           ext:publicContent ?publicContent .
+      ${sparqlEscapeUri(notulenUri)} a ext:VersionedNotulen.
       OPTIONAL { ${sparqlEscapeUri(notulenUri)} ext:publicBehandeling ?publicBehandeling . }
     }
 

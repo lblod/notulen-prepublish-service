@@ -1,3 +1,4 @@
+// @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 
@@ -61,6 +62,8 @@ async function getZittingForBehandeling(uuid) {
           ext:editorDocumentContent ?documentContent.
         OPTIONAL {
           ?bva besluit:heeftSecretaris ?secretaris.
+        }
+        OPTIONAL {
           ?bva besluit:heeftVoorzitter ?voorzitter.
         }
       }

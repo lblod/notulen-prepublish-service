@@ -1,3 +1,4 @@
+// @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 /**
@@ -29,12 +30,18 @@ async function getZittingForNotulen(uuid) {
       OPTIONAL {
         ?uri prov:atLocation ?location.
       }
+      OPTIONAL {
+        ?uri prov:startedAtTime ?startedAt.
+      }
+      OPTIONAL {
+        ?uri prov:endedAtTime ?endedAt.
+      }
     }`
   );
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName} = queryResult.results.bindings[0];
+  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName, startedAt, endedAt} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
     (b) => b.agendapunten.value
@@ -56,17 +63,24 @@ async function getZittingForNotulen(uuid) {
         ${sparqlEscapeUri(uri)} schema:position ?position.
         ?bva dct:subject ${sparqlEscapeUri(uri)}.
         ?bva mu:uuid ?bvaUuid.
-        ?bva ext:hasDocumentContainer ?document.
         ?bva besluit:openbaar ?openbaar.
-        ?document pav:hasCurrentVersion ?editorDocument.
-        ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;
-          ext:editorDocumentContent ?documentContent.
         OPTIONAL {
           ?bva besluit:heeftSecretaris ?secretaris.
+        }
+        OPTIONAL{
           ?bva besluit:heeftVoorzitter ?voorzitter.
+        }
+        OPTIONAL {
+          ?bva ext:hasDocumentContainer ?document.
+          ?document pav:hasCurrentVersion ?editorDocument.
+          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;
+          ext:editorDocumentContent ?documentContent.
         }
       }
     `);
+    if (queryResults.results.bindings.length == 0 ) {
+      return null;
+    }
     const agendapunten = queryResults.results.bindings[0];
     const mandateesResults = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
@@ -90,7 +104,6 @@ async function getZittingForNotulen(uuid) {
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
-      //TODO: Missing the geplandOpenbaarText
       position: agendapunten.position.value,
       titel: agendapunten.titel.value,
       description: agendapunten.description.value,
@@ -101,15 +114,15 @@ async function getZittingForNotulen(uuid) {
         presentMandatees,
         stemmings,
         document: {
-          uuid: agendapunten.editorDocumentUuid.value,
-          content: agendapunten.documentContent.value
+          uuid: agendapunten.editorDocumentUuid && agendapunten.editorDocumentUuid.value,
+          content: agendapunten.documentContent && agendapunten.documentContent.value
         }
       }
     }
   });
   const agendapunten = await Promise.all(agendaQueries);
 
-  const agendapuntenSorted = agendapunten.sort((a, b) => a.position > b.position ? 1 : -1);
+  const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
   const dateOptions = {
     year: 'numeric',
@@ -130,8 +143,16 @@ async function getZittingForNotulen(uuid) {
     },
     location: queryResult.results.bindings[0].location ? queryResult.results.bindings[0].location.value : '',
     geplandeStart: {
-      value: geplandeStart.value,
-      text: dateFormatter.format(new Date(geplandeStart.value)),
+      value: geplandeStart && geplandeStart.value,
+      text: geplandeStart && dateFormatter.format(new Date(geplandeStart.value)),
+    },
+    startedAt: {
+      value: startedAt && startedAt.value,
+      text: startedAt && dateFormatter.format(new Date(startedAt.value)),
+    },
+    endedAt: {
+      value: endedAt && endedAt.value,
+      text: endedAt && dateFormatter.format(new Date(endedAt.value)),
     },
     zittingUri: uri.value,
     participationList,

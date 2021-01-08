@@ -3,12 +3,12 @@ declare module Support {
     uri: string;
     geplandOpenbaar: boolean;
     titel: string;
+    position: number;
   }
 
   export interface Zitting {
     geplandeStart: any;
     bestuursorgaan: any;
-    opLocatie: any;
     agendapunten: AgendaPunt[];
     uri: string;
   }

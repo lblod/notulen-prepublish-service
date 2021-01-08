@@ -1,9 +1,6 @@
+// @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
-
-/**
- * @typedef {import("./types").Support}
- */
 
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
@@ -13,8 +10,7 @@ import {prefixMap} from "./prefixes";
  * @param {string} uuid UUID which is coupled to the Zitting
  * mu:uuid property.
  *
- * @return {Promise<Support.Zitting>} Promise which resolves to an object representing
- * the zitting
+ * @return Promise which resolves to an object representing the zitting
  */
 async function getZittingForBesluitenlijst(uuid) {
   /**
@@ -70,7 +66,6 @@ async function getZittingForBesluitenlijst(uuid) {
           ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid 
           } `)
   );
-  /** @type {Support.QueryResult<"agendaUri" | "geplandOpenbaar" | "titel">[]} */
   const agendaResults = await Promise.all(agendaQueries);
 
   const agendapunten = agendaResults.map((rslt) => {
