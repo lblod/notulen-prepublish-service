@@ -47,6 +47,10 @@ function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = 
   }
 }
 
+
+/**
+ * wraps the behandelingHTML supplied with the info of the zitting, given the final html ready to be published
+ */
 function wrapZittingInfo(zitting, behandelingHTML) {
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/behandeling-prepublish.hbs"))
@@ -55,6 +59,10 @@ function wrapZittingInfo(zitting, behandelingHTML) {
   return template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
 }
 
+/**
+ * generates the behandeling html from an agendapunt, this will need to be included on a notulen or wrapped 
+ * with the info of the zitting
+ */
 function generateBehandelingHTML(agendapunt) {
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/behandeling-html.hbs"))
@@ -162,6 +170,9 @@ async function publishVersionedBehandeling( versionedBehandelingUri, sessionId, 
   await updateDraftDecisionStatus(versionedBehandelingUri)
 }
 
+/**
+ * This functions gets the uri of a versioned behandeling and sets its status to published
+ */
 async function updateDraftDecisionStatus(versionedBehandelingUri) {
   const documentContainerQuery = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>

@@ -36,6 +36,10 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling ) {
   return besluitenHTML;
 }
 
+
+/**
+ * Given a zitting returns the html of its besluiten lijst ready to be published
+ */
 async function buildBesluitenLijstForZitting(zitting) {
   const agendapunten = zitting.agendapunten;
   const besluiten = [];
@@ -50,6 +54,9 @@ async function buildBesluitenLijstForZitting(zitting) {
   return wrapZittingInfo(besluiten.join(''), zitting);
 }
 
+/**
+ * wraps the besluitenlijst supplied with the info of the zitting, given the final html ready to be published
+ */
 async function wrapZittingInfo(besluitenlijst, zitting) {
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))

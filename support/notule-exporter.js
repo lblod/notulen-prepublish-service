@@ -24,6 +24,9 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
   return generateNotulenHtml(notulenData);
 }
 
+/**
+ * Given a zitting returns the html of its notulen ready to be published
+ */
 function generateNotulenHtml(notulenData) {
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/notulen-prepublish.hbs"))
@@ -32,6 +35,10 @@ function generateNotulenHtml(notulenData) {
   return template(notulenData);
 }
 
+/**
+ * Given a zitting and a list of public behandeling uris returns the html of those behandelings, ready to
+ * be included in a notulen
+ */
 function generateBehandelingHtml(zitting, publicBehandelingUris) {
   let behandelingHTML = '';
   for(const agendapunt of zitting.agendapunten) {
