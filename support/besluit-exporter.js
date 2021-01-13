@@ -12,7 +12,7 @@ import {prefixes} from "./prefixes";
  * Extracts the besluiten from the supplied document.
  * Returns an HTML+RDFa snippet containing the behandeling van agendapunten and generated besluiten
  */
-function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling ) {
+function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmingen) {
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
   const triples = cleanupTriples(Array.concat(...contexts));
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
@@ -23,6 +23,11 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling ) {
     const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
     const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
     var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+    besluitHTML+=`<h3 class="h4">Stemmingen</h3>`;
+
+    for(let i=0; i<stemmingen.length; i++){
+      besluitHTML+=`<p><strong>Onderwerp:</strong> <span property="besluit:onderwerp">${stemmingen[i].onderwerp.value}</span>, <strong>Gevolg:</strong> <span property="besluit:gevolg">${stemmingen[i].gevolg.value}</span></p>`
+    }
     besluitHTML = `<div resource="${behandeling}" typeof="besluit:BehandelingVanAgendapunt">
                       ${ agendapunt ? `<span property="http://purl.org/dc/terms/subject" resource="${agendapunt}" > </span>` : ''}
                       ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar}" class="annotation--agendapunt--${ openbaar === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye${ openbaar === "true" ? "" : "-slash"}"> </i></span>` : ''}
@@ -44,7 +49,7 @@ async function buildBesluitenLijstForZitting(zitting) {
     if(!behandeling.documentUuid) continue
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
     if(!doc) continue
-    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri);
+    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, behandeling.stemmingen);
     besluiten.push(besluit);
   }
   return wrapZittingInfo(besluiten.join(''), zitting);
