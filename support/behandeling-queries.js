@@ -25,6 +25,8 @@ async function getZittingForBehandeling(uuid) {
 
             besluit:isGehoudenDoor ?bestuursorgaan;
             besluit:geplandeStart ?geplandeStart;
+            prov:startedAtTime ?start;
+            prov:endedAtTime ?end;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
             )}
@@ -34,7 +36,7 @@ async function getZittingForBehandeling(uuid) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
 
-  const {bestuursorgaan, uri, geplandeStart} = queryResult.results.bindings[0];
+  const {bestuursorgaan, uri, geplandeStart, start, end} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
     (b) => b.agendapunten.value
@@ -139,6 +141,8 @@ async function getZittingForBehandeling(uuid) {
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
+    start: start.value,
+    end: end.value,
     uri: uri.value,
     agendapunten: agendapuntenSorted,
   };
