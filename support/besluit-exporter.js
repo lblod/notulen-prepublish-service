@@ -23,11 +23,15 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmi
     const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
     const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
     var besluitHTML = `<h3 class="h4" property="eli:title">${title ? title.object : ''}</h3><p property="eli:description">${description ? description.object : ''}</p>`;
+    
     besluitHTML+=`<h3 class="h4">Stemmingen</h3>`;
-
     for(let i=0; i<stemmingen.length; i++){
-      besluitHTML+=`<p><strong>Onderwerp:</strong> <span property="besluit:onderwerp">${stemmingen[i].onderwerp.value}</span>, <strong>Gevolg:</strong> <span property="besluit:gevolg">${stemmingen[i].gevolg.value}</span></p>`
+      besluitHTML+=`
+      <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource=${stemmingen[i].stemmingUri.value} property="besluit:heeftStemming">
+      <p><strong>Onderwerp:</strong> <span property="besluit:onderwerp">${stemmingen[i].onderwerp.value}</span>, <strong>Gevolg:</strong> <span property="besluit:gevolg">${stemmingen[i].gevolg.value}</span></p>
+      </div>`
     }
+
     besluitHTML = `<div resource="${behandeling}" typeof="besluit:BehandelingVanAgendapunt">
                       ${ agendapunt ? `<span property="http://purl.org/dc/terms/subject" resource="${agendapunt}" > </span>` : ''}
                       ${ openbaar ? `<span property="besluit:openbaar" datatype="xsd:boolean" content="${openbaar}" class="annotation--agendapunt--${ openbaar === "true"  ? "open" : "closed"}__icon"><i class="fa fa-eye${ openbaar === "true" ? "" : "-slash"}"> </i></span>` : ''}
