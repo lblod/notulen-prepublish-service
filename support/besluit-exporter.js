@@ -22,7 +22,6 @@ async function buildBesluitenLijstForZitting(zitting) {
     const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, behandeling.stemmingen);
     besluiten.push(besluit);
   }
-  debugger;
   return wrapZittingInfo(besluiten, zitting);
 }
 
@@ -31,7 +30,7 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmi
     const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
     const triples = cleanupTriples(Array.concat(...contexts));
     const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-    debugger;
+    
     for (const besluit of besluiten) {
       const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
       const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
@@ -48,7 +47,6 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmi
         besluitTypes: besluitTypes.join(' '),
         stemmingen: stemmingen,
       });
-      debugger;
     }
     return besluitenBuffer;
   }
@@ -59,7 +57,7 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmi
       .toString();
     const template = Handlebars.compile(templateStr);
     const output=template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
-    debugger;
+    
     return output;
   }
 
@@ -157,7 +155,6 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
   } else {
     console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
     const besluitenLijstContent = await buildBesluitenLijstForZitting( zitting );
-    debugger;
     const besluitenLijstUuid = uuid();
     const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;
 
