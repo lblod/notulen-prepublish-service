@@ -34,10 +34,14 @@
                 {{#each besluit.stemmingen as |stemming|}}
                     <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{stemming.stemmingUri.value}}" property="besluit:heeftStemming">
                         <p>
-                            <strong>Onderwerp:</strong> 
-                            <span property="besluit:onderwerp">{{stemming.onderwerp.value}}</span>, 
-                            <strong>Gevolg:</strong> 
-                            <span property="besluit:gevolg">{{stemming.gevolg.value}}</span>
+                            {{#if stemming.onderwerp.value}}
+                                <strong>Onderwerp:</strong> 
+                                <span property="besluit:onderwerp">{{stemming.onderwerp.value}}</span>, 
+                            {{/if}}
+                            {{#if stemming.gevolg.value}}    
+                                <strong>Gevolg:</strong> 
+                                <span property="besluit:gevolg">{{stemming.gevolg.value}}</span>
+                            {{/if}}
                         </p>
                     </div>
                 {{/each}}
