@@ -6,6 +6,47 @@
         <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
               content="{{zitting.geplandeStart}}"
               datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
-        {{{besluitenlijst}}}
+        {{#each besluitenlijst as |besluiten|}}
+            {{#each besluiten as |besluit|}}
+                <div resource="{{besluit.behandeling}}" typeof="besluit:BehandelingVanAgendapunt">
+                {{#if besluit.agendapunt}}
+                    <span property="http://purl.org/dc/terms/subject" resource="{{besluit.agendapunt}}" > </span>
+                {{/if}}
+                <span 
+                    property="besluit:openbaar" 
+                    datatype="xsd:boolean" 
+                    content="{{besluit.openbaar}}" 
+                    class="annotation--agendapunt--{{#if besluit.openbaar}}open{{else}}closed{{/if}}__icon"
+                >
+                    <i class="fa fa-eye{{#unless openbaar}}-slash{{/unless}}"></i>
+                </span>
+
+                {{#if besluit.gebeurtNa}}
+                    <span property="besluit:gebeurtNa" resource="{{besluit.gebeurtNa.objec}}"> </span>
+                {{/if}}
+                <div property="prov:generated" resource="{{besluit.besluit}}" typeof="{{besluit.besluitTypes}}">
+                    <h3 class="h4" property="eli:title">
+                        {{#if besluit.title}}{{besluit.title.object}}{{/if}}
+                    </h3>
+                    <p property="eli:description">{{#if besluit.description}}{{description.object}}{{/if}}</p>
+                </div>
+                {{#if besluit.stemmingen.length}}
+                    <h3 class="h4">Stemmingen</h3>
+                    {{#each besluit.stemmingen as |stemming|}}
+                        <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{stemming.stemmingUri.value}}" property="besluit:heeftStemming">
+                            <p>
+                                <strong>Onderwerp:</strong> 
+                                <span property="besluit:onderwerp">{{stemming.onderwerp.value}}</span>, 
+                                <strong>Gevolg:</strong> 
+                                <span property="besluit:gevolg">{{stemming.gevolg.value}}</span>
+                            </p>
+                        </div>
+                    {{/each}}
+                {{/if}}
+            {{/each}}
+        {{/each}}
+        </div>
+        </div>
     </div>
 </div>
+

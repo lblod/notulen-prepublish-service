@@ -63,7 +63,7 @@ async function getZittingForBesluitenlijst(uuid) {
           ?bva dct:subject ${sparqlEscapeUri(uri)}.
           ?bva ext:hasDocumentContainer ?document.
           ?document pav:hasCurrentVersion ?editorDocument.
-          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid 
+          ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid.
           } `)
   );
   const agendaResults = await Promise.all(agendaQueries);
@@ -82,9 +82,12 @@ async function getZittingForBesluitenlijst(uuid) {
     };
   });
 
+  for(let i=0; i<agendapunten.length; i++){
+    agendapunten[i].behandeling.stemmingen=await fetchStemmingen(agendapunten[i].behandeling.uri);
+  }
+  
   const agendapuntenSorted = agendapunten.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
-
-
+  
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
@@ -93,4 +96,16 @@ async function getZittingForBesluitenlijst(uuid) {
   };
 }
 
+//retrieves all the votes
+async function fetchStemmingen(bvaUri) {
+  const stemmingenQuery = await query(`
+  ${prefixMap.get("besluit").toSparqlString()}
+    SELECT DISTINCT * WHERE {
+      ${sparqlEscapeUri(bvaUri)} besluit:heeftStemming ?stemmingUri.
+      ?stemmingUri besluit:onderwerp ?onderwerp;
+        besluit:gevolg ?gevolg.
+    }
+  `);
+  return stemmingenQuery.results.bindings;
+}
 export {getZittingForBesluitenlijst};
