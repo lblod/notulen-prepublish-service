@@ -30,21 +30,19 @@
                     </h3>
                     <p property="eli:description">{{#if besluit.description}}{{description.object}}{{/if}}</p>
                 </div>
-                <h3 class="h4">Stemmingen</h3>
-                {{#each besluit.stemmingen as |stemming|}}
-                    <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{stemming.stemmingUri.value}}" property="besluit:heeftStemming">
-                        <p>
-                            {{#if stemming.onderwerp.value}}
+                {{#if besluit.stemmingen.length}}
+                    <h3 class="h4">Stemmingen</h3>
+                    {{#each besluit.stemmingen as |stemming|}}
+                        <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{stemming.stemmingUri.value}}" property="besluit:heeftStemming">
+                            <p>
                                 <strong>Onderwerp:</strong> 
                                 <span property="besluit:onderwerp">{{stemming.onderwerp.value}}</span>, 
-                            {{/if}}
-                            {{#if stemming.gevolg.value}}    
                                 <strong>Gevolg:</strong> 
                                 <span property="besluit:gevolg">{{stemming.gevolg.value}}</span>
-                            {{/if}}
-                        </p>
-                    </div>
-                {{/each}}
+                            </p>
+                        </div>
+                    {{/each}}
+                {{/if}}
             {{/each}}
         {{/each}}
         </div>
