@@ -6,6 +6,41 @@
         <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
               content="{{zitting.geplandeStart}}"
               datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
-        {{{besluitenlijst}}}
+        {{#each besluitenlijst as |besluiten|}}
+            {{#each besluiten as |besluit|}}
+                <div resource="{{besluit.behandeling}}" typeof="besluit:BehandelingVanAgendapunt">
+                {{#if besluit.agendapunt}}
+                    <span property="http://purl.org/dc/terms/subject" resource="{{besluit.agendapunt}}" > </span>
+                {{/if}}
+                {{#if besluit.openbaar}}
+                    <span property="besluit:openbaar" datatype="xsd:boolean" content="{{besluit.openbaar}}" class="annotation--agendapunt--{{if openbaar 'open' 'closed'}}__icon"><i class="fa fa-eye{{if openbaar '' '-slash'}}"></i></span>
+                {{/if}}
+
+                {{#if besluit.gebeurtNa}}
+                    <span property="besluit:gebeurtNa" resource="{{besluit.gebeurtNa.objec}}"> </span>
+                {{/if}}
+                <div property="prov:generated" resource="{{besluit.besluit}}" typeof="{{besluit.besluitTypes}}">
+                    <h3 class="h4" property="eli:title">{{if title title.object ''}}</h3><p property="eli:description">{{if description ? description.object ''}}</p>
+                </div>
+            {{/each}}
+        {{/each}}
+        </div>
+        </div>
     </div>
 </div>
+
+
+
+
+{{!-- <div class="besluiten" prefix="{{prefixes}}">
+
+    <div about="{{zitting.uri}}" typeof="besluit:Zitting">
+        <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+              resource="{{zitting.bestuursorgaan}}"></span>
+        <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
+              content="{{zitting.geplandeStart}}"
+              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+        {{{besluitenlijst}}}
+    </div>
+</div> --}}
+
