@@ -15,6 +15,7 @@ import {prefixMap} from "./prefixes";
  * the zitting
  */
 async function getZittingForBehandeling(uuid) {
+
   const queryResult = await query(
     `${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("besluit").toSparqlString()}
@@ -24,18 +25,25 @@ async function getZittingForBehandeling(uuid) {
             besluit:behandelt ?agendapunten;
 
             besluit:isGehoudenDoor ?bestuursorgaan;
-            besluit:geplandeStart ?geplandeStart;
-            prov:startedAtTime ?start;
-            prov:endedAtTime ?end;
+            besluit:geplandeStart ?geplandeStart;  
+                
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
-            )}
+            )}.
+      OPTIONAL {
+        ?uri prov:startedAtTime ?start.
+      }
+      OPTIONAL {
+        ?uri prov:endedAtTime ?end.
+      }      
+      
     }`
   );
+  debugger;
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-
+  
   const {bestuursorgaan, uri, geplandeStart, start, end} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
@@ -137,12 +145,12 @@ async function getZittingForBehandeling(uuid) {
 
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
-
+  debugger;
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
-    start: start.value,
-    end: end.value,
+    start: start?start.value:null,
+    end: end?end.value:null,
     uri: uri.value,
     agendapunten: agendapuntenSorted,
   };
