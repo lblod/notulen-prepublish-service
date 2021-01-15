@@ -39,7 +39,7 @@ async function getZittingForBehandeling(uuid) {
       
     }`
   );
-  debugger;
+  
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
@@ -145,7 +145,7 @@ async function getZittingForBehandeling(uuid) {
 
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
-  debugger;
+  
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
