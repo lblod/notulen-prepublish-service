@@ -6,6 +6,16 @@
         <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
               content="{{zitting.geplandeStart}}"
               datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+        {{#if zitting.start}}
+        <span property="http://www.w3.org/ns/prov#startedAtTime"
+              content="{{zitting.start}}"
+              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+        {{/if}}
+        {{#if zitting.end}}
+        <span property="http://www.w3.org/ns/prov#endedAtTime"
+              content="{{zitting.end}}"
+              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+        {{/if}}
         {{{behandelingHTML}}}
     </div>
 </div>
