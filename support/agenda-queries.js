@@ -72,7 +72,7 @@ async function getZittingForAgenda(uuid) {
     const {agendaUri, geplandOpenbaar, titel, position, aangebrachtNa, beschrijving } = rslt.results.bindings[0];
     return {
       uri: agendaUri.value,
-      geplandOpenbaar: geplandOpenbaar.value,
+      geplandOpenbaar: geplandOpenbaar.value === "true",
       titel: titel.value,
       position: position.value,
       aangebrachtNa: aangebrachtNa ? aangebrachtNa.value : null,
