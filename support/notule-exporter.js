@@ -6,6 +6,7 @@ import { prefixes } from "./prefixes";
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
+const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
@@ -48,6 +49,26 @@ async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatu
 
 async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
   await handleVersionedResource( "publication", versionedNotulenUri, sessionId, targetStatus, 'ext:publishesNotulen');
+  await updateDraftDecisionStatus( versionedNotulenUri );
+}
+
+async function updateDraftDecisionStatus( versionedNotulenUri ) {
+  await query(`
+    PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX dct: <http://purl.org/dc/terms/>
+    DELETE {
+      ?container ext:editorDocumentStatus ?status
+    } INSERT {
+      ?container ext:editorDocumentStatus ${sparqlEscapeUri(DRAFT_DECISON_PUBLISHED_STATUS)}
+    } WHERE {
+       ?meeting ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)};
+                besluit:behandelt ?agendapunt.
+       ?behandeling dct:subject ?agendapunt;
+                    ext:hasDocumentContainer ?container.
+       ?container ext:editorDocumentStatus ?status
+    }
+  `);
 }
 
 /**

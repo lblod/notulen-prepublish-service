@@ -6,7 +6,7 @@ import * as fs from "fs";
 import Handlebars from "handlebars";
 import {prefixes} from "./prefixes";
 
-const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06'
+const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 /**
  * Finds a versioned behandeling based on provided uri
  * does not check if it's linked to the right container
@@ -159,7 +159,7 @@ async function signVersionedBehandeling( versionedBehandelingUri, sessionId, tar
 
 async function publishVersionedBehandeling( versionedBehandelingUri, sessionId, targetStatus ) {
   await handleVersionedResource( "publication", versionedBehandelingUri, sessionId, targetStatus, 'ext:publishesBehandeling');
-  await updateDraftDecisionStatus(versionedBehandelingUri)
+  await updateDraftDecisionStatus(versionedBehandelingUri);
 }
 
 async function updateDraftDecisionStatus(versionedBehandelingUri) {
@@ -170,19 +170,19 @@ async function updateDraftDecisionStatus(versionedBehandelingUri) {
         ext:behandeling ?behandeling.
       ?behandeling ext:hasDocumentContainer ?documentContainer.
     }
-  `)
+  `);
   if(!documentContainerQuery.results.bindings.length) throw new Error('Document container not found for versioned behandeling ' + versionedBehandelingUri);
   const documentContainerUri = documentContainerQuery.results.bindings[0].documentContainer.value;
   await query(`
-    PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
+    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     DELETE {
-      ${sparqlEscapeUri(documentContainerUri)} besluit:ontwerpBesluitStatus ?status
+      ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ?status
     } INSERT {
-      ${sparqlEscapeUri(documentContainerUri)} besluit:ontwerpBesluitStatus ${sparqlEscapeUri(DRAFT_DECISON_PUBLISHED_STATUS)}
+      ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ${sparqlEscapeUri(DRAFT_DECISON_PUBLISHED_STATUS)}
     } WHERE {
-      ${sparqlEscapeUri(documentContainerUri)} besluit:ontwerpBesluitStatus ?status
+      ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ?status
     }
-  `)
+  `);
 }
 
 export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling, createBehandelingExtract }
