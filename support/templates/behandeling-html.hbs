@@ -32,7 +32,7 @@
     <p>
         <strong>Afwezige leden</strong>
         {{#each notPresentMandatees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}">
             <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}

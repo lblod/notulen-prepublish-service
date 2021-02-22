@@ -45,7 +45,7 @@
       <p>
         <strong>Afwezige leden</strong>
         {{#each participationList.notPresent}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}} property="besluit:heeftAanwezigeBijStart">
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{this.uri}}>
             <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
               <span property="persoon:gebruikteVoornaam">
                 {{this.name}}
@@ -59,7 +59,7 @@
       </p>
     </div>
     <p>
-      De voorzitter opent de zitting op 
+      De voorzitter opent de zitting op
       <span content="{{startedAt.value}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
         {{startedAt.text}}
       </span>.
