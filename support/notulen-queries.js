@@ -187,14 +187,13 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
-        ${sparqlEscapeUri(bestuursorgaan)} org:hasPost ?roleUri.
+      ${sparqlEscapeUri(zittingUri)} besluit:heeftAfwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?mandatarisUri org:holds ?roleUri.
         ?roleUri org:role ?bestuursfunctieCodeUri.
         ?bestuursfunctieCodeUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-        filter not exists { ${sparqlEscapeUri(zittingUri)} besluit:heeftAanwezigeBijStart ?mandatarisUri. }
     }
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);

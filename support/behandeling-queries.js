@@ -106,13 +106,12 @@ async function getZittingForBehandeling(uuid) {
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
     ${prefixMap.get("org").toSparqlString()}
+    ${prefixMap.get("ext").toSparqlString()}
       SELECT DISTINCT * WHERE {
-        ${sparqlEscapeUri(bestuursorgaan.value)} org:hasPost ?roleUri.
+        ${sparqlEscapeUri(agendapunten.bva.value)} ext:heeftAfwezige ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?roleUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-        filter not exists { ${sparqlEscapeUri(agendapunten.bva.value)} besluit:heeftAanwezige ?mandatarisUri. }
       }
     `);
     const notPresentMandatees = notPresentQuery.results.bindings.map(mandatee => ({
