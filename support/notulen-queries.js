@@ -92,7 +92,7 @@ async function getZittingForNotulen(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      }
+      } ORDER BY DESC(?familyName)
     `);
     const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
@@ -118,7 +118,7 @@ async function getZittingForNotulen(uuid) {
           content: agendapunten.documentContent && agendapunten.documentContent.value
         }
       }
-    }
+    };
   });
   const agendapunten = await Promise.all(agendaQueries);
 
@@ -176,7 +176,7 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
         ?bestuursfunctieCodeUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY DESC(?familyName)
   `);
   const present = presentQuery.results.bindings.map(processMandatee);
   const notPresentQuery = await query(`
@@ -194,7 +194,7 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
         ?bestuursfunctieCodeUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY DESC(?familyName)
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);
   return {present, notPresent};

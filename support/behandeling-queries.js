@@ -25,8 +25,8 @@ async function getZittingForBehandeling(uuid) {
             besluit:behandelt ?agendapunten;
 
             besluit:isGehoudenDoor ?bestuursorgaan;
-            besluit:geplandeStart ?geplandeStart;  
-                
+            besluit:geplandeStart ?geplandeStart;
+
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
             )}.
@@ -35,15 +35,15 @@ async function getZittingForBehandeling(uuid) {
       }
       OPTIONAL {
         ?uri prov:endedAtTime ?end.
-      }      
-      
+      }
+
     }`
   );
-  
+
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-  
+
   const {bestuursorgaan, uri, geplandeStart, start, end} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
@@ -92,7 +92,7 @@ async function getZittingForBehandeling(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      }
+      } ORDER BY DESC(?familyName)
     `);
     const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
@@ -112,7 +112,7 @@ async function getZittingForBehandeling(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      }
+      } ORDER BY DESC(?familyName)
     `);
     const notPresentMandatees = notPresentQuery.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
@@ -144,7 +144,7 @@ async function getZittingForBehandeling(uuid) {
 
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
-  
+
   return {
     bestuursorgaan: bestuursorgaan.value,
     geplandeStart: geplandeStart.value,
