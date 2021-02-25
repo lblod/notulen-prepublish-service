@@ -92,7 +92,7 @@ async function getZittingForNotulen(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      } ORDER BY DESC(?familyName)
+      } ORDER BY ASC(?familyName) ASC(?name)
     `);
     const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
@@ -176,27 +176,29 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
         ?bestuursfunctieCodeUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY DESC(?familyName)
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
   const present = presentQuery.results.bindings.map(processMandatee);
   const notPresentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("ext").toSparqlString()}
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("org").toSparqlString()}
     ${prefixMap.get("skos").toSparqlString()}
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(zittingUri)} besluit:heeftAfwezigeBijStart ?mandatarisUri.
+      ${sparqlEscapeUri(zittingUri)} ext:heeftAfwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?mandatarisUri org:holds ?roleUri.
         ?roleUri org:role ?bestuursfunctieCodeUri.
         ?bestuursfunctieCodeUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY DESC(?familyName)
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);
+  console.log(notPresent);
   return {present, notPresent};
 }
 

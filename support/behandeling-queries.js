@@ -92,7 +92,7 @@ async function getZittingForBehandeling(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      } ORDER BY DESC(?familyName)
+      } ORDER BY ASC(?familyName) ASC(?name)
     `);
     const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
@@ -112,7 +112,7 @@ async function getZittingForBehandeling(uuid) {
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
-      } ORDER BY DESC(?familyName)
+      } ORDER BY ASC(?familyName) ASC(?name)
     `);
     const notPresentMandatees = notPresentQuery.results.bindings.map(mandatee => ({
       uri: mandatee.mandatarisUri.value,
