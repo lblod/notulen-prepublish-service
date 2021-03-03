@@ -1,6 +1,10 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
+import {DateTime} from 'luxon';
+
+const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
+
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
  *
@@ -13,7 +17,7 @@ import {prefixMap} from "./prefixes";
 async function getZittingForNotulen(uuid) {
 
   const queryResult = await query(
-    `${prefixMap.get("ext").toSparqlString()} 
+    `${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("prov").toSparqlString()}
      ${prefixMap.get("mu").toSparqlString()}
@@ -124,17 +128,6 @@ async function getZittingForNotulen(uuid) {
 
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
-  const dateOptions = {
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: false,
-  };
-  const dateFormatter = new Intl.DateTimeFormat('nl', dateOptions);
-
-
   const participationList = await fetchParticipationList(uri.value, bestuursorgaanUri.value);
   return {
     bestuursorgaan: {
@@ -144,15 +137,15 @@ async function getZittingForNotulen(uuid) {
     location: queryResult.results.bindings[0].location ? queryResult.results.bindings[0].location.value : '',
     geplandeStart: {
       value: geplandeStart && geplandeStart.value,
-      text: geplandeStart && dateFormatter.format(new Date(geplandeStart.value)),
+      text: geplandeStart && DateTime.fromISO(geplandeStart.value).toFormat(dateFormat)
     },
     startedAt: {
       value: startedAt && startedAt.value,
-      text: startedAt && dateFormatter.format(new Date(startedAt.value)),
+      text: startedAt && DateTime.fromISO(startedAt.value).toFormat(dateFormat),
     },
     endedAt: {
       value: endedAt && endedAt.value,
-      text: endedAt && dateFormatter.format(new Date(endedAt.value)),
+      text: endedAt && DateTime.fromISO(endedAt.value).toFormat(dateFormat),
     },
     zittingUri: uri.value,
     participationList,
