@@ -1,9 +1,10 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
-import {DateTime} from 'luxon'
+import {DateTime} from 'luxon';
 
-const dateFormat = process.env.dateFormat || 'dd/MM/yyyy HH:mm:ss'
+const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
+
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
  *
@@ -16,7 +17,7 @@ const dateFormat = process.env.dateFormat || 'dd/MM/yyyy HH:mm:ss'
 async function getZittingForNotulen(uuid) {
 
   const queryResult = await query(
-    `${prefixMap.get("ext").toSparqlString()} 
+    `${prefixMap.get("ext").toSparqlString()}
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("prov").toSparqlString()}
      ${prefixMap.get("mu").toSparqlString()}

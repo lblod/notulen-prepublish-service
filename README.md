@@ -23,3 +23,8 @@ For compatibility with frontend-gelinkt-notuleren 1.x use a version < 0.5.x
 For compatibility with frontend-gelinkt-notuleren 2.x use a version >= 0.5.x
 
 Note that releases denoted 0.5.x should be considered a work in progress, with an inconsistent api while we are working towards the new publication flow.
+
+## configuration
+The following environment variables can be set to configure the service:
+
+  -  *DATE_FORMAT*: datetime format passed to luxon, see the [table of tokens](https://moment.github.io/luxon/docs/manual/formatting.html#table-of-tokens) for more information. Default: `dd/MM/yyyy HH:mm:ss`
