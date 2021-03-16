@@ -1,0 +1,58 @@
+---
+kind: pipeline
+type: docker
+name: verify
+steps:
+- name: build-dry-run
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
+    dry_run: true
+    purge: true
+trigger:
+  event:
+    - push
+---
+kind: pipeline
+type: docker
+name: push-latest-build
+steps:
+- name: push-latest-build
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+trigger:
+  branch:
+    - master
+---
+kind: pipeline
+type: docker
+name: release
+steps:
+- name: build-dry-run
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
+    dry_run: true
+- name: push-tagged-build
+  image: plugins/docker
+  settings:
+    repo: lblod/notulen-prepublish-service
+    tags: ${DRONE_TAG##v}
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password
+    purge: true
+trigger:
+  event:
+    - tag
+---
+kind: signature
+hmac: 76ffa5ccfc65eb9c769af3a4f50acf93100c2a07137575cb3941c2bf4b81a1a9
+
+...
