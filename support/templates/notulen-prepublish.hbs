@@ -1,5 +1,5 @@
-<div class='notulen' prefix="{{prefixes}}">
-  <div resource={{zittingUri}} typeof='besluit:Zitting'>
+<div class="notulen" prefix="{{prefixes}}">
+  <div resource={{zittingUri}} typeof="besluit:Zitting">
     <h1 property="dc:title">
       Notulen van de/het
       <span 
@@ -31,16 +31,16 @@
         <p typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
           <strong>
             Van 
-            <span property='prov:startedAtTime' datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
+            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
               {{intermission.startedAt.text}}
             </span>
             tot 
-            <span property='prov:endedAtTime' datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
+            <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
               {{intermission.endedAt.text}}
             </span>
             : 
           </strong>
-          <span property='rdfs:comment'>
+          <span property="rdfs:comment">
             {{intermission.comment}}
           </span>
         </p>
