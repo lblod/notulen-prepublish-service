@@ -346,8 +346,10 @@ async function fetchIntermissions(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} ext:hasIntermission ?intermissionUri.
       ?intermissionUri prov:startedAtTime ?startedAt;
-        prov:endedAtTime ?endedAt;
-        rdfs:comment ?comment.
+        prov:endedAtTime ?endedAt.
+      OPTIONAL {
+        ?intermissionUri rdfs:comment ?comment.
+      }
     }
   `);
   const intermissions = intermissionsQuery.results.bindings.map(processIntermissions);
@@ -365,7 +367,7 @@ function processIntermissions(intermission) {
       value: intermission.endedAt.value,
       text: DateTime.fromISO(intermission.endedAt.value).toFormat(dateFormat)
     },
-    comment: intermission.comment.value,
+    comment: intermission.comment ? intermission.comment.value : undefined,
   }
 }
 

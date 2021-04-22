@@ -38,11 +38,13 @@
             <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
               {{intermission.endedAt.text}}
             </span>
-            : 
-          </strong>
-          <span property="rdfs:comment">
-            {{intermission.comment}}
-          </span>
+          {{#if intermission.comment}}
+              : 
+            </strong>
+            <span property="rdfs:comment">
+              {{intermission.comment}}
+            </span>
+          {{/if}}
         </p>
       {{/each}}
     {{/if}}
