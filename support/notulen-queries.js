@@ -129,6 +129,9 @@ async function getZittingForNotulen(uuid) {
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
   const participationList = await fetchParticipationList(uri.value, bestuursorgaanUri.value);
+
+  const intermissions = await fetchIntermissions(uri.value);
+  
   return {
     bestuursorgaan: {
       uri: bestuursorgaanUri.value,
@@ -150,6 +153,7 @@ async function getZittingForNotulen(uuid) {
     zittingUri: uri.value,
     participationList,
     agendapunten: agendapuntenSorted,
+    intermissions: intermissions
   };
 }
 
@@ -332,6 +336,38 @@ function processMandatee(mandatee) {
     familyName: mandatee.familyName.value,
     roleUri: mandatee.roleUri.value,
     role: mandatee.role.value
+  }
+}
+
+async function fetchIntermissions(zittingUri) {
+  const intermissionsQuery = await query(`
+    ${prefixMap.get("ext").toSparqlString()}
+    ${prefixMap.get("prov").toSparqlString()}
+    SELECT DISTINCT * WHERE {
+      ${sparqlEscapeUri(zittingUri)} ext:hasIntermission ?intermissionUri.
+      ?intermissionUri prov:startedAtTime ?startedAt;
+        prov:endedAtTime ?endedAt.
+      OPTIONAL {
+        ?intermissionUri rdfs:comment ?comment.
+      }
+    }
+  `);
+  const intermissions = intermissionsQuery.results.bindings.map(processIntermissions);
+  return intermissions;
+}
+
+function processIntermissions(intermission) {
+  return {
+    uri: intermission.intermissionUri.value,
+    startedAt: {
+      value: intermission.startedAt.value,
+      text: DateTime.fromISO(intermission.startedAt.value).toFormat(dateFormat)
+    },
+    endedAt: {
+      value: intermission.endedAt.value,
+      text: DateTime.fromISO(intermission.endedAt.value).toFormat(dateFormat)
+    },
+    comment: intermission.comment ? intermission.comment.value : undefined,
   }
 }
 

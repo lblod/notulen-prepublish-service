@@ -1,5 +1,5 @@
-<div class='notulen' prefix="{{prefixes}}">
-  <div resource={{zittingUri}} typeof='besluit:Zitting'>
+<div class="notulen" prefix="{{prefixes}}">
+  <div resource={{zittingUri}} typeof="besluit:Zitting">
     <h1 property="dc:title">
       Notulen van de/het
       <span 
@@ -25,6 +25,29 @@
         {{location}}
       </span>
     </p>
+    {{#if intermissions}}
+      <h2>Onderbrekingen</h2>
+      {{#each intermissions as |intermission|}}
+        <p typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
+          <strong>
+            Van 
+            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
+              {{intermission.startedAt.text}}
+            </span>
+            tot 
+            <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
+              {{intermission.endedAt.text}}
+            </span>
+          {{#if intermission.comment}}
+              : 
+            </strong>
+            <span property="rdfs:comment">
+              {{intermission.comment}}
+            </span>
+          {{/if}}
+        </p>
+      {{/each}}
+    {{/if}}
     <h2>Aanwezigen bij de zitting</h2>
     <div property="ext:aanwezigenTable">
       <p>
