@@ -5,6 +5,7 @@ import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
 import {prefixes} from "./prefixes";
+import jsdom from 'jsdom';
 
 const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 /**
@@ -38,12 +39,17 @@ async function findVersionedBehandeling(uuid) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true) {
-  const behandelingHtml = generateBehandelingHTML(agendapunt);
-  if (isWrappedInZittingInfo) {
-    return wrapZittingInfo(zitting, behandelingHtml);
+function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true, isPublic = true) {
+  let behandelingHTML;
+  if(isPublic) {
+    behandelingHTML = generateBehandelingHTML(agendapunt);
   } else {
-    return behandelingHtml;
+    behandelingHTML = generatePrivateBehandelingHTML(agendapunt);
+  }
+  if (isWrappedInZittingInfo) {
+    return wrapZittingInfo(zitting, behandelingHTML);
+  } else {
+    return behandelingHTML;
   }
 }
 
@@ -69,6 +75,29 @@ function generateBehandelingHTML(agendapunt) {
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
   return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, notPresentMandatees, stemmings});
+}
+
+function generatePrivateBehandelingHTML(agendapunt) {
+  const templateStr = fs
+    .readFileSync(path.join(__dirname, "templates/behandeling-html.hbs"))
+    .toString();
+  const template = Handlebars.compile(templateStr);
+  const behandelingUri = agendapunt.behandeling.uri;
+  const agendapuntUri = agendapunt.uri;
+  const agendapuntTitle = agendapunt.title;
+  const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
+  const document = agendapunt.behandeling.document.content;
+  const documentNode = new jsdom.JSDOM(document).window.document;
+  const documentContainer = documentNode.querySelector(`[property='prov:generated']`)
+  const isBesluit = documentContainer.getAttribute('typeof').includes('besluit:Besluit')
+  if(isBesluit) {
+    const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
+    const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
+    documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`
+    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer});
+  } else {
+    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});
+  }
 }
 
 /**

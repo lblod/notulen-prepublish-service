@@ -37,7 +37,9 @@ function generateBehandelingHtml(zitting, publicBehandelingUris) {
   let behandelingHTML = '';
   for(const agendapunt of zitting.agendapunten) {
     if(!publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
-      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false);
+      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, true);
+    } else {
+      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, false)
     }
   }
   return behandelingHTML;
