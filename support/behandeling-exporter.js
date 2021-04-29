@@ -79,7 +79,7 @@ function generateBehandelingHTML(agendapunt) {
 
 function generatePrivateBehandelingHTML(agendapunt) {
   const templateStr = fs
-    .readFileSync(path.join(__dirname, "templates/behandeling-html.hbs"))
+    .readFileSync(path.join(__dirname, "templates/private-behandeling-html.hbs"))
     .toString();
   const template = Handlebars.compile(templateStr);
   const behandelingUri = agendapunt.behandeling.uri;
@@ -94,7 +94,7 @@ function generatePrivateBehandelingHTML(agendapunt) {
     const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
     const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
     documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer});
+    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer.outerHTML});
   } else {
     return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});
   }
