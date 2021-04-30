@@ -89,7 +89,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
     console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
     const {html, errors} = await buildBesluitenLijstForZitting( zitting );
     if(errors.length) {
-      throw new Error(errors.join(', '))
+      throw new Error(errors.join(', '));
     }
     const besluitenLijstUuid = uuid();
     const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;

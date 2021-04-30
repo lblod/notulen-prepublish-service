@@ -116,7 +116,7 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
     console.log(`Creating a new versioned notulen for ${zitting.zittingUri}`);
     const {html, errors} = await extractNotulenContentFromZitting(zitting, publicBehandelingUris);
     if(errors.length){
-      throw new Error(errors.join(', '))
+      throw new Error(errors.join(', '));
     }
     const notulenUuid = uuid();
     const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
@@ -155,7 +155,7 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
 
   const {html, errors} = await extractNotulenContentFromZitting( zitting, publicBehandelingUris);
   if(errors.length) {
-    throw new Error(errors.join(', '))
+    throw new Error(errors.join(', '));
   }
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>

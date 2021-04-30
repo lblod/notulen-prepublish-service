@@ -126,7 +126,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
     const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid);
     const {html, errors} = createBehandelingExtract(zitting, agendapunt);
     if(errors.length) {
-      throw new Error(errors.join(', '))
+      throw new Error(errors.join(', '));
     }
     const versionedBehandelingUuid = uuid();
     const versionedBehandelingUri = `http://data.lblod.info/prepublished-behandelingen/${versionedBehandelingUuid}`;
