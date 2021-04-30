@@ -263,8 +263,8 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
 app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
   try {
     const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
-    const besluitenlijst = await buildBesluitenLijstForZitting(zitting);
-    return res.send( { data: { attributes: { content: besluitenlijst }, type: "imported-besluitenlijst-contents" } } ).end();
+    const {html, errors} = await buildBesluitenLijstForZitting(zitting);
+    return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
@@ -321,8 +321,8 @@ app.get('/prepublish/notulen/behandelingen/:documentIdentifier', async function(
 app.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next) {
   try {
     const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
-    const result = await extractNotulenContentFromZitting(zitting);
-    return res.send( { data: { attributes: { content: result }, type: "imported-notulen-contents" } } ).end();
+    const {html, errors} = await extractNotulenContentFromZitting(zitting);
+    return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
   } catch (err) {
     console.log(JSON.stringify(err));
     const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);

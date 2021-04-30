@@ -58,7 +58,18 @@ function wrapZittingInfo(zitting, behandelingHTML) {
     .readFileSync(path.join(__dirname, "templates/behandeling-prepublish.hbs"))
     .toString();
   const template = Handlebars.compile(templateStr);
-  return template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
+  const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
+  const errors = []
+  if(!zitting.geplandeStart) {
+    errors.push('You must set the planned start of the meeting')
+  }
+  if(!zitting.start) {
+    errors.push('You must set the start of the meeting')
+  }
+  if(!zitting.end) {
+    errors.push('You must set the end of the meeting')
+  }
+  return {html, errors}
 }
 
 function generateBehandelingHTML(agendapunt) {
@@ -113,7 +124,10 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
   else {
     console.log(`creating a new versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
     const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid);
-    const newExtract = createBehandelingExtract(zitting, agendapunt);
+    const {html, errors} = createBehandelingExtract(zitting, agendapunt);
+    if(errors.length) {
+      throw new Error(errors.join(', '))
+    }
     const versionedBehandelingUuid = uuid();
     const versionedBehandelingUri = `http://data.lblod.info/prepublished-behandelingen/${versionedBehandelingUuid}`;
     await update(`
@@ -125,7 +139,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
       INSERT {
         ${sparqlEscapeUri(versionedBehandelingUri)}
            a ext:VersionedBehandeling;
-           ext:content ${hackedSparqlEscapeString( newExtract )};
+           ext:content ${hackedSparqlEscapeString( html )};
            mu:uuid ${sparqlEscapeString( versionedBehandelingUuid )};
            ext:behandeling ?behandeling.
         ${sparqlEscapeUri(zitting.uri)} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedBehandelingUri)}.
@@ -145,12 +159,13 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
     const agendapunten = zitting.agendapunten;
     const extracts = [];
     for (const agendapunt of agendapunten) {
-      const newExtract = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
+      const {html, errors} = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
       console.log(`creating temporary behandeling extract for ${zitting.uri}`);
       extracts.push({
         data: {
           attributes: {
-            content: newExtract,
+            content: html,
+            errors,
             behandeling: agendapunt.behandeling.uri,
             uuid: agendapunt.behandeling.uuid
           }

@@ -22,7 +22,18 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
   let behandelingsHtml = '';
   behandelingsHtml = generateBehandelingHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
-  return generateNotulenHtml(notulenData);
+  const html = generateNotulenHtml(notulenData);
+  const errors = [];
+  if(!zitting.geplandeStart.value) {
+    errors.push('You must set the planned start of the meeting')
+  }
+  if(!zitting.startedAt.value) {
+    errors.push('You must set the start of the meeting')
+  }
+  if(!zitting.endedAt.value) {
+    errors.push('You must set the end of the meeting')
+  }
+  return {html, errors}
 }
 
 function generateNotulenHtml(notulenData) {
@@ -103,7 +114,10 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
     return versionedNotulenId;
   } else {
     console.log(`Creating a new versioned notulen for ${zitting.zittingUri}`);
-    const notulenContent = await extractNotulenContentFromZitting(zitting, publicBehandelingUris);
+    const {html, errors} = await extractNotulenContentFromZitting(zitting, publicBehandelingUris);
+    if(errors.length){
+      throw new Error(errors.join(', '))
+    }
     const notulenUuid = uuid();
     const notulenUri = `http://data.lblod.info/prepublished-notulen/${notulenUuid}`;
 
@@ -116,7 +130,7 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
       INSERT DATA{
         ${sparqlEscapeUri(notulenUri)}
            a ext:VersionedNotulen;
-           ext:content ${hackedSparqlEscapeString(notulenContent)};
+           ext:content ${hackedSparqlEscapeString(html)};
            mu:uuid ${sparqlEscapeString( notulenUuid )}.
         ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
       }`);
@@ -139,7 +153,10 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
     publicBehandelingUrisStatement = `${sparqlEscapeUri(notulenUri)} ext:publicBehandeling ${uris} .`;
   }
 
-  const publicNotulenContent = await extractNotulenContentFromZitting( zitting, publicBehandelingUris);
+  const {html, errors} = await extractNotulenContentFromZitting( zitting, publicBehandelingUris);
+  if(errors.length) {
+    throw new Error(errors.join(', '))
+  }
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
 
@@ -154,7 +171,7 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
     ;
 
     INSERT DATA {
-      ${sparqlEscapeUri(notulenUri)} ext:publicContent ${hackedSparqlEscapeString(publicNotulenContent)} .
+      ${sparqlEscapeUri(notulenUri)} ext:publicContent ${hackedSparqlEscapeString(html)} .
       ${publicBehandelingUrisStatement}
     }
   `);

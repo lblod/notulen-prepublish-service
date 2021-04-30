@@ -56,9 +56,12 @@ async function wrapZittingInfo(besluitenlijst, zitting) {
     .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
     .toString();
   const template = Handlebars.compile(templateStr);
-  const output=template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
-  
-  return output;
+  const html = template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
+  const errors = []
+  if(!zitting.geplandeStart) {
+    errors.push('You must set the planned start of the meeting')
+  }
+  return {html, errors}
 }
 
 async function ensureVersionedBesluitenLijstForZitting( zitting ) {
@@ -84,7 +87,10 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
     return versionedBesluitenLijstId;
   } else {
     console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
-    const besluitenLijstContent = await buildBesluitenLijstForZitting( zitting );
+    const {html, errors} = await buildBesluitenLijstForZitting( zitting );
+    if(errors.length) {
+      throw new Error(errors.join(', '))
+    }
     const besluitenLijstUuid = uuid();
     const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;
 
@@ -98,7 +104,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
       INSERT DATA{
         ${sparqlEscapeUri(besluitenLijstUri)}
           a ext:VersionedBesluitenLijst;
-          ext:content ${hackedSparqlEscapeString( besluitenLijstContent )};
+          ext:content ${hackedSparqlEscapeString( html )};
           mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
         ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
