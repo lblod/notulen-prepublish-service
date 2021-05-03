@@ -3,6 +3,7 @@ import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';
 import { prefixes } from "./prefixes";
+import validateMeeting from "./validate-meeting";
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
@@ -23,16 +24,11 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
   behandelingsHtml = generateBehandelingHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   const html = generateNotulenHtml(notulenData);
-  const errors = [];
-  if(!zitting.geplandeStart.value) {
-    errors.push('You must set the planned start of the meeting');
-  }
-  if(!zitting.startedAt.value) {
-    errors.push('You must set the start of the meeting');
-  }
-  if(!zitting.endedAt.value) {
-    errors.push('You must set the end of the meeting');
-  }
+  const errors = validateMeeting( {
+    plannedStart: zitting.geplandeStart && zitting.geplandeStart.value,
+    startedAt: zitting.startedAt && zitting.startedAt.value,
+    endedAt: zitting.endedAt && zitting.endedAt.value
+  });
   return {html, errors};
 }
 
@@ -50,7 +46,7 @@ function generateBehandelingHtml(zitting, publicBehandelingUris) {
     if(!publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
       behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, true);
     } else {
-      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, false)
+      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, false);
     }
   }
   return behandelingHTML;

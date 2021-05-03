@@ -1,6 +1,7 @@
 // @ts-ignore
 import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
 import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import validateMeeting from './validate-meeting';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
@@ -59,16 +60,11 @@ function wrapZittingInfo(zitting, behandelingHTML) {
     .toString();
   const template = Handlebars.compile(templateStr);
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
-  const errors = [];
-  if(!zitting.geplandeStart) {
-    errors.push('You must set the planned start of the meeting');
-  }
-  if(!zitting.start) {
-    errors.push('You must set the start of the meeting');
-  }
-  if(!zitting.end) {
-    errors.push('You must set the end of the meeting');
-  }
+  const errors = validateMeeting({
+    plannedStart: zitting.geplandeStart,
+    startedAt: zitting.start,
+    endedAt: zitting.end
+  });
   return {html, errors};
 }
 
@@ -100,6 +96,7 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
   const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
+  const isBesluit = documentContainer && documentContainer.getAttribute('typeof').includes('besluit:Besluit');
   if(isBesluit) {
     const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
     const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
