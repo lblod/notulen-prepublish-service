@@ -213,8 +213,8 @@ app.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res,
     await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while published the notulen ${req.params.zittingIdentifier}: ${err}`);
     return next(error);
   }
 } );
