@@ -40,11 +40,11 @@ app.post("/signing/agenda/sign/:kind/:zittingIdentifier", async function (
     );
     return res.send({success: true}).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
+    console.log(err);
     const error = new Error(
       `An error occurred while signing the agenda ${
         req.params.documentIdentifier
-      }: ${JSON.stringify(err)}`
+      }: ${err}`
     );
     return next(error);
   }
@@ -63,8 +63,8 @@ app.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(req, 
     await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while signing the besluitenlijst ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while signing the besluitenlijst ${req.params.documentIdentifier}: ${err}`);
     return next(error);
   }
 });
@@ -86,7 +86,7 @@ app.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', async 
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`);
     return next(error);
   }
 });
@@ -104,8 +104,8 @@ app.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res, ne
     await signVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while signing the notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while signing the notulen ${req.params.zittingIdentifier}: ${err}`);
     return next(error);
   }
 });
@@ -141,11 +141,11 @@ app.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(req,
     );
     return res.send({success: true}).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
+    console.log(err);
     const error = new Error(
         `An error occurred while publishing the agenda ${
             req.params.zittingIdentifier
-        }: ${JSON.stringify(err)}`
+        }: ${err}`
     );
     return next(error);
   }
@@ -166,8 +166,8 @@ app.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function(re
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
     return next(error);
   }
 } );
@@ -186,7 +186,7 @@ app.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', asy
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while publishing the behandeling ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occurred while publishing the behandeling ${req.params.zittingIdentifier}: ${err}`);
     return next(error);
   }
 });
@@ -244,11 +244,11 @@ app.get("/prepublish/agenda/:zittingIdentifier", async function (
       })
       .end();
   } catch (err) {
-    console.log(JSON.stringify(err));
+    console.log(err);
     const error = new Error(
       `An error occurred while fetching contents for prepublished agenda ${
         req.params.zittingIdentifier
-      }: ${JSON.stringify(err)}`
+      }: ${err}`
     );
     // @ts-ignore
     error.status = 500;
@@ -266,8 +266,8 @@ app.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res
     const {html, errors} = await buildBesluitenLijstForZitting(zitting);
     return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
@@ -286,7 +286,7 @@ app.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res,
   }
   catch (err) {
     console.log(err);
-    const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${err}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
@@ -307,7 +307,7 @@ app.get('/prepublish/notulen/behandelingen/:documentIdentifier', async function(
   }
   catch (err) {
     console.log(err);
-    const error = new Error(`An error occured while fetching contents for prepublished notulen besluiten ${req.params.documentIdentifier}: ${JSON.stringify(err)}`);
+    const error = new Error(`An error occured while fetching contents for prepublished notulen besluiten ${req.params.documentIdentifier}: ${err}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
@@ -324,8 +324,8 @@ app.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next)
     const {html, errors} = await extractNotulenContentFromZitting(zitting);
     return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
   } catch (err) {
-    console.log(JSON.stringify(err));
-    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${JSON.stringify(err)}`);
+    console.log(err);
+    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
