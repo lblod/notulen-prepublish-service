@@ -59,17 +59,17 @@ function wrapZittingInfo(zitting, behandelingHTML) {
     .toString();
   const template = Handlebars.compile(templateStr);
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
-  const errors = []
+  const errors = [];
   if(!zitting.geplandeStart) {
-    errors.push('You must set the planned start of the meeting')
+    errors.push('You must set the planned start of the meeting');
   }
   if(!zitting.start) {
-    errors.push('You must set the start of the meeting')
+    errors.push('You must set the start of the meeting');
   }
   if(!zitting.end) {
-    errors.push('You must set the end of the meeting')
+    errors.push('You must set the end of the meeting');
   }
-  return {html, errors}
+  return {html, errors};
 }
 
 function generateBehandelingHTML(agendapunt) {
@@ -99,12 +99,11 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
-  const documentContainer = documentNode.querySelector(`[property='prov:generated']`)
-  const isBesluit = documentContainer.getAttribute('typeof').includes('besluit:Besluit')
+  const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
   if(isBesluit) {
     const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
     const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
-    documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`
+    documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
     return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer.outerHTML});
   } else {
     return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});

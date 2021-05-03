@@ -25,15 +25,15 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
   const html = generateNotulenHtml(notulenData);
   const errors = [];
   if(!zitting.geplandeStart.value) {
-    errors.push('You must set the planned start of the meeting')
+    errors.push('You must set the planned start of the meeting');
   }
   if(!zitting.startedAt.value) {
-    errors.push('You must set the start of the meeting')
+    errors.push('You must set the start of the meeting');
   }
   if(!zitting.endedAt.value) {
-    errors.push('You must set the end of the meeting')
+    errors.push('You must set the end of the meeting');
   }
-  return {html, errors}
+  return {html, errors};
 }
 
 function generateNotulenHtml(notulenData) {
