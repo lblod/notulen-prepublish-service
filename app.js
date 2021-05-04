@@ -81,7 +81,6 @@ app.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', async 
     const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
     const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
     const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
-    console.log(prepublishedBehandelingUri);
     await signVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {

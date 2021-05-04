@@ -107,7 +107,7 @@ async function getZittingForNotulen(uuid) {
     const stemmings = await fetchStemmings(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
-      geplandOpenbaar: agendapunten.geplandOpenbaar.value,
+      geplandOpenbaar: agendapunten.geplandOpenbaar.value === "true",
       position: agendapunten.position.value,
       titel: agendapunten.titel.value,
       description: agendapunten.description.value,
@@ -195,7 +195,6 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
     } ORDER BY ASC(?familyName) ASC(?name)
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);
-  console.log(notPresent);
   return {present, notPresent};
 }
 
