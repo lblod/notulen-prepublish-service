@@ -92,7 +92,7 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const behandelingUri = agendapunt.behandeling.uri;
   const agendapuntUri = agendapunt.uri;
   const agendapuntTitle = agendapunt.title;
-  const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
+  const openbaar = agendapunt.behandeling.openbaar === 'true';
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
   const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
