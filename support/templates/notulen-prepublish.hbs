@@ -87,9 +87,11 @@
         {{startedAt.text}}
       </span>.
     </h2>
-    <p>
-      {{{intro}}}
-    </p>
+    {{#if intro}}
+      <p>
+        {{{intro}}}
+      </p>
+    {{/if}}
     <h2>Agenda overzicht</h2>
     <div property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
       {{#each agendapunten}}
@@ -119,8 +121,10 @@
         {{endedAt.text}}
       </span>. 
     </h2>
-    <p>
-      {{{outro}}}
-    </p>
+    {{#if outro}}
+      <p>
+        {{{outro}}}
+      </p>
+    {{/if}}
   </div>
 </div>
