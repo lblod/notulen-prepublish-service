@@ -81,11 +81,14 @@
         {{/each}}
       </p>
     </div>
-    <p>
+    <h2>
       De voorzitter opent de zitting op
       <span content="{{startedAt.value}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
         {{startedAt.text}}
       </span>.
+    </h2>
+    <p>
+      {{{intro}}}
     </p>
     <h2>Agenda overzicht</h2>
     <div property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
@@ -110,12 +113,14 @@
     <div property="http://mu.semte.ch/vocabularies/ext/behandelingVanAgendapuntenContainer">
       {{{behandelingsHtml}}}
     </div>
-    <h2>Sluiting van de zitting</h2>
-    <p>
+    <h2>
       De voorzitter sluit de zitting op 
       <span content="{{endedAt.value}}" datatype="xsd:dateTime" property="prov:endedAtTime" class="is-required">
         {{endedAt.text}}
       </span>. 
+    </h2>
+    <p>
+      {{{outro}}}
     </p>
   </div>
 </div>

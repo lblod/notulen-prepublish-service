@@ -28,7 +28,9 @@ async function getZittingForNotulen(uuid) {
         besluit:behandelt ?agendapunten;
         besluit:isGehoudenDoor ?bestuursorgaanUri;
         besluit:geplandeStart ?geplandeStart;
-        mu:uuid ${sparqlEscapeString(uuid)}.
+        mu:uuid ${sparqlEscapeString(uuid)};
+        ext:intro ?intro;
+        ext:outro ?outro.
       ?bestuursorgaanUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
       ?mainBestuursorgaanUri skos:prefLabel ?bestuursorgaanName.
       OPTIONAL {
@@ -45,7 +47,7 @@ async function getZittingForNotulen(uuid) {
   if (queryResult.results.bindings.length === 0) {
     throw `Zitting with uuid: ${uuid} not found`;
   }
-  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName, startedAt, endedAt} = queryResult.results.bindings[0];
+  const {bestuursorgaanUri, uri, geplandeStart, bestuursorgaanName, startedAt, endedAt, intro, outro} = queryResult.results.bindings[0];
 
   const agendaUris = queryResult.results.bindings.map(
     (b) => b.agendapunten.value
@@ -150,6 +152,8 @@ async function getZittingForNotulen(uuid) {
       value: endedAt && endedAt.value,
       text: endedAt && DateTime.fromISO(endedAt.value).toFormat(dateFormat),
     },
+    intro: intro.value,
+    outro: outro.value,
     zittingUri: uri.value,
     participationList,
     agendapunten: agendapuntenSorted,
