@@ -26,7 +26,6 @@ async function getZittingForBehandeling(uuid) {
 
             besluit:isGehoudenDoor ?bestuursorgaan;
             besluit:geplandeStart ?geplandeStart;
-            
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
               uuid
             )}.
@@ -36,6 +35,7 @@ async function getZittingForBehandeling(uuid) {
       OPTIONAL {
         ?uri prov:endedAtTime ?end.
       }
+
     }`
   );
 
