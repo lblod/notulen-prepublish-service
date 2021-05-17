@@ -28,9 +28,7 @@ async function getZittingForNotulen(uuid) {
         besluit:behandelt ?agendapunten;
         besluit:isGehoudenDoor ?bestuursorgaanUri;
         besluit:geplandeStart ?geplandeStart;
-        mu:uuid ${sparqlEscapeString(uuid)};
-        ext:intro ?intro;
-        ext:outro ?outro.
+        mu:uuid ${sparqlEscapeString(uuid)}.
       ?bestuursorgaanUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
       ?mainBestuursorgaanUri skos:prefLabel ?bestuursorgaanName.
       OPTIONAL {
@@ -41,6 +39,12 @@ async function getZittingForNotulen(uuid) {
       }
       OPTIONAL {
         ?uri prov:endedAtTime ?endedAt.
+      }
+      OPTIONAL {
+        ?uri ext:intro ?intro.
+      }
+      OPTIONAL {
+        ?uri ext:outro ?outro.
       }
     }`
   );
