@@ -22,7 +22,7 @@ function hackedSparqlEscapeString( string ) {
 // the uri of the person publishing/signing
 // the created date of the resource
 
-// currently uses sha-256
+// currently uses sha-1
 async function generateHash(versionedUri, contentPredicate, sessionId, now){ 
   
   now=now.toISOString();
