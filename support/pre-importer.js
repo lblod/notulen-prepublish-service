@@ -56,13 +56,13 @@ async function generateHash(versionedUri, contentPredicate, sessionId, now){
       // the created date of the resource
       now;
     
-    const hashClass = createHash('sha256');
+    const hashClass = createHash('sha1');
     hashClass.update(stringToHash);
     const hashString=hashClass.digest('hex');
     
     return hashString;
   }
-  catch{
+  catch(error){
     throw new Error("unable to sign resource because couldn't find relavant data in the database");
   }
 }
@@ -85,6 +85,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
     ${prefixMap.get("publicationStatus").toSparqlString()}
     ${prefixMap.get("muSession").toSparqlString()}
     ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
 
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
@@ -92,6 +93,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
     } INSERT {
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
+        foaf:sha1 ${sparqlEscapeString(hash)};
         mu:uuid ${sparqlEscapeString(newResourceUuid)};
         sign:text ?content;
         sign:signatory ?userUri;
@@ -112,7 +114,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         ext:sessionRole ?signatoryRole.
       BIND ("helloworldsecretbehere" AS ?signatorySecret)
     }`;
-
+    
   const updatePromise = await update( query );
   return updatePromise;
 };
