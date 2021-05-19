@@ -25,7 +25,7 @@ function hackedSparqlEscapeString( string ) {
 // currently uses sha-1
 async function generateHash(versionedUri, contentPredicate, sessionId, now){ 
   
-  now=now.toISOString();
+  now = now.toISOString();
   
   const queryString=`
     ${prefixMap.get("muSession").toSparqlString()}
@@ -48,7 +48,7 @@ async function generateHash(versionedUri, contentPredicate, sessionId, now){
   try{
     const result = await query(queryString);
 
-    const stringToHash=
+    const stringToHash =
       // the full text content
       result.results.bindings[0].content.value+
       // the uri of the person publishing/signing
@@ -58,7 +58,7 @@ async function generateHash(versionedUri, contentPredicate, sessionId, now){
     
     const hashClass = createHash('sha1');
     hashClass.update(stringToHash);
-    const hashString=hashClass.digest('hex');
+    const hashString = hashClass.digest('hex');
     
     return hashString;
   }
@@ -68,13 +68,13 @@ async function generateHash(versionedUri, contentPredicate, sessionId, now){
 }
 
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {
-  const now=new Date();
+  const now = new Date();
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
   const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
   const statePredicate = customStatePredicate || "ext:stateString";
   const contentPredicate = customContentPredicate || "ext:content";
-  const hash=await generateHash(versionedUri, contentPredicate, sessionId, now);
+  const hash = await generateHash(versionedUri, contentPredicate, sessionId, now);
   // TODO: get correct signatorySecret from ACMIDM
   const query = `
     ${prefixMap.get("bv").toSparqlString()}
