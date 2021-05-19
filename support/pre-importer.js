@@ -23,7 +23,7 @@ function hackedSparqlEscapeString( string ) {
 // the created date of the resource
 
 // currently uses sha-1
-async function generateHash(versionedUri, contentPredicate, sessionId, now) { 
+async function generateHash( versionedUri, contentPredicate, sessionId, now ) { 
   
   now = now.toISOString();
   
@@ -62,7 +62,7 @@ async function generateHash(versionedUri, contentPredicate, sessionId, now) {
     
     return hashString;
   }
-  catch(error) {
+  catch( error ) {
     throw new Error("unable to sign resource because couldn't find relavant data in the database");
   }
 }
