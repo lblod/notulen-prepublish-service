@@ -11,7 +11,6 @@ import { createHash } from 'crypto';
 
 // currently uses sha-256
 async function generateStringToHash(versionedUri, contentPredicate, sessionId, now) {
-  
   now = now.toISOString();
   const queryString = `
     ${prefixMap.get("muSession").toSparqlString()}
@@ -50,18 +49,14 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
 }
 
 function generateHash(algorithm, stringToHash) {
-  
   const hashClass = createHash(algorithm);
   hashClass.update(stringToHash);
   const hashString = hashClass.digest('hex');
-
-  
 
   return hashString;
 }
 
 async function signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, algorithm) {
-  
   const stringToHash = await generateStringToHash(versionedUri, contentPredicate, sessionId, now);
   const hash = generateHash(algorithm, stringToHash);
   const query = `
