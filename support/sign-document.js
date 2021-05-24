@@ -73,7 +73,7 @@ async function signDocument(newResourceUri, versionedUri, contentPredicate, sess
     INSERT DATA{
       ${sparqlEscapeUri(newResourceUri)}
         sign:hashAlgorithm ${sparqlEscapeString(algorithm)};
-        sign:hashCode ${sparqlEscapeString(hash)}.
+        sign:hashValue ${sparqlEscapeString(hash)}.
     }
   `;
   
