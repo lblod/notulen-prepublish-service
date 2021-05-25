@@ -1,6 +1,7 @@
 // @ts-ignore
 import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {prefixMap} from "./prefixes";
+import {signDocument} from './sign-document'
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -15,7 +16,8 @@ function hackedSparqlEscapeString( string ) {
   return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return ''; }).replace(/\r/g, function(match) { return '';}))}""`;
 };
 
-async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {
+async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {  
+  const now = new Date();
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
   const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
@@ -31,6 +33,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
     ${prefixMap.get("publicationStatus").toSparqlString()}
     ${prefixMap.get("muSession").toSparqlString()}
     ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
 
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
@@ -42,7 +45,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         sign:text ?content;
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
-        dct:created ${sparqlEscapeDateTime(new Date())};
+        dct:created ${sparqlEscapeDateTime(now)};
         sign:signatorySecret ?signatorySecret;
         sign:status publicationStatus:unpublished;
         ${customSignaturePredicate ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};` : ''}
@@ -58,8 +61,9 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         ext:sessionRole ?signatoryRole.
       BIND ("helloworldsecretbehere" AS ?signatorySecret)
     }`;
-
+  
   const updatePromise = await update( query );
+  await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
   return updatePromise;
 };
 
