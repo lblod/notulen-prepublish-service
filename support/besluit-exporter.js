@@ -1,15 +1,12 @@
 // @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
 import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
-import { analyse } from '@lblod/marawa/dist/rdfa-context-scanner';
+import { analyse } from '@lblod/marawa/rdfa-context-scanner';
 import { editorDocumentFromUuid } from './editor-document';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
 import {prefixes} from "./prefixes";
-
-
-
 
 async function buildBesluitenLijstForZitting(zitting) {
   const agendapunten = zitting.agendapunten;
@@ -30,12 +27,12 @@ function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmi
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
   const triples = cleanupTriples(Array.concat(...contexts));
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-  
+
   for (const besluit of besluiten) {
     const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
     const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
     const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
-    const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);      
+    const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
     besluitenBuffer.push({
       title: title,
       description: description,
