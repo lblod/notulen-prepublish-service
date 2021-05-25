@@ -1,4 +1,5 @@
 import express from 'express';
+import {getZittingForAgenda} from "../support/agenda-queries";
 import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
