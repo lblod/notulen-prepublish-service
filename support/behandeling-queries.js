@@ -269,7 +269,7 @@ async function processStemming(stemming) {
 
   return {
     uri: stemmingUri,
-    geheim: stemming.geheim.value,
+    geheim: stemming.geheim.value === 'true',
     geheimText: stemming.geheim.value === 'true' ? "De raad stemt openbaar," : "De raad stemt geheim,",
     positiveVotes: stemming.positiveVotes.value,
     negativeVotes: stemming.negativeVotes.value,
