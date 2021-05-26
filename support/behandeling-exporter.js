@@ -78,10 +78,12 @@ function generateBehandelingHTML(agendapunt) {
   const agendapuntTitle = agendapunt.title;
   const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
   const document = agendapunt.behandeling.document.content;
+  const secretary = agendapunt.behandeling.secretary;
+  const chairman = agendapunt.behandeling.chairman;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, notPresentMandatees, stemmings});
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, secretary, chairman, presentMandatees, notPresentMandatees, stemmings});
 }
 
 function generatePrivateBehandelingHTML(agendapunt) {

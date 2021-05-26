@@ -14,6 +14,36 @@
   <h4 class="h6">Aanwezigen bij agendapunt</h4>
   <br />
   <div property="ext:aanwezigenTable">
+    {{#if chairman}}
+      <p>
+        <strong>Voorzitter</strong>
+        <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{chairman.uri}} property="besluit:heeftVoorzitter">
+            <span resource={{chairman.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{chairman.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{chairman.familyName}}
+              </span>
+            </span>
+          </span>
+      </p>
+    {{/if}}
+    {{#if secretary}}
+      <p>
+        <strong>Secretaris</strong>
+        <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{secretary.uri}} property="besluit:heeftSecretaris">
+            <span resource={{secretary.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{secretary.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{secretary.familyName}}
+              </span>
+            </span>
+          </span>
+      </p>
+    {{/if}}
     <p>
       <strong>Aanwezige leden:</strong>
     </p>

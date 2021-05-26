@@ -1,6 +1,7 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
+import { fetchChairmanAndSecretary } from './query-utils';
 import {DateTime} from 'luxon';
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
@@ -203,8 +204,8 @@ async function fetchParticipationList(zittingUri, bestuursorgaan) {
     } ORDER BY ASC(?familyName) ASC(?name)
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);
-  console.log(notPresent);
-  return {present, notPresent};
+  const {chairman, secretary} = await fetchChairmanAndSecretary(zittingUri);
+  return {present, notPresent, chairman, secretary};
 }
 
 async function fetchStemmings(bvaUri) {
