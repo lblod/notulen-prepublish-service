@@ -1,7 +1,7 @@
 // @ts-ignore
 import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {prefixMap} from "./prefixes";
-import {signDocument} from './sign-document'
+import {signDocument} from './sign-document';
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -14,7 +14,7 @@ function cleanupTriples(triples) {
 
 function hackedSparqlEscapeString( string ) {
   return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return ''; }).replace(/\r/g, function(match) { return '';}))}""`;
-};
+}
 
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {  
   const now = new Date();
@@ -65,7 +65,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
   const updatePromise = await update( query );
   await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
   return updatePromise;
-};
+}
 
 export {
   hackedSparqlEscapeString,

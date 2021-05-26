@@ -152,23 +152,23 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
  * Returns an array of behandeling extractions
  */
 async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedInZittingInfo ) {
-    const agendapunten = zitting.agendapunten;
-    const extracts = [];
-    for (const agendapunt of agendapunten) {
-      const {html, errors} = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
-      console.log(`creating temporary behandeling extract for ${zitting.uri}`);
-      extracts.push({
-        data: {
-          attributes: {
-            content: html,
-            errors,
-            behandeling: agendapunt.behandeling.uri,
-            uuid: agendapunt.behandeling.uuid
-          }
+  const agendapunten = zitting.agendapunten;
+  const extracts = [];
+  for (const agendapunt of agendapunten) {
+    const {html, errors} = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
+    console.log(`creating temporary behandeling extract for ${zitting.uri}`);
+    extracts.push({
+      data: {
+        attributes: {
+          content: html,
+          errors,
+          behandeling: agendapunt.behandeling.uri,
+          uuid: agendapunt.behandeling.uuid
         }
-      });
-    }
-    return extracts;
+      }
+    });
+  }
+  return extracts;
 }
 
 /**
@@ -225,4 +225,4 @@ async function updateDraftDecisionStatus(versionedBehandelingUri) {
   `);
 }
 
-export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling, createBehandelingExtract }
+export { extractBehandelingVanAgendapuntenFromZitting, ensureVersionedBehandelingForZitting, isPublished, signVersionedBehandeling, publishVersionedBehandeling, createBehandelingExtract };

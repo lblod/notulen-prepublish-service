@@ -333,7 +333,7 @@ async function processStemming(stemming) {
     positiveVoters,
     negativeVoters,
     abstentionVoters
-  }
+  };
 }
 
 function processMandatee(mandatee) {
@@ -344,7 +344,7 @@ function processMandatee(mandatee) {
     familyName: mandatee.familyName.value,
     roleUri: mandatee.roleUri.value,
     role: mandatee.role.value
-  }
+  };
 }
 
 async function fetchIntermissions(zittingUri) {
@@ -376,7 +376,7 @@ function processIntermissions(intermission) {
       text: DateTime.fromISO(intermission.endedAt.value).toFormat(dateFormat)
     },
     comment: intermission.comment ? intermission.comment.value : undefined,
-  }
+  };
 }
 
 export {getZittingForNotulen};
