@@ -32,21 +32,21 @@ router.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(r
     // check and possibly support the second signature.
     const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
     const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
-        zitting,
-        req.params.kind
+      zitting,
+      req.params.kind
     );
     await publishVersionedAgenda(
-        prepublishedAgendaUri,
-        req.header("MU-SESSION-ID"),
-        "gepubliceerd"
+      prepublishedAgendaUri,
+      req.header("MU-SESSION-ID"),
+      "gepubliceerd"
     );
     return res.send({success: true}).end();
   } catch (err) {
     console.log(err);
     const error = new Error(
-        `An error occurred while publishing the agenda ${
-            req.params.zittingIdentifier
-        }: ${err}`
+      `An error occurred while publishing the agenda ${
+        req.params.zittingIdentifier
+      }: ${err}`
     );
     return next(error);
   }

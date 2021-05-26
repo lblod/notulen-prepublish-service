@@ -35,8 +35,8 @@ async function getZittingForAgenda(uuid) {
             besluit:isGehoudenDoor ?bestuursorgaan;
             besluit:geplandeStart ?geplandeStart;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
-              uuid
-            )}.
+    uuid
+  )}.
      }`
   );
   if (queryResult.results.bindings.length === 0) {

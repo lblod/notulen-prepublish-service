@@ -7,7 +7,6 @@ import {buildAgendaContentFromZitting} from '../support/agenda-exporter';
 import {buildBesluitenLijstForZitting} from '../support/besluit-exporter';
 import {extractBehandelingVanAgendapuntenFromZitting} from '../support/behandeling-exporter';
 import {extractNotulenContentFromZitting} from '../support/notule-exporter';
-import {editorDocumentFromUuid} from '../support/editor-document';
 
 const router = express.Router();
 

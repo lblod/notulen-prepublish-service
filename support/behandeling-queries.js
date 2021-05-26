@@ -29,8 +29,8 @@ async function getZittingForBehandeling(uuid) {
             besluit:geplandeStart ?geplandeStart;
 
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString(
-              uuid
-            )}.
+    uuid
+  )}.
       OPTIONAL {
         ?uri prov:startedAtTime ?start.
       }

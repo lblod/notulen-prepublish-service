@@ -16,9 +16,9 @@ async function buildBesluitenLijstForZitting(zitting) {
   const besluiten = [];
   for(let agendapunt of agendapunten) {
     const behandeling = agendapunt.behandeling;
-    if(!behandeling.documentUuid) continue
+    if(!behandeling.documentUuid) continue;
     const doc = await editorDocumentFromUuid( behandeling.documentUuid );
-    if(!doc) continue
+    if(!doc) continue;
     const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, behandeling.stemmingen);
     besluiten.push(besluit);
   }
@@ -57,11 +57,11 @@ async function wrapZittingInfo(besluitenlijst, zitting) {
     .toString();
   const template = Handlebars.compile(templateStr);
   const html = template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
-  const errors = []
+  const errors = [];
   if(!zitting.geplandeStart) {
-    errors.push('You must set the planned start of the meeting')
+    errors.push('You must set the planned start of the meeting');
   }
-  return {html, errors}
+  return {html, errors};
 }
 
 async function ensureVersionedBesluitenLijstForZitting( zitting ) {
@@ -111,7 +111,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
 
     return besluitenLijstUri;
   }
-};
+}
 
 async function signVersionedBesluitenlijst( versionedBesluitenLijstUri, sessionId, targetStatus ) {
   await handleVersionedResource( "signature", versionedBesluitenLijstUri, sessionId, targetStatus, 'ext:signsBesluitenlijst');

@@ -135,7 +135,7 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
 
     return notulenUri;
   }
-};
+}
 
 /**
  * Sets the public-content of a versioned notulen containing only the public behandeling of the Zitting
@@ -171,7 +171,7 @@ async function addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBeh
       ${publicBehandelingUrisStatement}
     }
   `);
-};
+}
 
 
 export { ensureVersionedNotulenForZitting, extractNotulenContentFromZitting, signVersionedNotulen, publishVersionedNotulen };
