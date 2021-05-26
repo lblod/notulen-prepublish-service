@@ -13,7 +13,7 @@ function cleanupTriples(triples) {
 }
 
 function hackedSparqlEscapeString( string ) {
-  return `""${sparqlEscapeString(string.replace(/\n/g, function(match) { return ''; }).replace(/\r/g, function(match) { return '';}))}""`;
+  return `""${sparqlEscapeString(string.replace(/\n/g, function() { return ''; }).replace(/\r/g, function() { return '';}))}""`;
 }
 
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {  

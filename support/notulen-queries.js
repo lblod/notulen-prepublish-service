@@ -134,7 +134,7 @@ async function getZittingForNotulen(uuid) {
 
   const agendapuntenSorted = agendapunten.filter((a) => a != null).sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
 
-  const participationList = await fetchParticipationList(uri.value, bestuursorgaanUri.value);
+  const participationList = await fetchParticipationList(uri.value);
 
   const intermissions = await fetchIntermissions(uri.value);
   
@@ -165,7 +165,7 @@ async function getZittingForNotulen(uuid) {
   };
 }
 
-async function fetchParticipationList(zittingUri, bestuursorgaan) {
+async function fetchParticipationList(zittingUri) {
   const presentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
     ${prefixMap.get("mandaat").toSparqlString()}

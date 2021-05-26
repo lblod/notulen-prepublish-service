@@ -7,7 +7,6 @@ import {ensureVersionedAgendaForZitting, signVersionedAgenda} from '../support/a
 import {ensureVersionedBesluitenLijstForZitting, signVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedBehandelingForZitting, signVersionedBehandeling} from '../support/behandeling-exporter';
 import {ensureVersionedNotulenForZitting, signVersionedNotulen} from '../support/notule-exporter';
-import {editorDocumentFromUuid} from '../support/editor-document';
 
 const router = express.Router();
 
