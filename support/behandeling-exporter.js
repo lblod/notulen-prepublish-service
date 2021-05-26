@@ -75,8 +75,8 @@ function generateBehandelingHTML(agendapunt) {
   const template = Handlebars.compile(templateStr);
   const behandelingUri = agendapunt.behandeling.uri;
   const agendapuntUri = agendapunt.uri;
-  const agendapuntTitle = agendapunt.title;
-  const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
+  const agendapuntTitle = agendapunt.titel;
+  const openbaar = agendapunt.behandeling.openbaar === 'true';
   const document = agendapunt.behandeling.document.content;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
