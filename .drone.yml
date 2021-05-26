@@ -3,6 +3,15 @@ kind: pipeline
 type: docker
 name: verify
 steps:
+- name: install
+  image: node:14
+  commands:
+    - npm install
+- name: lint
+  image: node:14
+  commands:
+    - npm run lint
+  run: 
 - name: build-dry-run
   image: plugins/docker
   settings:
