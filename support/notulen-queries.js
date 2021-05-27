@@ -205,7 +205,14 @@ async function fetchParticipationList(zittingUri) {
   `);
   const notPresent = notPresentQuery.results.bindings.map(processMandatee);
   const {chairman, secretary} = await fetchChairmanAndSecretary(zittingUri);
-  return {present, notPresent, chairman, secretary};
+
+  //If there's no information in the participation list we return undefined to make it easier to hide in the template
+  if(present.length || notPresent.length || chairman || secretary) {
+    return {present, notPresent, chairman, secretary};
+  } else {
+    return undefined
+  }
+  
 }
 
 async function fetchStemmings(bvaUri) {
