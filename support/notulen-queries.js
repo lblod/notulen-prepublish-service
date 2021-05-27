@@ -210,7 +210,7 @@ async function fetchParticipationList(zittingUri) {
   if(present.length || notPresent.length || chairman || secretary) {
     return {present, notPresent, chairman, secretary};
   } else {
-    return undefined
+    return undefined;
   }
   
 }

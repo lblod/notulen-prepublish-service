@@ -91,7 +91,7 @@ function generateBehandelingHTML(agendapunt) {
       chairman,
       presentMandatees,
       notPresentMandatees
-    }
+    };
   }
   return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, participationList, stemmings});
 }
