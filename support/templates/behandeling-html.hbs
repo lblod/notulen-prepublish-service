@@ -117,26 +117,27 @@
         {{/each}}
       </p>
       <br />
+      
+      <p>
+        Totaal aantal voorstanders:
+        <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">
+          {{this.positiveVotes}}
+        </span>
+      </p>
+      <p>
+        Totaal aantal tegenstanders:
+        <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">
+          {{this.negativeVotes}}
+        </span>
+      </p>
+      <p>
+        Totaal aantal onthoudingen, blanco of ongeldig:
+        <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">
+          {{this.abstentionVotes}}
+        </span>
+      </p>
+      <br />
       {{#unless this.geheim}}
-        <p>
-          Totaal aantal voorstanders:
-          <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">
-            {{this.positiveVotes}}
-          </span>
-        </p>
-        <p>
-          Totaal aantal tegenstanders:
-          <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">
-            {{this.negativeVotes}}
-          </span>
-        </p>
-        <p>
-          Totaal aantal onthoudingen, blanco of ongeldig:
-          <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">
-            {{this.abstentionVotes}}
-          </span>
-        </p>
-        <br />
         <p>
           <strong>Voorstanders</strong>
         </p>
