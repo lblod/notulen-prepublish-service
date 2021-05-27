@@ -83,7 +83,17 @@ function generateBehandelingHTML(agendapunt) {
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, secretary, chairman, presentMandatees, notPresentMandatees, stemmings});
+  let participationList;
+  //Only fill participationList when there's content to make it easier to hide in template
+  if(secretary || chairman || (presentMandatees && presentMandatees.length) || (notPresentMandatees && notPresentMandatees.length)) {
+    participationList = {
+      secretary,
+      chairman,
+      presentMandatees,
+      notPresentMandatees
+    }
+  }
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, participationList, stemmings});
 }
 
 function generatePrivateBehandelingHTML(agendapunt) {
