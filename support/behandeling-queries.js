@@ -187,9 +187,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftAanwezige ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -205,9 +205,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftStemmer ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -224,14 +224,14 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftVoorstander ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const positiveVoters = positiveVotersQuery.results.bindings.map(processMandatee);
+  const positiveVoters = positiveVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
   const negativeVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -243,9 +243,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftTegenstander ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -262,9 +262,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftOnthouder ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }

@@ -177,9 +177,9 @@ async function fetchParticipationList(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} besluit:heeftAanwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?roleUri.
-        ?roleUri org:role ?bestuursfunctieCodeUri.
-        ?bestuursfunctieCodeUri skos:prefLabel ?role.
+        ?mandatarisUri org:holds ?positionUri.
+        ?positionUri org:role ?roleUri.
+        ?roleUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
     } ORDER BY ASC(?familyName) ASC(?name)
@@ -196,9 +196,9 @@ async function fetchParticipationList(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} ext:heeftAfwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?roleUri.
-        ?roleUri org:role ?bestuursfunctieCodeUri.
-        ?bestuursfunctieCodeUri skos:prefLabel ?role.
+        ?mandatarisUri org:holds ?positionUri.
+        ?positionUri org:role ?roleUri.
+        ?roleUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
     } ORDER BY ASC(?familyName) ASC(?name)
@@ -243,9 +243,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftAanwezige ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -261,14 +261,14 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftStemmer ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const voters = votersQuery.results.bindings.map(processMandatee);
+  const voters = votersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
   const positiveVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -280,9 +280,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftVoorstander ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -299,9 +299,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftTegenstander ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
@@ -318,9 +318,9 @@ async function processStemming(stemming) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(stemmingUri)} besluit:heeftOnthouder ?mandatarisUri.
       ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
     }
