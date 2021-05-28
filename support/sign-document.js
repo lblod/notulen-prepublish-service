@@ -40,7 +40,7 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
       result.results.bindings[0].userUri.value +
       // the created date of the resource
       now;
-    
+
     return stringToHash;
   }
   catch (error) {
@@ -76,9 +76,9 @@ async function signDocument(newResourceUri, versionedUri, contentPredicate, sess
         sign:hashValue ${sparqlEscapeString(hash)}.
     }
   `;
-  
+
   try {
-    const result=await update(query);
+    await update(query);
   }
   catch (error) {
     throw new Error("unable to sign resource because couldn't insert data into the database");

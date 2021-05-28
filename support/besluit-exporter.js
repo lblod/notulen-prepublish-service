@@ -108,7 +108,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
 
     return besluitenLijstUri;
   }
-};
+}
 
 async function signVersionedBesluitenlijst( versionedBesluitenLijstUri, sessionId, targetStatus ) {
   await handleVersionedResource( "signature", versionedBesluitenLijstUri, sessionId, targetStatus, 'ext:signsBesluitenlijst');
