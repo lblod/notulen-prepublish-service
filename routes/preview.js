@@ -7,7 +7,7 @@ import {buildAgendaContentFromZitting} from '../support/agenda-exporter';
 import {buildBesluitenLijstForZitting} from '../support/besluit-exporter';
 import {extractBehandelingVanAgendapuntenFromZitting} from '../support/behandeling-exporter';
 import {extractNotulenContentFromZitting} from '../support/notule-exporter';
-
+import {constructHtmlForAgenda } from '../support/agenda-utils';
 const router = express.Router();
 
 /***
@@ -20,13 +20,12 @@ const router = express.Router();
 * Prepublish an agenda as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get("/prepublish/agenda/:zittingIdentifier", async function (req, res, next) {
+router.get("/prepublish/agenda/:meetingUuid", async function (req, res, next) {
   try {
-    const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
-    const result = await buildAgendaContentFromZitting(zitting);
+    const html = await constructHtmlForAgenda(req.params.meetingUuid);
     return res
       .send({
-        data: {attributes: {content: result}, type: "imported-agenda-contents"},
+        data: {attributes: {content: html}, type: "imported-agenda-contents"},
       })
       .end();
   } catch (err) {

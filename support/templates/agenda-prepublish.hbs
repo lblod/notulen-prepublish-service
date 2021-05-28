@@ -1,32 +1,27 @@
 <div class="agendapunten" prefix="{{prefixes}}">
-    <div about="{{zitting.uri}}" typeof="besluit:Zitting">
-        <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
-              resource="{{zitting.bestuursorgaan}}"> </span>
-        <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
-              content="{{zitting.geplandeStart}}"
-              datatype="http://www.w3.org/2001/XMLSchema#dateTime"> </span>
-        {{#each zitting.agendapunten as |agendapunt|}}
-            <span property="besluit:behandelt"
-                  resource="{{agendapunt.uri}}"
-                  typeof="besluit:Agendapunt">
-            <span property="dc:subject">Agendapunt -</span>&nbsp;
-            <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapunt.geplandOpenbaar}}">
-                {{#if agendapunt.geplandOpenbaar}}
-                    <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
-                {{else}}
-                    <i class="fa fa-eye-slash"></i> <span>Gepland besloten</span>
-                {{/if}}
-            </span>
-            {{#if agendapunt.aangebrachtNa}}
-              <span property="besluit:aangebrachtNa" resource="{{agendapunt.aangebrachtNa}}"></span>
-            {{/if}}
-            <p property="dc:title">{{agendapunt.titel}}</p>
-            {{#if agendapunt.beschrijving}}
-              <p property="dc:description">
-                {{agendapunt.beschrijving}}
-              </p>
-            {{/if}}
+  <div about="{{meeting.uri}}" typeof="besluit:Zitting">
+    <h1 class="h3"> Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{meeting.adminBodyUri}}">{{meeting.adminBodyName}}</span>, zitting
+      gepland op<span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{meeting.plannedStartText}}</span></h1>
+    {{#each agendapoints as |agendapoint|}}
+      <span property="besluit:behandelt" resource="{{agendapoint.uri}}" typeof="besluit:Agendapunt">
+        Agendapunt -            <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapoint.plannedPublic}}">
+        {{#if agendapoint.plannedPublic}}
+          <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
+        {{else}}
+          <i class="fa fa-eye-slash"></i> <span>Gepland besloten</span>
+        {{/if}}
         </span>
-        {{/each}}
-    </div>
+        {{#if agendapoint.addedAfter}}
+          <span property="besluit:aangebrachtNa" resource="{{agendapunt.addedAfter}}"></span>
+        {{/if}}
+        <p property="dc:title">{{agendapoint.title}}</p>
+        {{#if agendapoint.type}}
+          <p property="besluit:Agendapunt.type" resource="{{agendapoint.type}}" typeof="skos:Concept">{{agendapoint.typeName}}</p>
+        {{/if}}
+        {{#if agendapoint.description}}
+          <p property="dc:description">{{agendapunt.beschrijving}}</p>
+        {{/if}}
+      </span>
+    {{/each}}
+  </div>
 </div>
