@@ -105,6 +105,21 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const agendapuntUri = agendapunt.uri;
   const agendapuntTitle = agendapunt.title;
   const openbaar = agendapunt.behandeling.openbaar === 'true';
+  const secretary = agendapunt.behandeling.secretary;
+  const chairman = agendapunt.behandeling.chairman;
+  const presentMandatees = agendapunt.behandeling.presentMandatees;
+  const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
+  const stemmings = agendapunt.behandeling.stemmings;
+  let participationList;
+  //Only fill participationList when there's content to make it easier to hide in template
+  if(secretary || chairman || (presentMandatees && presentMandatees.length) || (notPresentMandatees && notPresentMandatees.length)) {
+    participationList = {
+      secretary,
+      chairman,
+      presentMandatees,
+      notPresentMandatees
+    };
+  }
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
   const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
@@ -113,9 +128,9 @@ function generatePrivateBehandelingHTML(agendapunt) {
     const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
     const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
     documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer.outerHTML});
+    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, participationList, stemmings, isBesluit, document: documentContainer.outerHTML});
   } else {
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});
+    return template({behandelingUri, agendapuntUri, agendapuntTitle, participationList, stemmings, openbaar, isBesluit});
   }
 }
 
