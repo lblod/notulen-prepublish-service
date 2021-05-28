@@ -2,7 +2,7 @@
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 import { fetchChairmanAndSecretary } from './query-utils';
-
+import Mandatee from '../models/mandatee';
 
 /**
  * Retrieves the zitting belonging to the supplied zitting uuid
@@ -194,7 +194,7 @@ async function processStemming(stemming) {
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const attendees = attendeesQuery.results.bindings.map(processMandatee);
+  const attendees = attendeesQuery.results.bindings.map((binding) => new Mandatee(binding));
   const votersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
   ${prefixMap.get("mandaat").toSparqlString()}
@@ -212,7 +212,7 @@ async function processStemming(stemming) {
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const voters = votersQuery.results.bindings.map(processMandatee);
+  const voters = votersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
   const positiveVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -250,7 +250,7 @@ async function processStemming(stemming) {
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const negativeVoters = negativeVotersQuery.results.bindings.map(processMandatee);
+  const negativeVoters = negativeVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
   const abstentionVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -269,7 +269,7 @@ async function processStemming(stemming) {
       ?personUri persoon:gebruikteVoornaam ?name.
     }
   `);
-  const abstentionVoters = abstentionVotersQuery.results.bindings.map(processMandatee);
+  const abstentionVoters = abstentionVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
   return {
     uri: stemmingUri,
@@ -287,16 +287,4 @@ async function processStemming(stemming) {
     abstentionVoters
   };
 }
-
-function processMandatee(mandatee) {
-  return {
-    uri: mandatee.mandatarisUri.value,
-    personUri: mandatee.personUri.value,
-    name: mandatee.name.value,
-    familyName: mandatee.familyName.value,
-    roleUri: mandatee.roleUri.value,
-    role: mandatee.role.value
-  };
-}
-
 export {getZittingForBehandeling};
