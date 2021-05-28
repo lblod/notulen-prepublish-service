@@ -8,17 +8,16 @@
       <span>Besloten behandeling van agendapunt</span>
     {{/if}}
   </span>
-  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> 
+  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject">
     <span property="dc:title">{{agendapuntTitle}}</span>
   </h3>
   <h4 class="h6">Aanwezigen bij agendapunt</h4>
   <br />
   <div property="ext:aanwezigenTable">
-    <p>
-      <strong>Aanwezige leden:</strong>
-    </p>
+    <p><strong>Aanwezige leden:</strong></p>
+    <ul>
     {{#each presentMandatees}}
-      <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
+      <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
         <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
           <span property="persoon:gebruikteVoornaam">
             {{this.name}}
@@ -27,23 +26,20 @@
             {{this.familyName}}
           </span>
         </span>
-      </span>
+      </li>
     {{/each}}
-    <p>
-        <strong>Afwezige leden</strong>
+    </ul>
+    <p><strong>Afwezige leden</strong></p>
+    <ul>
         {{#each notPresentMandatees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>
             </span>
-          </span>
+          </li>
         {{/each}}
-      </p>
+      </ul>
   </div>
   <br />
   <h4 class="h6">Stemmingen bij agendapunt</h4>
@@ -51,7 +47,7 @@
   <div property="ext:stemmingTable">
     {{#each stemmings}}
     <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
-      <p datatype="xsd:boolean" content={{this.geheim}} property="besluit:geheim">
+      <p datatype="xsd:boolean" content="{{this.geheim}}" property="besluit:geheim">
         {{this.geheimText}}
       </p>
       <br />
@@ -62,60 +58,47 @@
       <p>
         <strong>Aanwezigen tijdens stemming</strong>
       </p>
-      <p>
+      <ul>
         {{#each this.attendees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
             <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>
               (
                 <span property="org:holds">
                   <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
+                    <span property="skos:prefLabel">{{this.role}}</span>
                   </span>
                 </span>
               )
             </span>
-          </span>
+          </li>
         {{else}}
           Geen
         {{/each}}
-      </p>
+      </ul>
       <br />
       <p>
         <strong>Effectieve stemmers</strong>
       </p>
-      <p>
+      <ul>
         {{#each this.voters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftStemmer">
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftStemmer">
             <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>              (
                 <span property="org:holds">
                   <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
+                    <span property="skos:prefLabel">{{this.role}}</span>
                   </span>
                 </span>
               )
             </span>
-          </span>
+          </li>
         {{else}}
           Geen
         {{/each}}
-      </p>
+      </ul>
       <br />
       <p>
         Totaal aantal voorstanders:
@@ -139,22 +122,16 @@
       <p>
         <strong>Voorstanders</strong>
       </p>
-      <p>
+      <ul>
         {{#each this.positiveVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftVoorstander">
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftVoorstander">
             <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>
               (
                 <span property="org:holds">
                   <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
+                    <span property="skos:prefLabel">{{this.role}}</span>
                   </span>
                 </span>
               )
@@ -163,21 +140,17 @@
         {{else}}
           Geen
         {{/each}}
-      </p>
+      </ul>
       <br />
       <p>
         <strong>Tegenstanders</strong>
       </p>
-      <p>
+      <ul>
         {{#each this.negativeVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftTegenstanders">
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftTegenstanders">
             <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>
               (
                 <span property="org:holds">
                   <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
@@ -188,40 +161,33 @@
                 </span>
               )
             </span>
-          </span>
+          </li>
         {{else}}
           Geen
         {{/each}}
-      </p>
+      </ul>
       <br />
       <p>
         <strong>Onthoudingen, blanco of ongeldig</strong>
       </p>
-      <p>
+      <ul>
         {{#each this.abstentionVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftOnthouders">
+          <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftOnthouders">
             <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
+              <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+              <span property="foaf:familyName">{{this.familyName}}</span>              (
                 <span property="org:holds">
                   <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
+                    <span property="skos:prefLabel">{{this.role}}</span>
                   </span>
                 </span>
               )
             </span>
-          </span>
+          </li>
         {{else}}
           Geen
         {{/each}}
-      </p>
+      </ul>
       <br />
       <p>
         Met als gevolg,
@@ -229,7 +195,6 @@
       <p property="besluit:gevolg">{{this.result}}</p>
       </div>
       {{/each}}
-    
   </div>
   <br />
   {{{document}}}
