@@ -88,39 +88,39 @@ async function getZittingForBehandeling(uuid) {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
+    ${prefixMap.get("org").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
+    ${prefixMap.get("ext").toSparqlString()}
       SELECT DISTINCT * WHERE {
         ${sparqlEscapeUri(agendapunten.bva.value)} besluit:heeftAanwezige ?mandatarisUri.
-        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?personUri foaf:familyName ?familyName.
-        ?personUri persoon:gebruikteVoornaam ?name.
+      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
+      ?personUri foaf:familyName ?familyName.
+      ?personUri persoon:gebruikteVoornaam ?name.
       } ORDER BY ASC(?familyName) ASC(?name)
     `);
-    const presentMandatees = mandateesResults.results.bindings.map(mandatee => ({
-      uri: mandatee.mandatarisUri.value,
-      personUri: mandatee.personUri.value,
-      name: mandatee.name.value,
-      familyName: mandatee.familyName.value
-    }));
+    const presentMandatees = mandateesResults.results.bindings.map((bindings) => new Mandatee(bindings));
     const notPresentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
     ${prefixMap.get("org").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
     ${prefixMap.get("ext").toSparqlString()}
       SELECT DISTINCT * WHERE {
         ${sparqlEscapeUri(agendapunten.bva.value)} ext:heeftAfwezige ?mandatarisUri.
-        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?personUri foaf:familyName ?familyName.
-        ?personUri persoon:gebruikteVoornaam ?name.
+      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
+      ?mandatarisUri org:holds ?positionUri.
+      ?positionUri org:role ?roleUri.
+      ?roleUri skos:prefLabel ?role.
+      ?personUri foaf:familyName ?familyName.
+      ?personUri persoon:gebruikteVoornaam ?name.
       } ORDER BY ASC(?familyName) ASC(?name)
     `);
-    const notPresentMandatees = notPresentQuery.results.bindings.map(mandatee => ({
-      uri: mandatee.mandatarisUri.value,
-      personUri: mandatee.personUri.value,
-      name: mandatee.name.value,
-      familyName: mandatee.familyName.value
-    }));
+    const notPresentMandatees = notPresentQuery.results.bindings.map((bindings) => new Mandatee(bindings));
     const stemmings = await fetchStemmingen(agendapunten.bva.value);
     const {chairman, secretary} = await fetchChairmanAndSecretary(agendapunten.bva.value);
     return {
