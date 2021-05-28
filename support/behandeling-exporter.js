@@ -75,13 +75,25 @@ function generateBehandelingHTML(agendapunt) {
   const template = Handlebars.compile(templateStr);
   const behandelingUri = agendapunt.behandeling.uri;
   const agendapuntUri = agendapunt.uri;
-  const agendapuntTitle = agendapunt.title;
-  const openbaar = agendapunt.behandeling.openbaar === 'true' ? true : false;
+  const agendapuntTitle = agendapunt.titel;
+  const openbaar = agendapunt.behandeling.openbaar === 'true';
   const document = agendapunt.behandeling.document.content;
+  const secretary = agendapunt.behandeling.secretary;
+  const chairman = agendapunt.behandeling.chairman;
   const presentMandatees = agendapunt.behandeling.presentMandatees;
   const notPresentMandatees = agendapunt.behandeling.notPresentMandatees;
   const stemmings = agendapunt.behandeling.stemmings;
-  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, presentMandatees, notPresentMandatees, stemmings});
+  let participationList;
+  //Only fill participationList when there's content to make it easier to hide in template
+  if(secretary || chairman || (presentMandatees && presentMandatees.length) || (notPresentMandatees && notPresentMandatees.length)) {
+    participationList = {
+      secretary,
+      chairman,
+      presentMandatees,
+      notPresentMandatees
+    };
+  }
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, document, participationList, stemmings});
 }
 
 function generatePrivateBehandelingHTML(agendapunt) {

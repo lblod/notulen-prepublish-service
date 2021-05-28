@@ -1,0 +1,25 @@
+{{#if mandatees.length}}
+  <p>
+    <strong>{{title}}</strong>
+  </p>
+  <ul>
+    {{#each mandatees}}
+      <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{relationship}}">
+        <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+          <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
+          <span property="foaf:familyName">{{this.familyName}} </span>
+        </span>
+        {{#if ../includeRole}}
+        (
+          <span property="org:holds" typeof="mandaat:Mandaat" resource="{{this.positionUri}}">
+            <span property="org:role" typeof="skos:Concept" resource="{{this.roleUri}}">
+              <span property="skos:prefLabel">{{this.role}}</span>
+            </span>
+          </span>
+        </span>
+        )
+        {{/if}}
+      </li>
+    {{/each}}
+  </ul>
+{{/if}}
