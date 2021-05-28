@@ -1,11 +1,12 @@
 export default class Mandatee {
-  uri;
-  personUri;
-  name;
-  familyName;
-  positionUri;
-  roleUri;
-  role;
+  // eslint doenst like class fields yet?
+  // uri;
+  // personUri;
+  // name;
+  // familyName;
+  // positionUri;
+  // roleUri;
+  // role;
   constructor(bindings) {
     this.uri = bindings.mandatarisUri?.value;
     this.personUri = bindings.personUri?.value;
