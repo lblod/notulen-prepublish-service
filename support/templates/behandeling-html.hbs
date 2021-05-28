@@ -79,9 +79,11 @@
           </span>
         </p>
         <br />
-        {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
-        {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
-        {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
+        {{#unless this.geheim}}
+          {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
+        {{/unless}}
         <p>
           Met als gevolg,
         </p>
