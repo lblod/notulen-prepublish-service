@@ -1,6 +1,7 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
+import { fetchChairmanAndSecretary } from './query-utils';
 
 
 /**
@@ -121,6 +122,7 @@ async function getZittingForBehandeling(uuid) {
       familyName: mandatee.familyName.value
     }));
     const stemmings = await fetchStemmingen(agendapunten.bva.value);
+    const {chairman, secretary} = await fetchChairmanAndSecretary(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
@@ -130,6 +132,8 @@ async function getZittingForBehandeling(uuid) {
         uri: agendapunten.bva.value,
         uuid: agendapunten.bvaUuid.value,
         openbaar: agendapunten.openbaar.value,
+        chairman,
+        secretary,
         presentMandatees,
         notPresentMandatees,
         stemmings,
