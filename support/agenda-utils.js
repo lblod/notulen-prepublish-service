@@ -15,7 +15,7 @@ import {handleVersionedResource} from './pre-importer';
  * gather all data required to build an agenda
  */
 async function getDataForAgenda(meetingUuid, agendaKindUuid) {
-  const meeting = await Meeting.findUuid(meetingUuid);
+  const meeting = await Meeting.find(meetingUuid);
   const agendapoints = await AgendaPoint.findAll({meetingUuid: meetingUuid});
   if (agendaKindUuid) {
     const agendaType = await Concept.find(agendaKindUuid);

@@ -4,7 +4,7 @@ import {query, sparqlEscapeString} from "mu";
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
-  static async findUuid(uuid) {
+  static async find(uuid) {
     const queryString = `
     ${prefixMap.get("ext").toSparqlString()}
     ${prefixMap.get("besluit").toSparqlString()}
