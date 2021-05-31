@@ -8,6 +8,7 @@ export default class VersionedAgenda {
     const result = await query(`
       ${prefixMap.get("mu").toSparqlString()}
       ${prefixMap.get("bv").toSparqlString()}
+      ${prefixMap.get("ext").toSparqlString()}
       SELECT ?uri ?agendaType ?meeting ?html
       WHERE {
         BIND(${sparqlEscapeString(agendaType)} as ?agendaType)
@@ -19,7 +20,7 @@ export default class VersionedAgenda {
         ?meeting mu:uuid ${sparqlEscapeString(meetingUuid)}.
       } LIMIT 1
     `);
-    if (result.results.binding.length === 0) {
+    if (result.results.bindings.length === 0) {
       return null;
     }
     else {
@@ -39,11 +40,10 @@ export default class VersionedAgenda {
     const agendaUri = `http://data.lblod.info/id/agendas/${agendaUuid}`;
 
     await update(`
-      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-      PREFIX bv: <http://data.vlaanderen.be/ns/besluitvorming#>
-      PREFIX pav: <http://purl.org/pav/>
-      PREFIX prov: <http://www.w3.org/ns/prov#>
+      ${prefixMap.get("mu").toSparqlString()}
+      ${prefixMap.get("bv").toSparqlString()}
+      ${prefixMap.get("ext").toSparqlString()}
+      ${prefixMap.get("pav").toSparqlString()}
 
       INSERT DATA {
         ${sparqlEscapeUri(agendaUri)}

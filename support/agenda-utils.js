@@ -56,7 +56,7 @@ export async function ensureVersionedAgendaForMeeting(meetingUuid, agendaKindUui
   let versionedAgenda = await VersionedAgenda.query({meetingUuid, agendaType: agendaType.label});
   if (versionedAgenda) {
     console.log(`Reusing versioned agenda ${versionedAgenda.uri}`);
-    return versionedAgenda;
+    return versionedAgenda.uri;
   }
   else {
     const {meeting, agendapoints} = await getDataForAgenda(meetingUuid, agendaKindUuid);
