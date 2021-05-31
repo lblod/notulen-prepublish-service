@@ -53,17 +53,8 @@ export default class Meeting {
     this.intro = bindings.intro?.value;
     this.outro = bindings.outro?.value;
     this.location = bindings.location?.value;
-  }
-
-  get startedAtText() {
-    return this.startedAt ?? DateTime.fromISO(this.startedAt.value).toFormat(dateFormat);
-  }
-
-  get plannedStartText() {
-    return this.plannedStart ?? DateTime.fromISO(this.plannedStart.value).toFormat(dateFormat);
-  }
-
-  get endedAtText() {
-    return this.endedAt ?? DateTime.fromISO(this.endedAt.value).toFormat(dateFormat);
+    this.startedAtText = this.startedAt ?? DateTime.fromISO(this.startedAt.value).toFormat(dateFormat);
+    this.endedAtText = this.endedAt ?? DateTime.fromISO(this.endedAt.value).toFormat(dateFormat);
+    this.plannedStartText = this.plannedStart ?? DateTime.fromISO(this.plannedStart.value).toFormat(dateFormat);
   }
 }
