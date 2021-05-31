@@ -8,229 +8,90 @@
       <span>Besloten behandeling van agendapunt</span>
     {{/if}}
   </span>
-  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> 
+  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject">
     <span property="dc:title">{{agendapuntTitle}}</span>
   </h3>
-  <h4 class="h6">Aanwezigen bij agendapunt</h4>
+  {{#if participationList}}
+    <h4 class="h6">Aanwezigen bij agendapunt</h4>
+    <br />
+    <div property="ext:aanwezigenTable">
+      {{> mandateeList mandatees=participationList.presentMandatees property="besluit:heeftAanwezige" title="Aanwezige leden" includeRole=true}}
+      {{> mandateeList mandatees=participationList.notPresentMandatees property="ext:heeftAfwezige" title="Afwezige leden" includeRole=true}}
+      {{#if participationList.chairman}}
+        <p>
+          <strong>Voorzitter</strong>
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{participationList.chairman.uri}}" property="besluit:heeftVoorzitter">
+              <span resource="{{participationList.chairman.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">{{participationList.chairman.name}}</span>
+                <span property="foaf:familyName">{{participationList.chairman.familyName}}</span>
+              </span>
+            </span>
+        </p>
+      {{/if}}
+      {{#if participationList.secretary}}
+        <p>
+          <strong>Secretaris</strong>
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{participationList.secretary.uri}}" property="besluit:heeftSecretaris">
+              <span resource="{{participationList.secretary.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">{{participationList.secretary.name}}</span>
+                <span property="foaf:familyName">{{participationList.secretary.familyName}}</span>
+              </span>
+            </span>
+        </p>
+      {{/if}}
+    </div>
+  {{/if}}
   <br />
-  <div property="ext:aanwezigenTable">
-    <p>
-      <strong>Aanwezige leden:</strong>
-    </p>
-    {{#each presentMandatees}}
-      <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
-        <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-          <span property="persoon:gebruikteVoornaam">
-            {{this.name}}
+  {{#if stemmings.length}}
+    <h4 class="h6">Stemmingen bij agendapunt</h4>
+    <br />
+    <div property="ext:stemmingTable">
+      {{#each stemmings}}
+      <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+        <p datatype="xsd:boolean" content="{{this.geheim}}" property="besluit:geheim">
+          {{this.geheimText}}
+        </p>
+        <br />
+        <p property="besluit:onderwerp">
+          {{this.subject}}
+        </p>
+        <br />
+        {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=true}}
+        <br />
+        {{> mandateeList mandatees=this.voters property="besluit:heeftStemmer" title="Effectieve stemmers" includeRole=false}}
+        <br />
+        <p>
+          Totaal aantal voorstanders:
+          <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">
+            {{this.positiveVotes}}
           </span>
-          <span property="foaf:familyName">
-            {{this.familyName}}
+        </p>
+        <p>
+          Totaal aantal tegenstanders:
+          <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">
+            {{this.negativeVotes}}
           </span>
-        </span>
-      </span>
-    {{/each}}
-    <p>
-        <strong>Afwezige leden</strong>
-        {{#each notPresentMandatees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}">
-            <span resource={{this.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-            </span>
+        </p>
+        <p>
+          Totaal aantal onthoudingen, blanco of ongeldig:
+          <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">
+            {{this.abstentionVotes}}
           </span>
+        </p>
+        <br />
+        {{#unless this.geheim}}
+          {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
+        {{/unless}}
+        <p>
+          Met als gevolg,
+        </p>
+        <p property="besluit:gevolg">{{this.result}}</p>
+        </div>
         {{/each}}
-      </p>
-  </div>
-  <br />
-  <h4 class="h6">Stemmingen bij agendapunt</h4>
-  <br />
-  <div property="ext:stemmingTable">
-    {{#each stemmings}}
-    <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
-      <p datatype="xsd:boolean" content={{this.geheim}} property="besluit:geheim">
-        {{this.geheimText}}
-      </p>
-      <br />
-      <p property="besluit:onderwerp">
-        {{this.subject}}
-      </p>
-      <br />
-      <p>
-        <strong>Aanwezigen tijdens stemming</strong>
-      </p>
-      <p>
-        {{#each this.attendees}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftAanwezige">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
-                <span property="org:holds">
-                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
-                  </span>
-                </span>
-              )
-            </span>
-          </span>
-        {{else}}
-          Geen
-        {{/each}}
-      </p>
-      <br />
-      <p>
-        <strong>Effectieve stemmers</strong>
-      </p>
-      <p>
-        {{#each this.voters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftStemmer">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
-                <span property="org:holds">
-                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
-                  </span>
-                </span>
-              )
-            </span>
-          </span>
-        {{else}}
-          Geen
-        {{/each}}
-      </p>
-      <br />
-      <p>
-        Totaal aantal voorstanders:
-        <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">
-          {{this.positiveVotes}}
-        </span>
-      </p>
-      <p>
-        Totaal aantal tegenstanders:
-        <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">
-          {{this.negativeVotes}}
-        </span>
-      </p>
-      <p>
-        Totaal aantal onthoudingen, blanco of ongeldig:
-        <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">
-          {{this.abstentionVotes}}
-        </span>
-      </p>
-      <br />
-      <p>
-        <strong>Voorstanders</strong>
-      </p>
-      <p>
-        {{#each this.positiveVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftVoorstander">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
-                <span property="org:holds">
-                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
-                  </span>
-                </span>
-              )
-            </span>
-          </span>
-        {{else}}
-          Geen
-        {{/each}}
-      </p>
-      <br />
-      <p>
-        <strong>Tegenstanders</strong>
-      </p>
-      <p>
-        {{#each this.negativeVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftTegenstanders">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
-                <span property="org:holds">
-                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
-                  </span>
-                </span>
-              )
-            </span>
-          </span>
-        {{else}}
-          Geen
-        {{/each}}
-      </p>
-      <br />
-      <p>
-        <strong>Onthoudingen, blanco of ongeldig</strong>
-      </p>
-      <p>
-        {{#each this.abstentionVoters}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="besluit:heeftOnthouders">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{this.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{this.familyName}}
-              </span>
-              (
-                <span property="org:holds">
-                  <span typeof="skos:Concept" resource="{{this.roleUri}}" property="org:role">
-                    <span property="skos:prefLabel">
-                      {{this.role}}
-                    </span>
-                  </span>
-                </span>
-              )
-            </span>
-          </span>
-        {{else}}
-          Geen
-        {{/each}}
-      </p>
-      <br />
-      <p>
-        Met als gevolg,
-      </p>
-      <p property="besluit:gevolg">{{this.result}}</p>
-      </div>
-      {{/each}}
-    
-  </div>
+    </div>
+  {{/if}}
   <br />
   {{{document}}}
 </div>

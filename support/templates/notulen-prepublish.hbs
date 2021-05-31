@@ -1,45 +1,47 @@
 <div class="notulen" prefix="{{prefixes}}">
-  <div resource={{zittingUri}} typeof="besluit:Zitting">
+  <div resource="{{zittingUri}}" typeof="besluit:Zitting">
     <h1 property="dc:title">
       Notulen van de/het
-      <span 
+      <span
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
-        resource={{bestuursorgaan.uri}}>
+        resource="{{bestuursorgaan.uri}}">
           {{bestuursorgaan.name}}
       </span>
-      , van 
-      <span content={{geplandeStart.value}} datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
+      , van
+      <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
         {{geplandeStart.text}}
       </span>
     </h1>
     <p>
-      Geplande start: 
-      <span content={{geplandeStart.value}} datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
+      Geplande start:
+      <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
         {{geplandeStart.text}}
       </span>
     </p>
-    <p>
-      Locatie:
-      <span property="prov:atLocation">
-        {{location}}
-      </span>
-    </p>
+    {{#if location}}
+      <p>
+        Locatie:
+        <span property="prov:atLocation">
+          {{location}}
+        </span>
+      </p>
+    {{/if}}
     {{#if intermissions}}
       <h2>Onderbrekingen</h2>
       {{#each intermissions as |intermission|}}
         <p typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
           <strong>
-            Van 
+            Van
             <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
               {{intermission.startedAt.text}}
             </span>
-            tot 
+            tot
             <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
               {{intermission.endedAt.text}}
             </span>
           {{#if intermission.comment}}
-              : 
+              :
             </strong>
             <span property="rdfs:comment">
               {{intermission.comment}}
@@ -48,39 +50,37 @@
         </p>
       {{/each}}
     {{/if}}
-    <h2>Aanwezigen bij de zitting</h2>
-    <div property="ext:aanwezigenTable">
-      <p>
-        <strong>Aanwezige leden</strong>
-        {{#each participationList.present as |mandatee|}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{mandatee.uri}} property="besluit:heeftAanwezigeBijStart">
-            <span resource={{mandatee.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{mandatee.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{mandatee.familyName}}
-              </span>
-            </span>
-          </span>
-        {{/each}}
-      </p>
-      <p>
-        <strong>Afwezige leden</strong>
-        {{#each participationList.notPresent as |mandatee|}}
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{mandatee.uri}}">
-            <span resource={{mandatee.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{mandatee.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{mandatee.familyName}}
+    {{#if participationList}}
+      {{> mandateeList mandatees=participationList.present property="besluit:heeftAanwezigeBijStart" title="Aanwezige leden" includeRole=true}}
+      {{> mandateeList mandatees=participationList.notPresent property="ext:heeftAfwezigeBijStart" title="Afwezige leden" includeRole=true}}
+      {{#if participationList.chairman}}
+        <p>
+          <strong>Voorzitter</strong>
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{participationList.chairman.uri}} property="besluit:heeftVoorzitter">
+              <span resource={{participationList.chairman.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">
+                  {{participationList.chairman.name}}
+                </span>
+                <span property="foaf:familyName">
+                  {{participationList.chairman.familyName}}
+                </span>
               </span>
             </span>
-          </span>
-        {{/each}}
-      </p>
+        </p>
+      {{/if}}
+      {{#if participationList.secretary}}
+        <p>
+          <strong>Secretaris</strong>
+          <span typeof="http://data.lblod.info/vocabularies/leidinggevenden/Functionaris" resource={{participationList.secretary.uri}} property="besluit:heeftSecretaris">
+              <span resource={{participationList.secretary.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">{{participationList.secretary.name}}</span>
+                  <span property="foaf:familyName">{{participationList.secretary.familyName}}</span>
+                </span>
+              </span>
+          </p>
+      {{/if}}
     </div>
+  {{/if}}
     <h2>
       De voorzitter opent de zitting op
       <span content="{{startedAt.value}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
@@ -95,10 +95,10 @@
     <h2>Agenda overzicht</h2>
     <div property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
       {{#each agendapunten}}
-          <span typeof="besluit:Agendapunt" resource={{this.uri}} property="besluit:behandelt">
+          <span typeof="besluit:Agendapunt" resource="{{this.uri}}" property="besluit:behandelt">
             <span property="dc:subject">Agendapunt</span>
             -
-            <span content={{this.geplandOpenbaar}} datatype="xsd:boolean" property="besluit:geplandOpenbaar">
+            <span content="{{this.geplandOpenbaar}}" datatype="xsd:boolean" property="besluit:geplandOpenbaar">
               {{#if this.geplandOpenbaar}}
                   <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
               {{else}}
@@ -116,10 +116,10 @@
       {{{behandelingsHtml}}}
     </div>
     <h2>
-      De voorzitter sluit de zitting op 
+      De voorzitter sluit de zitting op
       <span content="{{endedAt.value}}" datatype="xsd:dateTime" property="prov:endedAtTime" class="is-required">
         {{endedAt.text}}
-      </span>. 
+      </span>.
     </h2>
     {{#if outro}}
       <p>

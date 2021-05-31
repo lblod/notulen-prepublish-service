@@ -1,8 +1,10 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
+import { fetchChairmanAndSecretary } from './query-utils';
+import { fetchStemmingen } from './query-utils';
 import {DateTime} from 'luxon';
-
+import Mandatee from '../models/mandatee';
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
 
 /**
@@ -110,7 +112,7 @@ async function getZittingForNotulen(uuid) {
       name: mandatee.name.value,
       familyName: mandatee.familyName.value
     }));
-    const stemmings = await fetchStemmings(agendapunten.bva.value);
+    const stemmings = await fetchStemmingen(agendapunten.bva.value);
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
@@ -176,14 +178,14 @@ async function fetchParticipationList(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} besluit:heeftAanwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?roleUri.
-        ?roleUri org:role ?bestuursfunctieCodeUri.
-        ?bestuursfunctieCodeUri skos:prefLabel ?role.
+        ?mandatarisUri org:holds ?positionUri.
+        ?positionUri org:role ?roleUri.
+        ?roleUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
     } ORDER BY ASC(?familyName) ASC(?name)
   `);
-  const present = presentQuery.results.bindings.map(processMandatee);
+  const present = presentQuery.results.bindings.map((binding) => new Mandatee(binding));
   const notPresentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
     ${prefixMap.get("ext").toSparqlString()}
@@ -195,157 +197,24 @@ async function fetchParticipationList(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} ext:heeftAfwezigeBijStart ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?roleUri.
-        ?roleUri org:role ?bestuursfunctieCodeUri.
-        ?bestuursfunctieCodeUri skos:prefLabel ?role.
+        ?mandatarisUri org:holds ?positionUri.
+        ?positionUri org:role ?roleUri.
+        ?roleUri skos:prefLabel ?role.
         ?personUri foaf:familyName ?familyName.
         ?personUri persoon:gebruikteVoornaam ?name.
     } ORDER BY ASC(?familyName) ASC(?name)
   `);
-  const notPresent = notPresentQuery.results.bindings.map(processMandatee);
-  console.log(notPresent);
-  return {present, notPresent};
+  const notPresent = notPresentQuery.results.bindings.map((binding) => new Mandatee(binding));
+  const {chairman, secretary} = await fetchChairmanAndSecretary(zittingUri);
+
+  //If there's no information in the participation list we return undefined to make it easier to hide in the template
+  if(present.length || notPresent.length || chairman || secretary) {
+    return {present, notPresent, chairman, secretary};
+  } else {
+    return undefined;
+  }
 }
 
-async function fetchStemmings(bvaUri) {
-  const stemmingsQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(bvaUri)} besluit:heeftStemming ?stemmingUri.
-      ?stemmingUri besluit:aantalVoorstanders ?positiveVotes;
-        besluit:aantalTegenstanders ?negativeVotes;
-        besluit:aantalOnthouders ?abstentionVotes;
-        besluit:geheim ?geheim;
-        besluit:onderwerp ?subject;
-        besluit:gevolg ?result.
-    }
-  `);
-  return await Promise.all(stemmingsQuery.results.bindings.map(processStemming));
-}
-
-async function processStemming(stemming) {
-  const stemmingUri = stemming.stemmingUri.value;
-  const attendeesQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftAanwezige ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    }
-  `);
-  const attendees = attendeesQuery.results.bindings.map(processMandatee);
-  const votersQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftStemmer ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    }
-  `);
-  const voters = votersQuery.results.bindings.map(processMandatee);
-
-  const positiveVotersQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftVoorstander ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    }
-  `);
-  const positiveVoters = positiveVotersQuery.results.bindings.map(processMandatee);
-
-  const negativeVotersQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftTegenstander ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    }
-  `);
-  const negativeVoters = negativeVotersQuery.results.bindings.map(processMandatee);
-
-  const abstentionVotersQuery = await query(`
-  ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(stemmingUri)} besluit:heeftOnthouder ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?roleUri.
-      ?roleUri org:role ?bestuursfunctieCodeUri.
-      ?bestuursfunctieCodeUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    }
-  `);
-  const abstentionVoters = abstentionVotersQuery.results.bindings.map(processMandatee);
-
-  return {
-    uri: stemmingUri,
-    geheim: stemming.geheim.value,
-    geheimText: stemming.geheim.value ? "De raad stemt openbaar," : "De raad stemt geheim,",
-    positiveVotes: stemming.positiveVotes.value,
-    negativeVotes: stemming.negativeVotes.value,
-    abstentionVotes: stemming.abstentionVotes.value,
-    subject : stemming.subject.value,
-    result: stemming.result.value,
-    attendees,
-    voters,
-    positiveVoters,
-    negativeVoters,
-    abstentionVoters
-  };
-}
-
-function processMandatee(mandatee) {
-  return {
-    uri: mandatee.mandatarisUri.value,
-    personUri: mandatee.personUri.value,
-    name: mandatee.name.value,
-    familyName: mandatee.familyName.value,
-    roleUri: mandatee.roleUri.value,
-    role: mandatee.role.value
-  };
-}
 
 async function fetchIntermissions(zittingUri) {
   const intermissionsQuery = await query(`
