@@ -6,19 +6,19 @@ Once a specific document is generated for signing or publication the content is 
 
 ## generating previews
 
-* `POST /prepublish/agenda/:zittingIdentifier`: builds a publication from the agenda of a zitting present in the database, and returns it without persisting it
+* `POST /prepublish/agenda/:kindUuid,:zittingIdentifier`: builds a publication from the agenda of a zitting present in the database, and returns it without persisting it
 * `POST /prepublish/besluitenlijst/:zittingIdentifier`: returns a publication of an agenda without persisting it.
 * `POST /prepublish/behandelingen/:zittingIdentifier`: returns a publication for each "behandeling" linked to the zitting without persisting it.
 * `POST /prepublish/notulen/:documentIdentifier`: returns a publication of a notulen without persisting it.
 
 ## creating a signed document
-* `POST /signing/agenda/sign/:kind/:zittingIdentifier`: persists (if it doesn't exist yet) an agenda publication for :kind and creates a signedResource linked to the agenda.
+* `POST /signing/agenda/sign/:kindUuid/:zittingIdentifier`: persists (if it doesn't exist yet) an agenda publication for :kind and creates a signedResource linked to the agenda.
 * `POST /signing/besluitenlijst/sign/:zittingIdentifier`: persists (if it doesn't exist yet) a besluitenlijst publication and creates a signedResource linked to the besluitenlijst.
 * `POST /signing/behandeling/sign/:zittingIdentifier/`:behandelingUuid: persists (if it doesn't exist yet) a behandeling publication and creates a signedResource linked to the "behandeling".
 * `POST /signing/notulen/sign/:zittingIdentifier`: persists (if it doesn't exist yet) a notulen publication for the provided meeting and creates a signedResource linked to the meeting.
 
 ## creating a published document
-* `POST /signing/agenda/publish/:kind/:zittingIdentifier`: persists (if it doesn't exist yet) an agenda publication for :kind and creates a publishedResource linked to the agenda.
+* `POST /signing/agenda/publish/:kindUuid/:zittingIdentifier`: persists (if it doesn't exist yet) an agenda publication for :kind and creates a publishedResource linked to the agenda.
 * `POST /signing/besluitenlijst/publish/:zittingIdentifier`: persists (if it doesn't exist yet) a besluitenlijst publication and creates a publishedResource linked to the besluitenlijst.
 
 * `POST /signing/behandeling/publish/:zittingIdentifier/`:behandelingUuid: persists (if it doesn't exist yet) a behandeling publication and creates a publishedResource linked to the "behandeling".

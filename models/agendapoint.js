@@ -1,6 +1,5 @@
 import {prefixMap} from "../support/prefixes";
-import {DateTime} from 'luxon';
-import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
+import {query, sparqlEscapeString} from "mu";
 
 export default class AgendaPoint {
   static async findAll({meetingUuid}) {
@@ -40,12 +39,23 @@ export default class AgendaPoint {
     }
   }
 
-  constructor({uri, title, position, plannedPublic, addedAfter = null, description = null }) {
+  constructor({
+    uri,
+    title,
+    position,
+    plannedPublic,
+    addedAfter = null,
+    description = null,
+    type = null,
+    typeName = null
+  }) {
     this.uri = uri.value;
     this.title = title.value;
     this.position = position.value;
     this.plannedPublic = plannedPublic.value === "true";
     this.addedAfter = addedAfter?.value;
     this.description = description?.value;
+    this.type = type?.value;
+    this.typeName = typeName?.value;
   }
 }

@@ -4,7 +4,8 @@
       gepland op<span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{meeting.plannedStartText}}</span></h1>
     {{#each agendapoints as |agendapoint|}}
       <span property="besluit:behandelt" resource="{{agendapoint.uri}}" typeof="besluit:Agendapunt">
-        Agendapunt -            <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapoint.plannedPublic}}">
+        Agendapunt -
+        <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapoint.plannedPublic}}">
         {{#if agendapoint.plannedPublic}}
           <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
         {{else}}
@@ -14,9 +15,11 @@
         {{#if agendapoint.addedAfter}}
           <span property="besluit:aangebrachtNa" resource="{{agendapunt.addedAfter}}"></span>
         {{/if}}
-        <p property="dc:title">{{agendapoint.title}}</p>
-        {{#if agendapoint.type}}
-          <p property="besluit:Agendapunt.type" resource="{{agendapoint.type}}" typeof="skos:Concept">{{agendapoint.typeName}}</p>
+        <p>
+          <span property="dc:title">{{agendapoint.title}}</span>
+          {{#if agendapoint.type}}
+            <span property="besluit:Agendapunt.type" resource="{{agendapoint.type}}" typeof="skos:Concept">{{agendapoint.typeName}}</span>
+        </p>
         {{/if}}
         {{#if agendapoint.description}}
           <p property="dc:description">{{agendapunt.beschrijving}}</p>

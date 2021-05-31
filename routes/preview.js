@@ -1,9 +1,7 @@
 import express from 'express';
-import {getZittingForAgenda} from "../support/agenda-queries";
 import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
-import {buildAgendaContentFromZitting} from '../support/agenda-exporter';
 import {buildBesluitenLijstForZitting} from '../support/besluit-exporter';
 import {extractBehandelingVanAgendapuntenFromZitting} from '../support/behandeling-exporter';
 import {extractNotulenContentFromZitting} from '../support/notule-exporter';
@@ -20,9 +18,9 @@ const router = express.Router();
 * Prepublish an agenda as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get("/prepublish/agenda/:meetingUuid", async function (req, res, next) {
+router.get("/prepublish/agenda/:kindUuid/:meetingUuid", async function (req, res, next) {
   try {
-    const html = await constructHtmlForAgenda(req.params.meetingUuid);
+    const html = await constructHtmlForAgenda(req.params.meetingUuid, req.params.kindUuid);
     return res
       .send({
         data: {attributes: {content: html}, type: "imported-agenda-contents"},

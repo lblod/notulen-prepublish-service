@@ -1,19 +1,10 @@
 import {prefixMap} from "../support/prefixes";
 import {DateTime} from 'luxon';
-import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
+import {query, sparqlEscapeString} from "mu";
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
 
 export default class Meeting {
-  uri;
-  startedAt;
-  plannedStart;
-  endedAt;
-  intro;
-  outro;
-  location;
-  adminBodyUri;
-
   static async findUuid(uuid) {
     const queryString = `
     ${prefixMap.get("ext").toSparqlString()}

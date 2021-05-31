@@ -1,9 +1,8 @@
 import express from 'express';
-import {getZittingForAgenda} from "../support/agenda-queries";
 import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
-import {ensureVersionedAgendaForZitting, publishVersionedAgenda} from '../support/agenda-exporter';
+import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../support/agenda-utils';
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedBehandelingForZitting, publishVersionedBehandeling} from '../support/behandeling-exporter';
 import {ensureVersionedNotulenForZitting, publishVersionedNotulen} from '../support/notule-exporter';
@@ -22,19 +21,9 @@ const router = express.Router();
  * Makes the current user publish the agenda for the supplied document.
  * Ensures the prepublished agenda that is signed is persisted in the store and attached to the document container
  */
-router.post('/signing/agenda/publish/:kind/:zittingIdentifier', async function(req, res, next) {
-  // TODO this is 99% the same as
-  // /signing/agenda/sign/:kind/:documentIdentifier, it just uses the
-  // publishVersionedAgenda instead.  We can likely clean this up.
-
+router.post('/signing/agenda/publish/:agendaKindUuid/:meetingUuid', async function(req, res, next) {
   try {
-    // TODO: we now assume this is the first signature.  we should
-    // check and possibly support the second signature.
-    const zitting = await getZittingForAgenda(req.params.zittingIdentifier);
-    const prepublishedAgendaUri = await ensureVersionedAgendaForZitting(
-      zitting,
-      req.params.kind
-    );
+    const prepublishedAgendaUri = await ensureVersionedAgendaForMeeting(req.params.meetingUuid, req.params.agendaKindUuid);
     await publishVersionedAgenda(
       prepublishedAgendaUri,
       req.header("MU-SESSION-ID"),
