@@ -1,8 +1,7 @@
 import {prefixMap} from "../support/prefixes";
 import {DateTime} from 'luxon';
 import {query, sparqlEscapeString} from "mu";
-
-const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
+const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
   static async findUuid(uuid) {
@@ -53,8 +52,8 @@ export default class Meeting {
     this.intro = bindings.intro?.value;
     this.outro = bindings.outro?.value;
     this.location = bindings.location?.value;
-    this.startedAtText = this.startedAt ?? DateTime.fromISO(this.startedAt.value).toFormat(dateFormat);
-    this.endedAtText = this.endedAt ?? DateTime.fromISO(this.endedAt.value).toFormat(dateFormat);
-    this.plannedStartText = this.plannedStart ?? DateTime.fromISO(this.plannedStart.value).toFormat(dateFormat);
+    this.startedAtText = this.startedAt ? DateTime.fromISO(this.startedAt).toFormat(dateFormat) : "";
+    this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
+    this.plannedStartText = this.plannedStart ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat) : "";
   }
 }
