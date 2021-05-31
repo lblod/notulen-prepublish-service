@@ -25,7 +25,7 @@ async function buildBesluitenLijstForZitting(zitting) {
 function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmingen) {
   var besluitenBuffer=[];
   const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
-  const triples = cleanupTriples(Array.concat(...contexts));
+  const triples = cleanupTriples(contexts.flat());
   const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
 
   for (const besluit of besluiten) {
