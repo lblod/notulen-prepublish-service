@@ -1,5 +1,5 @@
 import {prefixMap} from "../support/prefixes";
-import {query, sparqlEscapeString} from "mu";
+import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 
 export default class AgendaPoint {
   static async findAll({meetingUuid}) {
@@ -38,6 +38,46 @@ export default class AgendaPoint {
       return agendapoints.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
     }
   }
+
+  async fetchParticipationList(mandateeCache) {
+    const presentQuery = await query(`
+      ${prefixMap.get("besluit").toSparqlString()}
+      SELECT DISTINCT * WHERE {
+        ${sparqlEscapeUri(this.uri)} besluit:heeftAanwezigeBijStart ?mandatarisUri.
+      }
+    `);
+    const present = presentQuery.results.bindings.map((binding) => mandateeCache.get(binding.mandatarisUri));
+    const notPresentQuery = await query(`
+      ${prefixMap.get("besluit").toSparqlString()}
+      SELECT DISTINCT * WHERE {
+        ${sparqlEscapeUri(this.uri)} ext:heeftAfwezigeBijStart ?mandatarisUri.
+      }
+    `);
+    const notPresent = notPresentQuery.results.bindings.map((binding) => mandateeCache.get(binding.mandatarisUri));
+    const chairmanAndSecretaryQuery = await query(`
+      ${prefixMap.get("besluit").toSparqlString()}
+      SELECT DISTINCT * WHERE {
+        OPTIONAL {
+          ${sparqlEscapeUri(this.uri)} besluit:heeftVoorzitter ?chairmanUri.
+        }
+        OPTIONAL {
+          ${sparqlEscapeUri(this.uri)} besluit:heeftSecretaris ?secretaryUri.
+        }
+      }
+    `);
+
+    const chairman = mandateeCache.get(chairmanAndSecretaryQuery.results.bindings[0].chairmanUri);
+    const secretary = mandateeCache.get(chairmanAndSecretaryQuery.results.bindings[0].secretaryUri);
+
+    //If there's no information in the participation list we return undefined to make it easier to hide in the template
+    if(present.length || notPresent.length || chairman || secretary) {
+      return {present, notPresent, chairman, secretary};
+    } else {
+      return undefined;
+    }
+  }
+
+
 
   constructor({
     uri,
