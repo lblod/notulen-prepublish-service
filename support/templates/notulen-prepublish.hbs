@@ -1,4 +1,4 @@
-<div class="notulen" prefix="{{prefixes}}">
+<div class="au-c-template au-c-template--notes notulen" prefix="{{prefixes}}">
   <div resource="{{zittingUri}}" typeof="besluit:Zitting">
     <h1 property="dc:title">
       Notulen van de/het
@@ -55,28 +55,28 @@
       {{> mandateeList mandatees=participationList.notPresent property="ext:heeftAfwezigeBijStart" title="Afwezige leden" includeRole=true}}
       {{#if participationList.chairman}}
         <p>
-          <strong>Voorzitter</strong>
+          <strong>Voorzitter:</strong>
           <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource={{participationList.chairman.uri}} property="besluit:heeftVoorzitter">
-              <span resource={{participationList.chairman.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-                <span property="persoon:gebruikteVoornaam">
-                  {{participationList.chairman.name}}
-                </span>
-                <span property="foaf:familyName">
-                  {{participationList.chairman.familyName}}
-                </span>
+            <span resource={{participationList.chairman.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">
+                {{participationList.chairman.name}}
+              </span>
+              <span property="foaf:familyName">
+                {{participationList.chairman.familyName}}
               </span>
             </span>
+          </span>
         </p>
       {{/if}}
       {{#if participationList.secretary}}
         <p>
-          <strong>Secretaris</strong>
+          <strong>Secretaris:</strong>
           <span typeof="http://data.lblod.info/vocabularies/leidinggevenden/Functionaris" resource={{participationList.secretary.uri}} property="besluit:heeftSecretaris">
-              <span resource={{participationList.secretary.personUri}} property="mandaat:isBestuurlijkeAliasVan">
-                <span property="persoon:gebruikteVoornaam">{{participationList.secretary.name}}</span>
-                  <span property="foaf:familyName">{{participationList.secretary.familyName}}</span>
-                </span>
+            <span resource={{participationList.secretary.personUri}} property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">{{participationList.secretary.name}}</span>
+                <span property="foaf:familyName">{{participationList.secretary.familyName}}</span>
               </span>
+            </span>
           </p>
       {{/if}}
     </div>
@@ -93,28 +93,29 @@
       </p>
     {{/if}}
     <h2>Agenda overzicht</h2>
-    <div property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
+    <ul class="au-c-template-list" property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
       {{#each agendapunten}}
-          <span typeof="besluit:Agendapunt" resource="{{this.uri}}" property="besluit:behandelt">
-            <span property="dc:subject">Agendapunt</span>
-            -
-            <span content="{{this.geplandOpenbaar}}" datatype="xsd:boolean" property="besluit:geplandOpenbaar">
-              {{#if this.geplandOpenbaar}}
-                  <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
-              {{else}}
-                  <i class="fa fa-eye-slash"></i> <span>Gepland besloten</span>
-              {{/if}}
-            </span>
-            <p datatype="xsd:string" property="dc:title">{{this.titel}}</p>
-            <p datatype="xsd:string" property="dc:description">{{this.description}}</p>
+        <li class="au-c-template-list__item" typeof="besluit:Agendapunt" resource="{{this.uri}}" property="besluit:behandelt">
+          <span property="dc:subject">Agendapunt</span>
+          -
+          <span content="{{this.geplandOpenbaar}}" datatype="xsd:boolean" property="besluit:geplandOpenbaar">
+            {{#if this.geplandOpenbaar}}
+              <span class="au-c-template-public">Gepland openbaar</span>
+            {{else}}
+              <span class="au-c-template-private">Gepland besloten</span>
+            {{/if}}
           </span>
-        {{/each}}
-    </div>
+          <h3 datatype="xsd:string" property="dc:title">{{this.titel}}</h3>
+          <p datatype="xsd:string" property="dc:description">{{this.description}}</p>
+        </li>
+      {{/each}}
+    </ul>
 
     <h2>Behandeling van de Agendapunten</h2>
-    <div property="http://mu.semte.ch/vocabularies/ext/behandelingVanAgendapuntenContainer">
+    <div class="c-template-content" property="http://mu.semte.ch/vocabularies/ext/behandelingVanAgendapuntenContainer">
       {{{behandelingsHtml}}}
     </div>
+
     <h2>
       De voorzitter sluit de zitting op
       <span content="{{endedAt.value}}" datatype="xsd:dateTime" property="prov:endedAtTime" class="is-required">
