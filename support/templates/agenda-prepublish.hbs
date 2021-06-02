@@ -1,6 +1,6 @@
 <div class="agendapunten" prefix="{{prefixes}}">
   <div about="{{meeting.uri}}" typeof="besluit:Zitting">
-    <h1 class="h3"> Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{meeting.adminBodyUri}}">{{meeting.adminBodyName}}</span>, zitting
+    <h1 class="h3"> Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{meeting.adminBodyUri}}" typeof="besluit:Bestuursorgaan">{{meeting.adminBodyName}}</span>, zitting
       gepland op <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{meeting.plannedStartText}}</span></h1>
     {{#each agendapoints as |agendapoint|}}
       <span property="besluit:behandelt" resource="{{agendapoint.uri}}" typeof="besluit:Agendapunt">
@@ -13,7 +13,7 @@
         {{/if}}
         </span>
         {{#if agendapoint.addedAfter}}
-          <span property="besluit:aangebrachtNa" resource="{{agendapunt.addedAfter}}"></span>
+          <span property="besluit:aangebrachtNa" resource="{{agendapoint.addedAfter}}"></span>
         {{/if}}
         <p>
           <span property="dc:title">{{agendapoint.title}}</span>
