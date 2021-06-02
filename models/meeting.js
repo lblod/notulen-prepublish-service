@@ -39,21 +39,43 @@ export default class Meeting {
     if (result.results.bindings.length !== 1) {
       throw `found ${result.results.bindings.length} meetings for id ${uuid}`;
     }
-    return new Meeting(result.results.bindings[0]);
+    return new Meeting.fromBinding(result.results.bindings[0]);
   }
 
-  constructor(bindings) {
-    this.uri = bindings.uri.value;
-    this.adminBodyUri = bindings.adminBodyUri?.value;
-    this.adminBodyName = bindings.adminBodyName?.value;
-    this.startedAt = bindings.startedAt?.value;
-    this.endedAt = bindings.endedAt?.value;
-    this.plannedStart = bindings.plannedStart?.value;
-    this.intro = bindings.intro?.value;
-    this.outro = bindings.outro?.value;
-    this.location = bindings.location?.value;
-    this.startedAtText = this.startedAt ? DateTime.fromISO(this.startedAt).toFormat(dateFormat) : "";
-    this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
-    this.plannedStartText = this.plannedStart ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat) : "";
+  static fromBinding(binding) {
+    return new Meeting({
+      binding: binding.uri.value,
+      adminBodyUri: binding.adminBodyUri?.value,
+      adminBodyName: binding.adminBodyName?.value,
+      startedAt: binding.startedAt?.value,
+      endedAt: binding.endedAt?.value,
+      plannedStart: binding.plannedStart?.value,
+      intro: binding.intro?.value,
+      outro: binding.outro?.value,
+      location: binding.location?.value
+    });
+  }
+    constructor(
+      {
+        uri,
+        adminBodyName = null,
+        adminBodyUri = null,
+        startedAt = null,
+        endedAt = null,
+        plannedStart = null,
+        intro = null,
+        outro = null,
+        location = null
+      }
+    ) {
+      this.uri = uri;
+      this.adminBodyUri = adminBodyUri;
+      this.adminBodyName = adminBodyName;
+      this.startedAt = startedAt;
+      this.endedAt = endedAt;
+      this.plannedStart = plannedStart;
+      this.startedAtText = this.startedAt ? DateTime.fromISO(this.startedAt).toFormat(dateFormat) : "";
+      this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
+      this.plannedStartText = this.plannedStart ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat) : "";
   }
 }

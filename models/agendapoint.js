@@ -34,12 +34,12 @@ export default class AgendaPoint {
       return [];
     }
     else {
-      const agendapoints = result.results.bindings.map((binding) => new AgendaPoint(binding));
+      const agendapoints = result.results.bindings.map((binding) => AgendaPoint.fromBinding(binding));
       return agendapoints.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
     }
   }
 
-  constructor({
+  static fromBinding({
     uri,
     title,
     position,
@@ -57,5 +57,25 @@ export default class AgendaPoint {
     this.description = description?.value;
     this.type = type?.value;
     this.typeName = typeName?.value;
+  }
+
+  constructor({
+    uri,
+    title,
+    position,
+    plannedPublic,
+    addedAfter = null,
+    description = null,
+    type = null,
+    typeName = null
+  }) {
+    this.uri = uri;
+    this.title = title;
+    this.position = position;
+    this.plannedPublic = plannedPublic;
+    this.addedAfter = addedAfter;
+    this.description = description;
+    this.type = type;
+    this.typeName = typeName;
   }
 }

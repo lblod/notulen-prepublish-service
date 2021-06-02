@@ -39,7 +39,7 @@ export async function constructHtmlForAgenda(meetingUuid, agendaKindUuid = null)
 }
 
 
-function constructHtmlForAgendaFromData(meeting, agendapoints) {
+export function constructHtmlForAgendaFromData(meeting, agendapoints) {
   const templateStr = readFileSync(join(__dirname, "templates/agenda-prepublish.hbs")).toString();
   const template = Handlebars.compile(templateStr);
   return template({meeting, agendapoints, prefixes: prefixes.join(" ")});
