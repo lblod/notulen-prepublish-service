@@ -1,30 +1,32 @@
-<div class="agendapunten" prefix="{{prefixes}}">
+<div class="au-c-template au-c-template--agenda agendapunten" prefix="{{prefixes}}">
   <div about="{{meeting.uri}}" typeof="besluit:Zitting">
-    <h1 class="h3"> Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{meeting.adminBodyUri}}" typeof="besluit:Bestuursorgaan">{{meeting.adminBodyName}}</span>, zitting
+    <h1>Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{meeting.adminBodyUri}}" typeof="besluit:Bestuursorgaan">{{meeting.adminBodyName}}</span>, zitting
       gepland op <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{meeting.plannedStartText}}</span></h1>
+    <ul class="au-c-template-list">
     {{#each agendapoints as |agendapoint|}}
-      <span property="besluit:behandelt" resource="{{agendapoint.uri}}" typeof="besluit:Agendapunt">
+      <li class="au-c-template-list__item" property="besluit:behandelt" resource="{{agendapoint.uri}}" typeof="besluit:Agendapunt">
         Agendapunt -
         <span property="besluit:geplandOpenbaar" datatype="xsd:boolean" content="{{agendapoint.plannedPublic}}">
         {{#if agendapoint.plannedPublic}}
-          <i class="fa fa-eye"></i> <span>Gepland openbaar</span>
+          <span class="au-c-template-public">Gepland openbaar</span>
         {{else}}
-          <i class="fa fa-eye-slash"></i> <span>Gepland besloten</span>
+          <span class="au-c-template-private">Gepland besloten</span>
         {{/if}}
         </span>
         {{#if agendapoint.addedAfter}}
           <span property="besluit:aangebrachtNa" resource="{{agendapoint.addedAfter}}"></span>
         {{/if}}
-        <p>
+        <h2>
           <span property="dc:title">{{agendapoint.title}}</span>
           {{#if agendapoint.type}}
             <span property="besluit:Agendapunt.type" resource="{{agendapoint.type}}" typeof="skos:Concept">{{agendapoint.typeName}}</span>
-        </p>
+        </h2>
         {{/if}}
         {{#if agendapoint.description}}
           <p property="dc:description">{{agendapunt.beschrijving}}</p>
         {{/if}}
-      </span>
+      </li>
     {{/each}}
+    </ul>
   </div>
 </div>

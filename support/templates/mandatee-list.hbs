@@ -1,10 +1,11 @@
 {{#if mandatees.length}}
+<div class="au-c-template-list-container">
   <p>
     <strong>{{title}}</strong>
   </p>
-  <ul>
+  <ul class="au-c-template-list-inline">
     {{#each mandatees}}
-      <li typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{relationship}}">
+      <li class="au-c-template-list-inline__item" typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{relationship}}">
         <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
           <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
           <span property="foaf:familyName">{{this.familyName}} </span>
@@ -22,4 +23,5 @@
       </li>
     {{/each}}
   </ul>
+</div>
 {{/if}}
