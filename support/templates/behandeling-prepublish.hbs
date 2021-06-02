@@ -1,17 +1,16 @@
-<div class="behandeling" prefix="{{prefixes}}">
-
-    <div about="{{zitting.uri}}" typeof="besluit:Zitting">
-        <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
-              resource="{{zitting.bestuursorgaan}}"></span>
-        <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
-              content="{{zitting.geplandeStart}}"
-              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
-        <span property="http://www.w3.org/ns/prov#startedAtTime"
-              content="{{zitting.start}}"
-              datatype="http://www.w3.org/2001/XMLSchema#dateTime" class="is-required"></span>
-        <span property="http://www.w3.org/ns/prov#endedAtTime"
-              content="{{zitting.end}}"
-              datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
-        {{{behandelingHTML}}}
-    </div>
+<div class="au-c-template au-c-template--treatment behandeling" prefix="{{prefixes}}">
+  <div about="{{zitting.uri}}" typeof="besluit:Zitting">
+    <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+          resource="{{zitting.bestuursorgaan}}"></span>
+    <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
+          content="{{zitting.geplandeStart}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    <span property="http://www.w3.org/ns/prov#startedAtTime"
+          content="{{zitting.start}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime" class="is-required"></span>
+    <span property="http://www.w3.org/ns/prov#endedAtTime"
+          content="{{zitting.end}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    {{{behandelingHTML}}}
+  </div>
 </div>

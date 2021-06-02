@@ -1,17 +1,17 @@
-<div typeof="besluit:BehandelingVanAgendapunt" resource="{{behandelingUri}}" property="ext:behandelt">
+<div class="au-c-template au-c-template--private" typeof="besluit:BehandelingVanAgendapunt" resource="{{behandelingUri}}" property="ext:behandelt">
   <span content="{{openbaar}}" datatype="xsd:boolean" property="besluit:openbaar">
     {{#if openbaar}}
-      <em class="fa fa-eye"></em>
-      <span>Openbare behandeling van agendapunt</span>
+      <span class="au-c-template-public">Openbare behandeling van agendapunt</span>
     {{else}}
-      <em class="fa fa-eye-slash"></em>
-      <span>Besloten behandeling van agendapunt</span>
+      <span class="au-c-template-private">Besloten behandeling van agendapunt</span>
     {{/if}}
   </span>
-  <h3 class="h4" resource="{{agendapuntUri}}" property="dc:subject"> 
+  <h3 resource="{{agendapuntUri}}" property="dc:subject">
     <span property="dc:title">{{agendapuntTitle}} </span>
   </h3>
   {{#if isBesluit}}
+  <div class="c-template-content c-template-content--decision">
     {{{document}}}
+  </div>
   {{/if}}
 </div>
