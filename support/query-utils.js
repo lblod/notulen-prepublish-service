@@ -64,6 +64,7 @@ function processChairmanAndSecretary(bindings) {
 export async function fetchStemmingen(bvaUri) {
   const stemmingsQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
+  ${prefixMap.get("schema").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(bvaUri)} besluit:heeftStemming ?stemmingUri.
       ?stemmingUri besluit:aantalVoorstanders ?positiveVotes;
@@ -72,7 +73,10 @@ export async function fetchStemmingen(bvaUri) {
         besluit:geheim ?geheim;
         besluit:onderwerp ?subject;
         besluit:gevolg ?result.
-    }
+      OPTIONAL {
+        ?stemmingUri schema:position ?position.
+      }
+    }ORDER BY ASC(?position)
   `);
   return await Promise.all(stemmingsQuery.results.bindings.map(processStemming));
 }
