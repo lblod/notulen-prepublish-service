@@ -3,7 +3,11 @@ module.exports = {
     "es2021": true,
     "node": true
   },
-  "extends": "eslint:recommended",
+  "plugins": [ "mocha" ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:mocha/recommended"
+  ],
   "parserOptions": {
     "ecmaVersion": 12,
     "sourceType": "module"
