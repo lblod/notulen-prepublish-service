@@ -1,10 +1,10 @@
-import  { strict  as assert } from 'assert';
+import  { strict  as assert, equal } from 'assert';
 import { before } from 'mocha';
+import { setupHandleBars } from '../support/setup-handlebars';
 import { constructHtmlForAgendaFromData } from '../support/agenda-utils';
 import Meeting from '../models/meeting';
 import AgendaPoint from '../models/agendapoint';
-
-import { parse, loadDataset, htmlToRdf, shaclReportToMessage } from './helpers';
+import { loadDataset, htmlToRdf, shaclReportToMessage } from './helpers';
 import factory from '@rdfjs/dataset';
 import SHACLValidator from 'rdf-validate-shacl';
 
@@ -30,6 +30,7 @@ const agendapoint2 = new AgendaPoint({
   plannedPublic: true,
   type: "http://my-example.org/agendapoint-type/1",
   typeName: "gepland",
+  description: "a description for agendapoint 2",
   position: 2
 });
 function constructAgenda() {
@@ -40,9 +41,16 @@ function constructAgenda() {
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 describe('agenda publication template', function () {
-  before(async function() { this.dataset = await htmlToRdf(constructAgenda());});
+  before(async function() {
+    setupHandleBars();
+    this.dataset = await htmlToRdf(constructAgenda());
+  });
 
-  it('has the expected administrative body linked to the meeting', async function() {
+  it('has triples', function() {
+    assert(this.dataset.size > 0);
+  });
+
+  it('has the expected administrative body linked to the meeting', function() {
     const adminBodyQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode("http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"),
@@ -50,7 +58,7 @@ describe('agenda publication template', function () {
     );
     assert(this.dataset.has(adminBodyQuad));
   });
-  it('has the expected zitting type', async function() {
+  it('has the expected zitting type', function() {
     const typeQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode(RDF_TYPE),
@@ -58,7 +66,7 @@ describe('agenda publication template', function () {
     );
     assert(this.dataset.has(typeQuad));
   });
-  it('has the correct planned start date', async function() {
+  it('has the correct planned start date', function() {
     const plannedStartQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode("http://data.vlaanderen.be/ns/besluit#geplandeStart"),
@@ -67,7 +75,7 @@ describe('agenda publication template', function () {
     assert(this.dataset.has(plannedStartQuad), "expected planned start");
   });
 
-  it('has agendapoint 2 correctly linking to agendapoint1', async function() {
+  it('has agendapoint 2 correctly linking to agendapoint1', function() {
     const addedAfterQuad = factory.quad(
       factory.namedNode(agendapoint2.uri),
       factory.namedNode("http://data.vlaanderen.be/ns/besluit#aangebrachtNa"),
@@ -76,7 +84,7 @@ describe('agenda publication template', function () {
     assert(this.dataset.has(addedAfterQuad));
   });
 
-  it('has the correct title for agendapoint 1', async function () {
+  it('has the correct title for agendapoint 1', function () {
     const titleQuad = factory.quad(
       factory.namedNode(agendapoint1.uri),
       factory.namedNode("http://purl.org/dc/terms/title"),
@@ -84,6 +92,24 @@ describe('agenda publication template', function () {
     );
     assert(this.dataset.has(titleQuad));
   });
+
+  it('doesnt include a description for agendapoint 1', function() {
+    const datasetMatches = this.dataset.match(
+      factory.namedNode(agendapoint1.uri),
+      factory.namedNode("http://purl.org/dc/terms/description"),
+      null);
+    equal(datasetMatches.size, 0 );
+  });
+
+  it('has the correct description for agendapoint 2', function() {
+    const addedAfterQuad = factory.quad(
+      factory.namedNode(agendapoint2.uri),
+      factory.namedNode("http://purl.org/dc/terms/description"),
+      factory.literal(agendapoint2.description)
+    );
+    assert(this.dataset.has(addedAfterQuad));
+  });
+
 
   it('validates the basic shacl profile', async function(){
     const shacl = await loadDataset(__dirname + "/shapes/basic-agenda.ttl");

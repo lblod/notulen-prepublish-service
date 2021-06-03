@@ -9,12 +9,11 @@ export async function loadDataset(filepath) {
   return await parse(file);
 }
 
-
 export async function parse(triples) {
   return new Promise((resolve, reject) => {
     const parser = new ParserN3();
     const dataset = factory.dataset();
-    parser.parse(triples, (error, quad, prefixes) => {
+    parser.parse(triples, (error, quad) => {
       if (error) {
         console.warn(error);
         reject(error);
@@ -22,8 +21,10 @@ export async function parse(triples) {
       else if(quad) {
         dataset.add(quad);
       }
+      else {
+        resolve(dataset);
+      }
     });
-    resolve(dataset);
   });
 }
 
@@ -40,6 +41,7 @@ function shaclSeverityToString(severity) {
   const uri = severity.value;
   return uri.replace("http://www.w3.org/ns/shacl#","");
 }
+
 export function shaclReportToMessage(report) {
   let reportString = "\n";
   for (const r of report.results) {

@@ -1,5 +1,4 @@
 import express from 'express';
-import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../support/agenda-utils';
@@ -51,8 +50,7 @@ router.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function
   // publishVersionedBesluitenlijst instead.  We can likely clean this up.
 
   try {
-    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
-    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
+    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(req.params.zittingIdentifier);
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {

@@ -1,6 +1,7 @@
-import {prefixMap} from "../support/prefixes";
-import {DateTime} from 'luxon';
-import {query, sparqlEscapeString} from "mu";
+import { prefixMap } from "../support/prefixes";
+import { DateTime } from 'luxon';
+import { query, sparqlEscapeString } from "mu";
+import validateMeeting from "../support/validate-meeting";
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
@@ -39,12 +40,12 @@ export default class Meeting {
     if (result.results.bindings.length !== 1) {
       throw `found ${result.results.bindings.length} meetings for id ${uuid}`;
     }
-    return new Meeting.fromBinding(result.results.bindings[0]);
+    return Meeting.fromBinding(result.results.bindings[0]);
   }
 
   static fromBinding(binding) {
     return new Meeting({
-      binding: binding.uri.value,
+      uri: binding.uri.value,
       adminBodyUri: binding.adminBodyUri?.value,
       adminBodyName: binding.adminBodyName?.value,
       startedAt: binding.startedAt?.value,
@@ -55,27 +56,34 @@ export default class Meeting {
       location: binding.location?.value
     });
   }
-    constructor(
-      {
-        uri,
-        adminBodyName = null,
-        adminBodyUri = null,
-        startedAt = null,
-        endedAt = null,
-        plannedStart = null,
-        intro = null,
-        outro = null,
-        location = null
-      }
-    ) {
-      this.uri = uri;
-      this.adminBodyUri = adminBodyUri;
-      this.adminBodyName = adminBodyName;
-      this.startedAt = startedAt;
-      this.endedAt = endedAt;
-      this.plannedStart = plannedStart;
-      this.startedAtText = this.startedAt ? DateTime.fromISO(this.startedAt).toFormat(dateFormat) : "";
-      this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
-      this.plannedStartText = this.plannedStart ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat) : "";
+  constructor(
+    {
+      uri,
+      adminBodyName = null,
+      adminBodyUri = null,
+      startedAt = null,
+      endedAt = null,
+      plannedStart = null,
+      intro = null,
+      outro = null,
+      location = null
+    }
+  ) {
+    this.uri = uri;
+    this.adminBodyUri = adminBodyUri;
+    this.adminBodyName = adminBodyName;
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
+    this.plannedStart = plannedStart;
+    this.startedAtText = this.startedAt ? DateTime.fromISO(this.startedAt).toFormat(dateFormat) : "";
+    this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
+    this.plannedStartText = this.plannedStart ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat) : "";
+    this.intro = intro;
+    this.outro = outro;
+    this.location = location;
+  }
+
+  validate() {
+    return validateMeeting(this);
   }
 }

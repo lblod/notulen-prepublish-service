@@ -1,5 +1,4 @@
 import express from 'express';
-import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
@@ -49,8 +48,7 @@ router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(re
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
-    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(zitting);
+    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(req.params.zittingIdentifier);
     await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
     return res.send( { success: true } ).end();
   } catch (err) {

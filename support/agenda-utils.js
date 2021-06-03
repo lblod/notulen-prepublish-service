@@ -1,7 +1,4 @@
-import Handlebars from "handlebars";
-import { readFileSync } from 'fs';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
-import { join } from 'path';
 import {prefixes} from "./prefixes";
 import Meeting from '../models/meeting';
 import AgendaPoint from '../models/agendapoint';
