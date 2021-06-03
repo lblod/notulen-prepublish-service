@@ -56,10 +56,7 @@ function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = 
 }
 
 function wrapZittingInfo(zitting, behandelingHTML) {
-  const templateStr = fs
-    .readFileSync(path.join(__dirname, "templates/behandeling-prepublish.hbs"))
-    .toString();
-  const template = Handlebars.compile(templateStr);
+  const template = PUBLISHER_TEMPLATES.get("treatment");
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
   const errors = validateMeeting({
     plannedStart: zitting.geplandeStart,
