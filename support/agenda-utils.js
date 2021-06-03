@@ -1,5 +1,6 @@
 import Handlebars from "handlebars";
 import { readFileSync } from 'fs';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { join } from 'path';
 import {prefixes} from "./prefixes";
 import Meeting from '../models/meeting';
@@ -40,8 +41,7 @@ export async function constructHtmlForAgenda(meetingUuid, agendaKindUuid = null)
 
 
 export function constructHtmlForAgendaFromData(meeting, agendapoints) {
-  const templateStr = readFileSync(join(__dirname, "templates/agenda-prepublish.hbs")).toString();
-  const template = Handlebars.compile(templateStr);
+  const template = PUBLISHER_TEMPLATES.get("agenda");
   return template({meeting, agendapoints, prefixes: prefixes.join(" ")});
 }
 
