@@ -3,8 +3,7 @@ import {cleanupTriples} from '../support/pre-importer';
 import { editorDocumentFromUuid } from '../support/editor-document';
 
 export default class Decision {
-  // TODO: perhaps not the best name or place, given that it returns an array
-  static async fromDoc(editorDocumentUuid) {
+  static async extractDecisionsFromDocument(editorDocumentUuid) {
     const doc = await editorDocumentFromUuid(editorDocumentUuid);
     const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
     const triples = cleanupTriples(contexts.flat());
