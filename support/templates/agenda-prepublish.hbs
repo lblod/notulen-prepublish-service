@@ -1,5 +1,4 @@
 <div class="au-c-template au-c-template--agenda agendapunten" prefix="{{prefixes}}">
-  foo
   <div about="{{this.meeting.uri}}" typeof="besluit:Zitting">
     <h1>Agenda voor <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{this.meeting.adminBodyUri}}" typeof="besluit:Bestuursorgaan">{{this.meeting.adminBodyName}}</span>, zitting
       gepland op <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{this.meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{this.meeting.plannedStartText}}</span></h1>
