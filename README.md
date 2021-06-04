@@ -73,6 +73,27 @@ The published resource is a document as it has been published. The content of th
 * `sign:hashValue`: the hash that was calculated when publishing the document
 * `sign:hashAlgorithm`: the hashing algorithm that was used
 
+
+## development and testing
+This service extends nvdk/mu-javascript-template, which is a fork of semtech/mu-javascript-template. For development include the following in your docker-compose.yml:
+
+```
+  preimporter:
+    image: nvdk/mu-javascript-template
+    ports:
+      - 9229:9229
+    environment:
+      NODE_ENV: "development"
+      LOG_SPARQL_ALL: "true"
+      DEBUG_AUTH_HEADERS: "true"
+    volumes:
+        - /path/to/notulen-prepublish-service:/app/
+```
+
+Running tests can currently be done with the following command:
+```
+docker run --rm -v `pwd`:/app -e NODE_ENV=test --name foo nvdk/mu-javascript-template
+```
 ## compatibility with frontend-gelinkt-notuleren
 
 For compatibility with frontend-gelinkt-notuleren 1.x use a version < 0.5.x
