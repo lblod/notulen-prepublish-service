@@ -25,6 +25,7 @@ async function getZittingForNotulen(uuid) {
      ${prefixMap.get("mu").toSparqlString()}
      ${prefixMap.get("skos").toSparqlString()}
      ${prefixMap.get("mandaat").toSparqlString()}
+     ${prefixMap.get("notulen").toSparqlString()}
      SELECT * WHERE {
       ?uri a besluit:Zitting;
         besluit:behandelt ?agendapunten;
@@ -43,10 +44,10 @@ async function getZittingForNotulen(uuid) {
         ?uri prov:endedAtTime ?endedAt.
       }
       OPTIONAL {
-        ?uri ext:intro ?intro.
+        ?uri notulen:intro ?intro.
       }
       OPTIONAL {
-        ?uri ext:outro ?outro.
+        ?uri notulen:outro ?outro.
       }
     }`
   );
