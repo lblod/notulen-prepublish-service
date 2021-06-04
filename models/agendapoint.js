@@ -49,14 +49,16 @@ export default class AgendaPoint {
     type = null,
     typeName = null
   }) {
-    this.uri = uri.value;
-    this.title = title.value;
-    this.position = position.value;
-    this.plannedPublic = plannedPublic.value === "true";
-    this.addedAfter = addedAfter?.value;
-    this.description = description?.value;
-    this.type = type?.value;
-    this.typeName = typeName?.value;
+    return new AgendaPoint({
+      uri: uri.value,
+      title: title.value,
+      position: position.value,
+      plannedPublic: plannedPublic.value === "true",
+      addedAfter: addedAfter?.value,
+      description: description?.value,
+      type: type?.value,
+      typeName: typeName?.value
+    });
   }
 
   constructor({

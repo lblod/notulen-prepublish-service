@@ -34,7 +34,7 @@ export default class VersionedAgenda {
     }
   }
 
-  static async create({meeting, agendaType, html}) {
+  static async create({meeting, agendaType, agendapoints, html}) {
     console.log(`Creating a new versioned agenda for ${meeting}`);
     const agendaUuid = uuid();
     const agendaUri = `http://data.lblod.info/id/agendas/${agendaUuid}`;
@@ -53,6 +53,12 @@ export default class VersionedAgenda {
            mu:uuid ${sparqlEscapeString(agendaUuid)};
            bv:agendaType ${sparqlEscapeString(agendaType)}.
       }`);
+    await update(`
+      ${prefixMap.get("dct").toSparqlString()}
+      INSERT DATA {
+       ${agendapoints.map((ap) => `${sparqlEscapeUri(ap.uri)} dct:type ${sparqlEscapeUri(ap.type)}.`).join("\n")}
+      }
+    `);
     return new VersionedAgenda({html, uri: agendaUri, agendaType, meeting});
   }
 

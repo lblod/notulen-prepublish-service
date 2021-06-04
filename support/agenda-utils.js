@@ -17,14 +17,18 @@ async function getDataForAgenda(meetingUuid, agendaKindUuid) {
   const agendapoints = await AgendaPoint.findAll({meetingUuid: meetingUuid});
   if (agendaKindUuid) {
     const agendaType = await Concept.find(agendaKindUuid);
-    for (const agendapoint of agendapoints) {
-      if (! agendapoint.type) {
-        agendapoint.type = agendaType.uri;
-        agendapoint.typeName = agendaType.label;
-      }
-    }
+    ensureAgendapointType(agendapoints, agendaType);
   }
   return { meeting, agendapoints };
+}
+
+export function ensureAgendapointType(agendapoints, type) {
+  for (const agendapoint of agendapoints) {
+    if (! agendapoint.type) {
+      agendapoint.type = type.uri;
+      agendapoint.typeName = type.label;
+    }
+  }
 }
 /**
  * This file contains helpers for exporting, signing and publishing content from the agenda.
@@ -58,7 +62,7 @@ export async function ensureVersionedAgendaForMeeting(meetingUuid, agendaKindUui
   else {
     const {meeting, agendapoints} = await getDataForAgenda(meetingUuid, agendaKindUuid);
     const html = constructHtmlForAgendaFromData(meeting, agendapoints);
-    versionedAgenda = await VersionedAgenda.create({ meeting: meeting.uri, agendaType: agendaType.label, html});
+    versionedAgenda = await VersionedAgenda.create({ meeting: meeting.uri, agendapoints, agendaType: agendaType.label, html});
   }
   return versionedAgenda.uri;
 }
