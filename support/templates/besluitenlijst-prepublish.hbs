@@ -1,50 +1,50 @@
-<div class="au-c-template au-c-template--decision besluiten" prefix="{{prefixes}}">
-  <div about="{{zitting.uri}}" typeof="besluit:Zitting">
-    <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
-          resource="{{zitting.bestuursorgaan}}"></span>
-    <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
-          content="{{zitting.geplandeStart}}"
-          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
-    {{#each besluitenlijst as |besluiten|}}
-      {{#each besluiten as |besluit|}}
-        <div resource="{{besluit.behandeling}}" typeof="besluit:BehandelingVanAgendapunt">
-          {{#if besluit.agendapunt}}
-            <span property="http://purl.org/dc/terms/subject" resource="{{besluit.agendapunt}}" > </span>
-          {{/if}}
-          <span
-            property="besluit:openbaar"
-            datatype="xsd:boolean"
-            content="{{besluit.openbaar}}"
-            class="au-template-{{#if besluit.openbaar}}public{{else}}private{{/if}}"
-          >
-          </span>
-          {{#if besluit.gebeurtNa}}
-            <span property="besluit:gebeurtNa" resource="{{besluit.gebeurtNa.objec}}"> </span>
-          {{/if}}
-          <div property="prov:generated" resource="{{besluit.besluit}}" typeof="{{besluit.besluitTypes}}">
-            <h3 property="eli:title">
-              {{#if besluit.title}}{{besluit.title.object}}{{/if}}
-            </h3>
-            <p property="eli:description">{{#if besluit.description}}{{description.object}}{{/if}}</p>
-          </div>
-          {{#if besluit.stemmingen.length}}
-            <h3>Stemmingen</h3>
-              {{#each besluit.stemmingen as |stemming|}}
-                <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{stemming.stemmingUri.value}}" property="besluit:heeftStemming">
-                  <p>
-                    <strong>Onderwerp:</strong>
-                    <span property="besluit:onderwerp">{{stemming.onderwerp.value}}</span>,
-                  </p>
-                  <p>
-                    <strong>Gevolg:</strong>
-                    <span property="besluit:gevolg">{{stemming.gevolg.value}}</span>
-                  </p>
-                </div>
-              {{/each}}
+<div class="au-c-template au-c-template--decision besluiten" prefix="{{this.prefixes}}">
+  <div about="{{this.meeting.uri}}" typeof="besluit:Zitting">
+    <h1>Besluitenlijst van <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor" resource="{{this.meeting.adminBodyUri}}" typeof="besluit:Bestuursorgaan">{{this.meeting.adminBodyName}}</span>, zitting
+      op <span property="prov:startedAtTime" content="{{this.meeting.startedAt}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime">{{this.meeting.startedAtText}}</span></h1>
+    <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart" content="{{this.meeting.plannedStart}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    <span property="prov:endedAtTime" content="{{this.meeting.endedAt}}" datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    {{#each this.treatments}}
+      <div resource="{{this.uri}}" typeof="besluit:BehandelingVanAgendapunt">
+        <span property="http://purl.org/dc/terms/subject" resource="{{this.agendapoint}}" typeof="besluit:Agendapunt">
+        </span>
+        <span about="{{this.meeting}}" property="besluit:behandelt" resource="{{this.agendapoint}}"></span>
+        {{#if this.executedAfter}}
+          <span property="besluit:gebeurtNa" resource="{{this.executedAfter}}"></span>
+        {{/if}}
+        <span
+          property="besluit:openbaar"
+          datatype="xsd:boolean"
+          content="{{this.isPublic}}"
+          class="au-template-{{#if this.isPublic}}public{{else}}private{{/if}}"
+        >
+        </span>
+        {{#each this.decisions}}
+          <div property="prov:generated" resource="{{this.uri}}" typeof="{{this.typesAsText}}">
+              <h3 property="eli:title">{{this.title}}</h3>
+            {{#if this.description}}
+              <p property="eli:description">{{this.description}}</p>
             {{/if}}
-          {{/each}}
+            <span property="eli:language" resource="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept"></span>
+          </div>
         {{/each}}
-      </div>
+        {{#if this.votes}}
+          <h3>Stemmingen</h3>
+          {{#each this.votes}}
+            <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+              <p>
+                <strong>Onderwerp:</strong>
+                <span property="besluit:onderwerp">{{this.subject}}</span>,
+              </p>
+              <p>
+                <strong>Gevolg:</strong>
+                <span property="besluit:gevolg">{{this.result}}</span>
+              </p>
+            </div>
+          {{/each}}
+        {{/if}}
+      {{/each}}
     </div>
   </div>
 </div>
+

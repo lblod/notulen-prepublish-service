@@ -1,5 +1,4 @@
 import express from 'express';
-import {getZittingForBesluitenlijst} from '../support/besluit-queries';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {buildBesluitenLijstForZitting} from '../support/besluit-exporter';
@@ -43,10 +42,9 @@ router.get("/prepublish/agenda/:kindUuid/:meetingUuid", async function (req, res
 * Prepublish a besluitenlijst as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get('/prepublish/besluitenlijst/:zittingIdentifier', async function(req, res, next) {
+router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, next) {
   try {
-    const zitting = await getZittingForBesluitenlijst(req.params.zittingIdentifier);
-    const {html, errors} = await buildBesluitenLijstForZitting(zitting);
+    const {html, errors} = await buildBesluitenLijstForZitting(req.params.meetingUuid);
     return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(err);

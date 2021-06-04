@@ -23,7 +23,7 @@ export default class AgendaPoint {
             ?uri dct:description ?description.
           }
           OPTIONAL {
-            ?uri <https://data.vlaanderen.be/ns/besluit#Agendapunt.type> ?type.
+            ?uri <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ?type.
             ?type skos:prefLabel ?typeName.
          }
       }
@@ -34,9 +34,31 @@ export default class AgendaPoint {
       return [];
     }
     else {
-      const agendapoints = result.results.bindings.map((binding) => new AgendaPoint(binding));
+      const agendapoints = result.results.bindings.map((binding) => AgendaPoint.fromBinding(binding));
       return agendapoints.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
     }
+  }
+
+  static fromBinding({
+    uri,
+    title,
+    position,
+    plannedPublic,
+    addedAfter = null,
+    description = null,
+    type = null,
+    typeName = null
+  }) {
+    return new AgendaPoint({
+      uri: uri.value,
+      title: title.value,
+      position: position.value,
+      plannedPublic: plannedPublic.value === "true",
+      addedAfter: addedAfter?.value,
+      description: description?.value,
+      type: type?.value,
+      typeName: typeName?.value
+    });
   }
 
   constructor({
@@ -49,13 +71,13 @@ export default class AgendaPoint {
     type = null,
     typeName = null
   }) {
-    this.uri = uri.value;
-    this.title = title.value;
-    this.position = position.value;
-    this.plannedPublic = plannedPublic.value === "true";
-    this.addedAfter = addedAfter?.value;
-    this.description = description?.value;
-    this.type = type?.value;
-    this.typeName = typeName?.value;
+    this.uri = uri;
+    this.title = title;
+    this.position = position;
+    this.plannedPublic = plannedPublic;
+    this.addedAfter = addedAfter;
+    this.description = description;
+    this.type = type;
+    this.typeName = typeName;
   }
 }

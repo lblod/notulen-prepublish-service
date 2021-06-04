@@ -1,64 +1,41 @@
 // @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {handleVersionedResource, cleanupTriples, hackedSparqlEscapeString} from './pre-importer';
-import { analyse } from '@lblod/marawa/rdfa-context-scanner';
-import { editorDocumentFromUuid } from './editor-document';
-import * as path from "path";
-import * as fs from "fs";
-import Handlebars from "handlebars";
-import {prefixes} from "./prefixes";
+import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars';
+import { prefixes } from './prefixes';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
+import Decision from '../models/decision';
+import Vote from '../models/vote';
 
-async function buildBesluitenLijstForZitting(zitting) {
-  const agendapunten = zitting.agendapunten;
-  const besluiten = [];
-  for(let agendapunt of agendapunten) {
-    const behandeling = agendapunt.behandeling;
-    if(!behandeling.documentUuid) continue;
-    const doc = await editorDocumentFromUuid( behandeling.documentUuid );
-    if(!doc) continue;
-    const besluit = extractBesluitenFromDoc(doc, agendapunt.uri, agendapunt.geplandOpenbaar, behandeling.uri, behandeling.stemmingen);
-    besluiten.push(besluit);
+async function buildBesluitenLijstForZitting(meetingUuid) {
+  const meeting = await Meeting.find(meetingUuid);
+  const treatments = await Treatment.findAll({meetingUuid});
+  for (const treatment of treatments) {
+    await addVotesToTreatment(treatment);
+    await addDecisionsToTreatment(treatment);
   }
-  return wrapZittingInfo(besluiten, zitting);
-}
-
-function extractBesluitenFromDoc( doc, agendapunt, openbaar, behandeling, stemmingen) {
-  var besluitenBuffer=[];
-  const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
-  const triples = cleanupTriples(contexts.flat());
-  const besluiten = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-
-  for (const besluit of besluiten) {
-    const title = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#title' && t.subject === besluit);
-    const description = triples.find((t) => t.predicate === 'http://data.europa.eu/eli/ontology#description' && t.subject === besluit);
-    const gebeurtNa = triples.find((t) => t.predicate === 'http://data.vlaanderen.be/ns/besluit#gebeurtNa' && t.subject === behandeling.subject);
-    const besluitTypes = triples.filter((t) => t.predicate === "a" && t.subject === besluit).map(type => type.object);
-    besluitenBuffer.push({
-      title: title,
-      description: description,
-      behandeling: behandeling,
-      agendapunt: agendapunt,
-      openbaar: openbaar,
-      gebeurtNa: gebeurtNa,
-      besluit: besluit,
-      besluitTypes: besluitTypes.join(' '),
-      stemmingen: stemmingen,
-    });
-  }
-  return besluitenBuffer;
-}
-
-async function wrapZittingInfo(besluitenlijst, zitting) {
-  const templateStr = fs
-    .readFileSync(path.join(__dirname, "templates/besluitenlijst-prepublish.hbs"))
-    .toString();
-  const template = Handlebars.compile(templateStr);
-  const html = template({besluitenlijst, zitting, prefixes: prefixes.join(" ")});
-  const errors = [];
-  if(!zitting.geplandeStart) {
-    errors.push('You must set the planned start of the meeting');
-  }
+  const html = constructHtmlForDecisionList(meeting, treatments);
+  const errors = meeting.validate();
   return {html, errors};
+}
+
+async function addDecisionsToTreatment(treatment) {
+  treatment.decisions = await Decision.fromDoc(treatment.editorDocumentUuid);
+}
+
+async function addVotesToTreatment(treatment) {
+  const votes = await Vote.findAll({ treatment: treatment.uri});
+  if (votes.length > 0) {
+    // this makes it easier to check if there are votes in the template
+    treatment.votes = votes;
+  }
+}
+
+export function constructHtmlForDecisionList(meeting, treatments) {
+  const template = PUBLISHER_TEMPLATES.get('decisionList');
+  const html = template({meeting, treatments, prefixes: prefixes.join(" ")});
+  return html;
 }
 
 async function ensureVersionedBesluitenLijstForZitting( zitting ) {
@@ -119,4 +96,4 @@ async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessi
 }
 
 
-export { extractBesluitenFromDoc, signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };
+export {signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };

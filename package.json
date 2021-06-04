@@ -14,8 +14,11 @@
     "eslint": "^7.27.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.3",
+    "eslint-plugin-mocha": "^9.0.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "eslint-plugin-promise": "^5.1.0",
+    "n3": "^1.10.0",
+    "rdf-validate-shacl": "^0.3.2"
   },
   "scripts": {
     "lint": "eslint ."
