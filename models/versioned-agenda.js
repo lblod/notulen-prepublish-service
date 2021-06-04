@@ -54,9 +54,8 @@ export default class VersionedAgenda {
            bv:agendaType ${sparqlEscapeString(agendaType)}.
       }`);
     await update(`
-      ${prefixMap.get("dct").toSparqlString()}
       INSERT DATA {
-       ${agendapoints.map((ap) => `${sparqlEscapeUri(ap.uri)} dct:type ${sparqlEscapeUri(ap.type)}.`).join("\n")}
+       ${agendapoints.map((ap) => `${sparqlEscapeUri(ap.uri)} <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ${sparqlEscapeUri(ap.type)}.`).join("\n")}
       }
     `);
     return new VersionedAgenda({html, uri: agendaUri, agendaType, meeting});

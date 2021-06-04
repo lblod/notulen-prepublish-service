@@ -23,7 +23,7 @@ export default class AgendaPoint {
             ?uri dct:description ?description.
           }
           OPTIONAL {
-            ?uri <https://data.vlaanderen.be/ns/besluit#Agendapunt.type> ?type.
+            ?uri <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ?type.
             ?type skos:prefLabel ?typeName.
          }
       }
