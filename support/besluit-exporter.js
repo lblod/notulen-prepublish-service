@@ -21,7 +21,7 @@ async function buildBesluitenLijstForZitting(meetingUuid) {
 }
 
 async function addDecisionsToTreatment(treatment) {
-  treatment.decisions = await Decision.fromDoc(treatment.editorDocumentUuid);
+  treatment.decisions = await Decision.extractDecisionsFromDocument(treatment.editorDocumentUuid);
 }
 
 async function addVotesToTreatment(treatment) {
