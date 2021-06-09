@@ -28,7 +28,7 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
     startedAt: zitting.startedAt && zitting.startedAt.value,
     endedAt: zitting.endedAt && zitting.endedAt.value
   });
-  errors.push(...behandelingsErrors)
+  errors.push(...behandelingsErrors);
   return {html, errors};
 }
 
@@ -42,9 +42,9 @@ function generateNotulenHtml(notulenData) {
 
 function generateBehandelingsHtml(zitting, publicBehandelingUris) {
   let behandelingsHtml = '';
-  const behandelingsErrors = []
+  const behandelingsErrors = [];
   for(const agendapunt of zitting.agendapunten) {
-    const isPublic = !publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)
+    const isPublic = !publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri);
     const {html, errors} = createBehandelingExtract(zitting, agendapunt, false, isPublic);
     behandelingsHtml += html;
     behandelingsErrors.push(...errors);

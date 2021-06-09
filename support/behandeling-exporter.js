@@ -59,9 +59,9 @@ function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = 
     });
     
     errors.push(...zittingErrors);
-    return {html: wrapZittingInfo(zitting, behandelingHTML), errors}
+    return {html: wrapZittingInfo(zitting, behandelingHTML), errors};
   } else {
-    return {html: behandelingHTML, errors}
+    return {html: behandelingHTML, errors};
   }
 }
 
@@ -72,7 +72,7 @@ function wrapZittingInfo(zitting, behandelingHTML) {
 }
 
 function validateBehandeling(agendapunt) {
-  const errors = []
+  const errors = [];
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
   const documentContainers = documentNode.querySelectorAll(`[property='prov:generated']`);
@@ -84,9 +84,9 @@ function validateBehandeling(agendapunt) {
 
       const containsBesluitType = typeOf.includes('besluittype:');
       if(!containsBesluitType) {
-        const titleContainer = documentContainer.querySelector(`[property='eli:title']`)
+        const titleContainer = documentContainer.querySelector(`[property='eli:title']`);
         const title = titleContainer.textContent;
-        errors.push(`Besluit with title ${title} must include a type`)
+        errors.push(`Besluit with title ${title} must include a type`);
       }
     }
   }
