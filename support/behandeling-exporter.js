@@ -48,22 +48,49 @@ function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = 
   } else {
     behandelingHTML = generatePrivateBehandelingHTML(agendapunt);
   }
+  const errors = [];
+  const behandelingErrors = validateBehandeling(agendapunt);
+  errors.push(...behandelingErrors);
   if (isWrappedInZittingInfo) {
-    return wrapZittingInfo(zitting, behandelingHTML);
+    const zittingErrors = validateMeeting({
+      plannedStart: zitting.geplandeStart,
+      startedAt: zitting.start,
+      endedAt: zitting.end,
+    });
+    
+    errors.push(...zittingErrors);
+    return {html: wrapZittingInfo(zitting, behandelingHTML), errors}
   } else {
-    return behandelingHTML;
+    return {html: behandelingHTML, errors}
   }
 }
 
 function wrapZittingInfo(zitting, behandelingHTML) {
   const template = PUBLISHER_TEMPLATES.get("treatment");
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
-  const errors = validateMeeting({
-    plannedStart: zitting.geplandeStart,
-    startedAt: zitting.start,
-    endedAt: zitting.end
-  });
-  return {html, errors};
+  return html;
+}
+
+function validateBehandeling(agendapunt) {
+  const errors = []
+  const document = agendapunt.behandeling.document.content;
+  const documentNode = new jsdom.JSDOM(document).window.document;
+  const documentContainers = documentNode.querySelectorAll(`[property='prov:generated']`);
+  for(let i = 0; i < documentContainers.length; i++) {
+    const documentContainer = documentContainers[i];
+    const typeOf = documentContainer ? documentContainer.getAttribute('typeof') : '';
+    const isBesluit = typeOf.includes('besluit:Besluit');
+    if(isBesluit) {
+
+      const containsBesluitType = typeOf.includes('besluittype:');
+      if(!containsBesluitType) {
+        const titleContainer = documentContainer.querySelector(`[property='eli:title']`)
+        const title = titleContainer.textContent;
+        errors.push(`Besluit with title ${title} must include a type`)
+      }
+    }
+  }
+  return errors;
 }
 
 function generateBehandelingHTML(agendapunt) {

@@ -20,8 +20,7 @@ const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
 async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) {
-  let behandelingsHtml = '';
-  behandelingsHtml = generateBehandelingHtml(zitting, publicBehandelingUris);
+  const {behandelingsHtml, behandelingsErrors} = generateBehandelingsHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   const html = generateNotulenHtml(notulenData);
   const errors = validateMeeting( {
@@ -29,6 +28,7 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
     startedAt: zitting.startedAt && zitting.startedAt.value,
     endedAt: zitting.endedAt && zitting.endedAt.value
   });
+  errors.push(...behandelingsErrors)
   return {html, errors};
 }
 
@@ -40,16 +40,16 @@ function generateNotulenHtml(notulenData) {
   return template(notulenData);
 }
 
-function generateBehandelingHtml(zitting, publicBehandelingUris) {
-  let behandelingHTML = '';
+function generateBehandelingsHtml(zitting, publicBehandelingUris) {
+  let behandelingsHtml = '';
+  const behandelingsErrors = []
   for(const agendapunt of zitting.agendapunten) {
-    if(!publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
-      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, true);
-    } else {
-      behandelingHTML += createBehandelingExtract(zitting, agendapunt, false, false);
-    }
+    const isPublic = !publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri)
+    const {html, errors} = createBehandelingExtract(zitting, agendapunt, false, isPublic);
+    behandelingsHtml += html;
+    behandelingsErrors.push(...errors);
   }
-  return behandelingHTML;
+  return {behandelingsHtml, behandelingsErrors};
 }
 
 async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
