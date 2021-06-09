@@ -9,9 +9,9 @@
   <h3 resource="{{agendapuntUri}}" property="dc:subject">
     <span property="dc:title">{{agendapuntTitle}} </span>
   </h3>
-  {{#if isBesluit}}
-  <div class="c-template-content c-template-content--decision">
-    {{{document}}}
-  </div>
+  {{#if hasBesluit}}
+    <div class="c-template-content c-template-content--decision">
+      {{{document}}}
+    </div>
   {{/if}}
 </div>

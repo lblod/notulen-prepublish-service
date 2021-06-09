@@ -132,16 +132,22 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const openbaar = agendapunt.behandeling.openbaar === 'true';
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
-  const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
-  const isBesluit = documentContainer && documentContainer.getAttribute('typeof').includes('besluit:Besluit');
-  if(isBesluit) {
-    const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
-    const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
-    documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer.outerHTML});
-  } else {
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});
+  const documentContainers = documentNode.querySelectorAll(`[property='prov:generated']`);
+  let hasBesluit = false;
+  let finalHtml = '';
+  for(let i = 0; i < documentContainers.length; i++) {
+    const documentContainer = documentContainers[i];
+    const typeOf = documentContainer && documentContainer.getAttribute('typeof');
+    const isBesluit = typeOf.includes('besluit:Besluit') || typeOf.includes('http://data.vlaanderen.be/ns/besluit#Besluit');
+    if(isBesluit) {
+      hasBesluit = true;
+      const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
+      const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
+      documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
+      finalHtml += documentContainer.outerHTML;
+    }
   }
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, hasBesluit, document: finalHtml});
 }
 
 /**
