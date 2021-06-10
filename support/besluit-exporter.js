@@ -10,7 +10,7 @@ import Vote from '../models/vote';
 
 export async function buildBesluitenLijstForMeetingId(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);
-  buildBesluitenLijstForMeeting(meeting, meetingUuid);
+  return buildBesluitenLijstForMeeting(meeting, meetingUuid);
 }
 
 async function buildBesluitenLijstForMeeting(meeting, meetingUuid) {
@@ -47,7 +47,7 @@ export function constructHtmlForDecisionList(meeting, treatments) {
 async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
   // TODO remove (or move) relationship between previously signable
   // besluitenLijst, and the current besluitenLijst.
-  const meeting = Meeting.find(meetingUuid);
+  const meeting = await Meeting.find(meetingUuid);
   const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
