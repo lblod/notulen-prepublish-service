@@ -5,13 +5,15 @@ import { editorDocumentFromUuid } from '../support/editor-document';
 export default class Decision {
   static async extractDecisionsFromDocument(editorDocumentUuid) {
     const doc = await editorDocumentFromUuid(editorDocumentUuid);
-    const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
-    const triples = cleanupTriples(contexts.flat());
     const decisions = [];
-    const decisionUris = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
-    for (const uri of decisionUris) {
-      const decision = Decision.fromTriples(triples.filter((t) => t.subject === uri));
-      decisions.push(decision);
+    if (doc) {
+      const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
+      const triples = cleanupTriples(contexts.flat());
+      const decisionUris = triples.filter((t) => t.predicate === "a" && t.object === "http://data.vlaanderen.be/ns/besluit#Besluit").map( (b) => b.subject);
+      for (const uri of decisionUris) {
+        const decision = Decision.fromTriples(triples.filter((t) => t.subject === uri));
+        decisions.push(decision);
+      }
     }
     return decisions;
   }
