@@ -8,8 +8,13 @@ import Treatment from '../models/treatment';
 import Decision from '../models/decision';
 import Vote from '../models/vote';
 
-async function buildBesluitenLijstForZitting(meetingUuid) {
+export async function buildBesluitenLijstForMeetingId(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);
+  buildBesluitenLijstForMeeting(meeting);
+}
+
+async function buildBesluitenLijstForMeeting(meeting) {
+
   const treatments = await Treatment.findAll({meetingUuid});
   for (const treatment of treatments) {
     await addVotesToTreatment(treatment);
@@ -38,10 +43,10 @@ export function constructHtmlForDecisionList(meeting, treatments) {
   return html;
 }
 
-async function ensureVersionedBesluitenLijstForZitting( zitting ) {
+async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
   // TODO remove (or move) relationship between previously signable
   // besluitenLijst, and the current besluitenLijst.
-
+  const meeting = Meeting.find(meetingUuid);
   const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
@@ -52,7 +57,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
     WHERE {
       ?besluitenLijstUri
         a ext:VersionedBesluitenLijst.
-      ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
+      ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -60,8 +65,8 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
     return versionedBesluitenLijstId;
   } else {
-    console.log(`Creating a new versioned besluitenlijst for ${zitting.uri}`);
-    const {html, errors} = await buildBesluitenLijstForZitting( zitting );
+    console.log(`Creating a new versioned besluitenlijst for ${meeting.uri}`);
+    const {html, errors} = await buildBesluitenLijstForMeeting( meeting );
     if(errors.length) {
       throw new Error(errors.join(', '));
     }
@@ -80,7 +85,7 @@ async function ensureVersionedBesluitenLijstForZitting( zitting ) {
           a ext:VersionedBesluitenLijst;
           ext:content ${hackedSparqlEscapeString( html )};
           mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
-        ${sparqlEscapeUri(zitting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
+        ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
     return besluitenLijstUri;
@@ -96,4 +101,4 @@ async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessi
 }
 
 
-export {signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting, buildBesluitenLijstForZitting };
+export {signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting };
