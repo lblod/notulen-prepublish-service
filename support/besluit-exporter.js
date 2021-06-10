@@ -10,17 +10,18 @@ import Vote from '../models/vote';
 
 export async function buildBesluitenLijstForMeetingId(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);
-  buildBesluitenLijstForMeeting(meeting);
+  buildBesluitenLijstForMeeting(meeting, meetingUuid);
 }
 
-async function buildBesluitenLijstForMeeting(meeting) {
+async function buildBesluitenLijstForMeeting(meeting, meetingUuid) {
 
   const treatments = await Treatment.findAll({meetingUuid});
   for (const treatment of treatments) {
     await addVotesToTreatment(treatment);
     await addDecisionsToTreatment(treatment);
   }
-  const html = constructHtmlForDecisionList(meeting, treatments);
+  const treatmentsWithDecisions = treatments.filter((t) => t.decisions.length > 0);
+  const html = constructHtmlForDecisionList(meeting, treatmentsWithDecisions);
   const errors = meeting.validate();
   return {html, errors};
 }
@@ -66,7 +67,7 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
     return versionedBesluitenLijstId;
   } else {
     console.log(`Creating a new versioned besluitenlijst for ${meeting.uri}`);
-    const {html, errors} = await buildBesluitenLijstForMeeting( meeting );
+    const {html, errors} = await buildBesluitenLijstForMeeting( meeting, meetingUuid );
     if(errors.length) {
       throw new Error(errors.join(', '));
     }
