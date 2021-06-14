@@ -33,6 +33,7 @@ async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) 
 }
 
 function generateNotulenHtml(notulenData) {
+  debugger;
   const templateStr = fs
     .readFileSync(path.join(__dirname, "templates/notulen-prepublish.hbs"))
     .toString();

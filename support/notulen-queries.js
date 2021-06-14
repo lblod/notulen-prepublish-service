@@ -221,20 +221,36 @@ async function fetchIntermissions(zittingUri) {
   const intermissionsQuery = await query(`
     ${prefixMap.get("ext").toSparqlString()}
     ${prefixMap.get("prov").toSparqlString()}
+    ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} ext:hasIntermission ?intermissionUri.
-      ?intermissionUri prov:startedAtTime ?startedAt;
-        prov:endedAtTime ?endedAt.
+      ?intermissionUri prov:startedAtTime ?startedAt.
+      OPTIONAL{  
+        ?intermissionUri prov:endedAtTime ?endedAt.
+      }
       OPTIONAL {
         ?intermissionUri rdfs:comment ?comment.
       }
+      OPTIONAL {
+        ?intermissionUri ext:agendaPosition ?agendaPosUri.
+        
+        ?agendaPosUri dct:related ?posApUri.
+        ?agendaPosUri ext:location ?posConceptUri.
+        
+        ?posConceptUri skos:prefLabel ?positionLabel.
+
+        ?posApUri dct:title ?positionApTitle.
+      }
     }
   `);
+  debugger;
   const intermissions = intermissionsQuery.results.bindings.map(processIntermissions);
   return intermissions;
 }
 
 function processIntermissions(intermission) {
+
   return {
     uri: intermission.intermissionUri.value,
     startedAt: {
@@ -242,10 +258,15 @@ function processIntermissions(intermission) {
       text: DateTime.fromISO(intermission.startedAt.value).toFormat(dateFormat)
     },
     endedAt: {
-      value: intermission.endedAt.value,
-      text: DateTime.fromISO(intermission.endedAt.value).toFormat(dateFormat)
+      value: intermission.endedAt ? intermission.endedAt.value : undefined,
+      text: intermission.endedAt ? DateTime.fromISO(intermission.endedAt.value).toFormat(dateFormat): undefined
     },
     comment: intermission.comment ? intermission.comment.value : undefined,
+    apPosition: {
+      aPUri: intermission.agendaPosUri ? intermission.agendaPosUri : undefined,
+      ap: intermission.positionApTitle ? intermission.positionApTitle.value : undefined,
+      position: intermission.positionLabel ? intermission.positionLabel.value : undefined
+    }
   };
 }
 

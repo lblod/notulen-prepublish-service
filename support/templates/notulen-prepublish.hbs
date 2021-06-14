@@ -36,10 +36,26 @@
             <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
               {{intermission.startedAt.text}}
             </span>
-            tot
-            <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
-              {{intermission.endedAt.text}}
-            </span>
+            {{#if intermission.endedAt.text}}
+              tot
+              <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
+                {{intermission.endedAt.text}}
+              </span>
+            {{/if}}
+            {{#if intermission.apPosition.aPUri}}
+              <span typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.aPUri}}">
+                <span typeof="skos:concept">
+                  <span property="skos:prefLabel">
+                    {{intermission.apPosition.position}}
+                  </span>
+                </span>
+                <span typeof="besluit:Agendapunt">
+                  <span property="dc:title">                  
+                    {{intermission.apPosition.ap}}
+                  </span>
+                </span>
+              </span>
+            {{/if}}
           {{#if intermission.comment}}
               :
             </strong>
