@@ -244,7 +244,6 @@ async function fetchIntermissions(zittingUri) {
       }
     }
   `);
-  debugger;
   const intermissions = intermissionsQuery.results.bindings.map(processIntermissions);
   return intermissions;
 }
