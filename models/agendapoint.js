@@ -1,5 +1,5 @@
 import {prefixMap} from "../support/prefixes";
-import {query, sparqlEscapeString} from "mu";
+import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 
 export default class AgendaPoint {
   static async findAll({meetingUuid}) {
@@ -36,6 +36,38 @@ export default class AgendaPoint {
     else {
       const agendapoints = result.results.bindings.map((binding) => AgendaPoint.fromBinding(binding));
       return agendapoints.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
+    }
+  }
+
+  static async findURI(uri) {
+    const queryString = `
+    ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("schema").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
+    SELECT * WHERE {
+        BIND(${sparqlEscapeUri(uri)} as ?uri)
+        ?uri besluit:geplandOpenbaar ?plannedPublic.
+        ?uri dct:title ?title.
+        ?uri schema:position ?position.
+        OPTIONAL {
+            ?uri besluit:aangebrachtNa ?addedAfter.
+        }
+      OPTIONAL {
+          ?uri dct:description ?description.
+      }
+      OPTIONAL {
+          ?uri <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ?type.
+          ?type skos:prefLabel ?typeName.
+      }
+    }`;
+    const result = await query(queryString);
+    if (result.results.bindings.length === 1) {
+      return AgendaPoint.fromBinding(result.results.bindings[0]);
+    }
+    else {
+      console.warn(`no agendapoint found for uri ${uri}`);
+      return [];
     }
   }
 

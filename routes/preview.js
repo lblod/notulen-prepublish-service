@@ -1,10 +1,14 @@
 import express from 'express';
-import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {buildBesluitenLijstForMeetingId} from '../support/besluit-exporter';
-import {extractBehandelingVanAgendapuntenFromZitting} from '../support/behandeling-exporter';
 import {extractNotulenContentFromZitting} from '../support/notule-exporter';
+import validateMeeting from '../support/validate-meeting';
+import validateTreatment from '../support/validate-treatment';
 import {constructHtmlForAgenda } from '../support/agenda-utils';
+import InvalidRequest from '../support/invalid-request';
+import {parseBody} from '../support/parse-body';
+import {buildExtractData, constructHtmlForExtract, buildAllExtractsForMeeting} from '../support/extract-utils';
+import {uuid} from 'mu';
 const router = express.Router();
 
 /***
@@ -61,9 +65,8 @@ router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, n
  */
 router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
   try {
-    const zitting = await getZittingForBehandeling(req.params.zittingIdentifier);
-    const behandeling = await extractBehandelingVanAgendapuntenFromZitting(zitting);
-    return res.send(behandeling).end();
+    const extracts = await buildAllExtractsForMeeting(req.params.zittingIdentifier);
+    return res.send(extracts).end();
   }
   catch (err) {
     console.log(err);
@@ -92,4 +95,51 @@ router.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, ne
   }
 });
 
+router.post('/extract-previews', async function (req, res, next) {
+  try {
+    const {relationships} = parseBody(req.body);
+    const treatmentUuid = relationships?.treatment?.id;
+    if (!treatmentUuid) {
+      throw new InvalidRequest("no valid treatment provided");
+    }
+    const extractData = await buildExtractData(treatmentUuid);
+    const html = constructHtmlForExtract(extractData);
+
+    const errors = validateMeeting(extractData.meeting);
+    errors.concat(validateTreatment(extractData.treatment));
+    return res.status(201).send(
+      {
+        data: {
+          type: "extract-preview",
+          id: uuid(),
+          attributes: {
+            html: html
+          }
+        },
+        relationships: {
+          treatment: {
+            data: {
+              id: treatmentUuid,
+              type: "behandeling-van-agendapunt"
+            }
+          }
+        }
+      }
+    ).end();
+  }
+  catch(e) {
+    if (e.constructor.name === InvalidRequest.name) {
+      return res.status(400).send(
+        {errors: [{title: 'invalid request'}]}).end();
+    }
+    else {
+      const error = new Error(`An error occurred while building the extract preview: ${e}`
+      );
+      // @ts-ignore
+      console.error(e);
+      error.status = 500;
+      return next(error);
+    }
+  }
+});
 export default router;

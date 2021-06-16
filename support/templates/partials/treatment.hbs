@@ -1,0 +1,88 @@
+<div class="au-c-template au-c-template--treatment" typeof="besluit:BehandelingVanAgendapunt" resource="{{this.treatment.uri}}">
+  <p content="{{this.treatment.isPublic}}" datatype="xsd:boolean" property="besluit:openbaar">
+    {{#if this.treatment.isPublic}}
+      <span class="au-c-template-public">Openbare behandeling van agendapunt</span>
+    {{else}}
+      <span class="au-c-template-private">Besloten behandeling van agendapunt</span>
+    {{/if}}
+  </p>
+  <h3 resource="{{this.treatment.agendapoint}}" property="dc:subject">
+    <span property="dc:title">{{this.agendapoint.title}}</span>
+    {{#if agendapuntType}}
+      <span property="besluit:Agendapunt.type" resource="{{this.agendapoint.type}}" typeof="skos:Concept">{{this.agendapoint.typeName}}</span>
+    {{/if}}
+  </h3>
+  {{#if this.participationList}}
+    <h4>Aanwezigen bij agendapunt</h4>
+    <div class="c-template-content c-template-content--present" property="ext:aanwezigenTable">
+      {{log this.particpationList}}
+      {{> mandateeList mandatees=this.participationList.present property="besluit:heeftAanwezige" title="Aanwezige leden" includeRole=true}}
+      {{> mandateeList mandatees=this.participationList.notPresent property="ext:heeftAfwezige" title="Afwezige leden" includeRole=true}}
+      {{#if this.participationList.chairman}}
+        <p>
+          <strong>Voorzitter:</strong>
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.participationList.chairman.uri}}" property="besluit:heeftVoorzitter">
+              <span resource="{{this.participationList.chairman.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">{{this.participationList.chairman.name}}</span>
+                <span property="foaf:familyName">{{this.participationList.chairman.familyName}}</span>
+              </span>
+            </span>
+        </p>
+      {{/if}}
+      {{#if this.participationList.secretary}}
+        <p>
+          <strong>Secretaris:</strong>
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.participationList.secretary.uri}}" property="besluit:heeftSecretaris">
+            <span resource="{{this.participationList.secretary.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">{{this.participationList.secretary.name}}</span>
+              <span property="foaf:familyName">{{this.participationList.secretary.familyName}}</span>
+            </span>
+          </span>
+        </p>
+      {{/if}}
+    </div>
+  {{/if}}
+  {{#if this.votes}}
+    <h4>Stemmingen bij agendapunt</h4>
+    <div class="c-template-content c-template-content--voting" property="ext:stemmingTable">
+      {{#each this.votes}}
+      <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+        <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
+          {{#if this.isSecret}}
+            De raad stemt geheim
+          {{else}}
+            De raad stemt openbaar
+          {{/if}}
+        </p>
+        <p lang="nl-BE" property="besluit:onderwerp">{{this.subject}}</p>
+        {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=true}}
+        {{> mandateeList mandatees=this.voters property="besluit:heeftStemmer" title="Effectieve stemmers" includeRole=false}}
+        <p>
+          Totaal aantal voorstanders:
+          <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">{{this.positiveVotes}}</span>
+        </p>
+        <p>
+          Totaal aantal tegenstanders:
+          <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">{{this.negativeVotes}}</span>
+        </p>
+        <p>
+          Totaal aantal onthoudingen, blanco of ongeldig:
+          <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">{{this.abstentionVotes}}</span>
+        </p>
+        {{#unless this.geheim}}
+          {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
+          {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
+        {{/unless}}
+        <p>
+          Met als gevolg,
+        </p>
+        <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
+      </div>
+      {{/each}}
+    </div>
+  {{/if}}
+  <div class="c-template-content c-template-content--treatment">
+    {{{content}}}
+  </div>
+</div>

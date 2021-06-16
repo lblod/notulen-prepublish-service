@@ -69,12 +69,10 @@ async function editorDocumentFromUuid( uuid ){
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
      SELECT * WHERE {
-     GRAPH <http://mu.semte.ch/application> {
        ?uri a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
             ext:editorDocumentContent ?content;
             ext:editorDocumentContext ?context;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid )}
-       }
      }`);
   
   if( queryResult.results.bindings.length === 0 ) {

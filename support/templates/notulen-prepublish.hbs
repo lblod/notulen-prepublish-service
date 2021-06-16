@@ -1,85 +1,80 @@
-<div class="au-c-template au-c-template--notes notulen" prefix="{{prefixes}}">
-  <div resource="{{zittingUri}}" typeof="besluit:Zitting">
+<div class="au-c-template au-c-template--notes notulen" prefix="{{this.prefixes}}">
+  <div resource="{{this.meeting.uri}}" typeof="besluit:Zitting">
     <h1 property="dc:title">
       Notulen van de/het
       <span
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
-        resource="{{bestuursorgaan.uri}}">
-          {{bestuursorgaan.name}}
+        resource="{{this.adminBodyUri}}">
+          {{this.adminBodyName}}
       </span>
       , van
-      <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
-        {{geplandeStart.text}}
+      <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime" class='is-required'>
+        {{this.meeting.startedAtText}}
       </span>
     </h1>
     <p>
       Geplande start:
-      <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
-        {{geplandeStart.text}}
+      <span content="{{this.meeting.plannedStart}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
+        {{this.meeting.plannedStartText}}
       </span>
     </p>
-    {{#if location}}
+    {{#if this.meeting.location}}
       <p>
         Locatie:
-        <span property="prov:atLocation">
-          {{location}}
-        </span>
+        <span property="prov:atLocation">{{this.meeting.location}}</span>
       </p>
     {{/if}}
-    {{#if intermissions}}
+    {{#if this.intermissions}}
       <h2>Onderbrekingen</h2>
-      {{#each intermissions as |intermission|}}
-        <p property="ext:hasIntermission" typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
+      {{#each this.intermissions}}
+        <p property="ext:hasIntermission" typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{this.uri}}">
           <strong>
             Van
-            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
-              {{intermission.startedAt.text}}
+            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{this.startedAt.value}}">
+              {{this.startedAt.text}}
             </span>
-            {{#if intermission.endedAt.text}}
+            {{#if this.endedAt.text}}
               tot
-              <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{intermission.endedAt.value}}">
-                {{intermission.endedAt.text}}
+              <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{this.endedAt.value}}">
+                {{this.endedAt.text}}
               </span>
             {{/if}}
-            {{#if intermission.apPosition.agendaPosUri}}
-              <span property="ext:agendaPosition" typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.agendaPosUri}}">
-                <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{intermission.apPosition.positionUri}}">
+            {{#if this.apPosition.agendaPosUri}}
+              <span property="ext:agendaPosition" typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{this.apPosition.agendaPosUri}}">
+                <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{this.apPosition.positionUri}}">
                   <span property="skos:prefLabel">
-                    {{intermission.apPosition.positionLabel}}
+                    {{this.apPosition.positionLabel}}
                   </span>
                 </span>
-                <span style="display: inline !important" property="dct:related" resource="{{intermission.apPosition.apUri}}" typeof="besluit:Agendapunt">
+                <span style="display: inline !important" property="dct:related" resource="{{this.apPosition.apUri}}" typeof="besluit:Agendapunt">
                   <span property="dc:title">
-                    {{intermission.apPosition.apTitle}}
+                    {{this.apPosition.apTitle}}
                   </span>
                 </span>
               </span>
             {{/if}}
-          {{#if intermission.comment}}
+          {{#if this.comment}}
               :
             </strong>
             <span property="rdfs:comment">
-              {{intermission.comment}}
+              {{this.comment}}
             </span>
           {{/if}}
         </p>
       {{/each}}
     {{/if}}
-    {{#if participationList}}
-      {{> mandateeList mandatees=participationList.present property="besluit:heeftAanwezigeBijStart" title="Aanwezige leden" includeRole=true}}
-      {{> mandateeList mandatees=participationList.notPresent property="ext:heeftAfwezigeBijStart" title="Afwezige leden" includeRole=true}}
-      {{#if participationList.chairman}}
+    {{#if this.participationList}}
+      {{> mandateeList mandatees=this.participationList.present property="besluit:heeftAanwezigeBijStart" title="Aanwezige leden" includeRole=true}}
+      {{> mandateeList mandatees=this.participationList.notPresent property="ext:heeftAfwezigeBijStart" title="Afwezige leden" includeRole=true}}
+      {{#if this.participationList.chairman}}
         <p>
           <strong>Voorzitter:</strong>
-          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{participationList.chairman.uri}}" property="besluit:heeftVoorzitter">
-            <span resource="{{participationList.chairman.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-              <span property="persoon:gebruikteVoornaam">
-                {{participationList.chairman.name}}
-              </span>
-              <span property="foaf:familyName">
-                {{participationList.chairman.familyName}}
-              </span>
+
+          <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.participationList.chairman.uri}}" property="besluit:heeftVoorzitter">
+            <span resource="{{this.participationList.chairman.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+              <span property="persoon:gebruikteVoornaam">{{this.participationList.chairman.name}}</span>
+              <span property="foaf:familyName">{{this.participationList.chairman.familyName}}</span>
             </span>
           </span>
         </p>
@@ -87,10 +82,10 @@
       {{#if participationList.secretary}}
         <p>
           <strong>Secretaris:</strong>
-          <span typeof="http://data.lblod.info/vocabularies/leidinggevenden/Functionaris" resource="{{participationList.secretary.uri}}" property="besluit:heeftSecretaris">
-            <span resource="{{participationList.secretary.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
-                <span property="persoon:gebruikteVoornaam">{{participationList.secretary.name}}</span>
-                <span property="foaf:familyName">{{participationList.secretary.familyName}}</span>
+          <span typeof="http://data.lblod.info/vocabularies/leidinggevenden/Functionaris" resource="{{this.participationList.secretary.uri}}" property="besluit:heeftSecretaris">
+            <span resource="{{this.participationList.secretary.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+                <span property="persoon:gebruikteVoornaam">{{this.participationList.secretary.name}}</span>
+                <span property="foaf:familyName">{{this.participationList.secretary.familyName}}</span>
             </span>
           </span>
         </p>
@@ -98,18 +93,18 @@
   {{/if}}
     <h2>
       De voorzitter opent de zitting op
-      <span content="{{startedAt.value}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
-        {{startedAt.text}}
+      <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
+        {{this.meeting.startedAtText}}
       </span>.
     </h2>
-    {{#if intro}}
+    {{#if this.intro}}
       <p>
-        {{{intro}}}
+        {{{this.intro}}}
       </p>
     {{/if}}
     <h2>Agenda overzicht</h2>
-    <ul class="au-c-template-list" property="http://mu.semte.ch/vocabularies/ext/agendapuntenTable">
-      {{#each agendapunten}}
+    <ul class="au-c-template-list">
+      {{#each this.agendapoints}}
         <li class="au-c-template-list__item" typeof="besluit:Agendapunt" resource="{{this.uri}}" property="besluit:behandelt">
           <span property="dc:subject">Agendapunt</span>
           -

@@ -1,9 +1,14 @@
 import express from 'express';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
+import validateMeeting from '../support/validate-meeting';
+import validateTreatment from '../support/validate-treatment';
+
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../support/agenda-utils';
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
-import {ensureVersionedBehandelingForZitting, publishVersionedBehandeling} from '../support/behandeling-exporter';
+import {ensureVersionedExtract, publishVersionedExtract} from '../support/extract-utils';
 import {ensureVersionedNotulenForZitting, publishVersionedNotulen} from '../support/notule-exporter';
 import {isPublished} from '../support/behandeling-exporter';
 
@@ -67,14 +72,22 @@ router.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function
  */
 router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', async function(req, res, next) {
   try {
-    const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
-    const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
-    const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
-    await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
-    return res.send( { success: true } ).end();
+    const meeting = await Meeting.find(req.params.zittingIdentifier);
+    const treatment = await Treatment.find(req.params.behandelingUuid);
+    const meetingErrors = validateMeeting(meeting);
+    const treatmentErrors = await validateTreatment(treatment);
+    const errors = [...meetingErrors, ...treatmentErrors];
+    if (errors.length) {
+      return res.status(400).send({errors}).end();
+    }
+    else {
+      const extractUri = await ensureVersionedExtract(treatment, meeting);
+      await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      return res.send( { success: true } ).end();
+    }
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while publishing the behandeling ${req.params.zittingIdentifier}: ${err}`);
+    const error = new Error(`An error occurred while publishing the behandeling ${req.params.behandelingUuid}: ${err}`);
     return next(error);
   }
 });

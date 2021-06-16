@@ -1,7 +1,7 @@
 // @ts-ignore
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
-import { fetchChairmanAndSecretary } from './query-utils';
+import { fetchParticipationList } from './query-utils';
 import { fetchStemmingen } from './query-utils';
 import {DateTime} from 'luxon';
 import Mandatee from '../models/mandatee';
@@ -181,53 +181,7 @@ async function getZittingForNotulen(uuid) {
   };
 }
 
-async function fetchParticipationList(zittingUri) {
-  const presentQuery = await query(`
-    ${prefixMap.get("besluit").toSparqlString()}
-    ${prefixMap.get("mandaat").toSparqlString()}
-    ${prefixMap.get("org").toSparqlString()}
-    ${prefixMap.get("skos").toSparqlString()}
-    ${prefixMap.get("foaf").toSparqlString()}
-    ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(zittingUri)} besluit:heeftAanwezigeBijStart ?mandatarisUri.
-        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?positionUri.
-        ?positionUri org:role ?roleUri.
-        ?roleUri skos:prefLabel ?role.
-        ?personUri foaf:familyName ?familyName.
-        ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
-  `);
-  const present = presentQuery.results.bindings.map((binding) => new Mandatee(binding));
-  const notPresentQuery = await query(`
-    ${prefixMap.get("besluit").toSparqlString()}
-    ${prefixMap.get("ext").toSparqlString()}
-    ${prefixMap.get("mandaat").toSparqlString()}
-    ${prefixMap.get("org").toSparqlString()}
-    ${prefixMap.get("skos").toSparqlString()}
-    ${prefixMap.get("foaf").toSparqlString()}
-    ${prefixMap.get("persoon").toSparqlString()}
-    SELECT DISTINCT * WHERE {
-      ${sparqlEscapeUri(zittingUri)} ext:heeftAfwezigeBijStart ?mandatarisUri.
-        ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-        ?mandatarisUri org:holds ?positionUri.
-        ?positionUri org:role ?roleUri.
-        ?roleUri skos:prefLabel ?role.
-        ?personUri foaf:familyName ?familyName.
-        ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
-  `);
-  const notPresent = notPresentQuery.results.bindings.map((binding) => new Mandatee(binding));
-  const {chairman, secretary} = await fetchChairmanAndSecretary(zittingUri);
 
-  //If there's no information in the participation list we return undefined to make it easier to hide in the template
-  if(present.length || notPresent.length || chairman || secretary) {
-    return {present, notPresent, chairman, secretary};
-  } else {
-    return undefined;
-  }
-}
 
 
 async function fetchIntermissions(zittingUri) {

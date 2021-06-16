@@ -1,17 +1,39 @@
 // @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars';
+import { ensureAgendapointType } from './agenda-utils';
 import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';
 import { prefixes } from "./prefixes";
+import Meeting from '../models/meeting';
+import AgendaPoint from '../models/agendapoint';
+import Concept from './agenda-utils';
+import Treatment from '../models/treatment';
 import validateMeeting from "./validate-meeting";
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
 const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
-
+const PLANNED_AGENDAPOINT_TYPE_ID = "bdf68a65-ce15-42c8-ae1b-19eeb39e20d0";
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
  */
+
+
+
+async function constructHtmlForMeetingNotes(meetingUuid) {
+  const meeting = await Meeting.find(meetingUuid);
+  const agendapoints = await AgendaPoint.findAll({meetingUuid});
+  const defaultAgendaPointType = await Concept.find(PLANNED_AGENDAPOINT_TYPE_ID);
+  ensureAgendapointType(agendapoints, defaultAgendaPointType);
+  const treatments = await Treatment.findAll({meetingUuid});
+  const intermissions = fetchIntermissions(meeting.uri);
+}
+
+function constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatments}) {
+  const template = PUBLISHER_TEMPLATES.get("meetingNotes");
+  const html = template({meeting, agendapoints, treatments});
+}
 
 /**
  * Extracts the Notulen content from the supplied zitting
@@ -19,8 +41,9 @@ const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/
  * If a list of publicBehandelingUris is passed, the snippet will contain only those behandelingen.
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
-async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) {
-  const {behandelingsHtml, behandelingsErrors} = await generateBehandelingsHtml(zitting, publicBehandelingUris);
+async function extractNotulenContentFromZitting(meetingUuid, publicBehandelingUris) {
+  const meeting = await Meeting.find(meetingUuid);
+  let {behandelingsHtml, behandelingsErrors} = await generateBehandelingsHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   const html = generateNotulenHtml(notulenData);
   const errors = validateMeeting( {
@@ -87,7 +110,7 @@ async function updateDraftDecisionStatus( versionedNotulenUri ) {
  * Additionally, on publication the versioned notulen also gets a public-content property containing
  * only the behandelingen that are public.
  */
-async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelingUris ) {
+async function ensureVersionedNotulenForZitting(zitting, type, publicBehandelingUris) {
   // TODO remove (or move) relationship between previously signable notulen, and the current notulen.
   const previousId = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -98,15 +121,13 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
 
     SELECT ?notulenUri
     WHERE {
-      ?notulenUri
-        a ext:VersionedNotulen.
+      ?notulenUri a ext:VersionedNotulen;
+                  ext:notulenKind ${sparqlEscapeString(type)}.
       ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen  ?notulenUri.
     } LIMIT 1`);
   if( previousId.results.bindings.length ) {
     const versionedNotulenId = previousId.results.bindings[0].notulenUri.value;
     console.log(`Reusing versioned notulen ${versionedNotulenId}`);
-    if (type == 'publication')
-      addPublicContentOnVersionedNotulen(zitting, versionedNotulenId, publicBehandelingUris);
     return versionedNotulenId;
   } else {
     console.log(`Creating a new versioned notulen for ${zitting.zittingUri}`);
@@ -127,13 +148,11 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
         ${sparqlEscapeUri(notulenUri)}
           a ext:VersionedNotulen;
           ext:content ${hackedSparqlEscapeString(html)};
+          ext:notulenKind ${sparqlEscapeString(type)};
           mu:uuid ${sparqlEscapeString( notulenUuid )}.
         ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
         ${zitting.agendapunten.map((ap) => `${sparqlEscapeUri(ap.uri)} <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ${sparqlEscapeUri(ap.type)}.`).join("\n")}
       }`);
-    if (type == 'publication')
-      await addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris);
-
     return notulenUri;
   }
 }

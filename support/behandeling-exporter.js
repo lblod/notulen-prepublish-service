@@ -3,7 +3,7 @@ import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
 import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import validateMeeting from './validate-meeting';
-import validateBehandeling from './validate-behandeling';
+import validateBehandeling from './validate-treatment';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";

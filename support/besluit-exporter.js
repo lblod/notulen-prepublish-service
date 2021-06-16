@@ -31,7 +31,7 @@ async function addDecisionsToTreatment(treatment) {
 }
 
 async function addVotesToTreatment(treatment) {
-  const votes = await Vote.findAll({ treatment: treatment.uri});
+  const votes = await Vote.findAll({ treatmentUri: treatment.uri});
   if (votes.length > 0) {
     // this makes it easier to check if there are votes in the template
     treatment.votes = votes;

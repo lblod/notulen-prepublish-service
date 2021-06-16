@@ -1,0 +1,16 @@
+<div class="au-c-template au-c-template--treatment behandeling" prefix="{{this.prefixes}}">
+  <div about="{{this.meeting.uri}}" typeof="besluit:Zitting">
+    <span property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
+          resource="{{this.meeting.adminBodyUri}}"></span>
+    <span property="http://data.vlaanderen.be/ns/besluit#geplandeStart"
+          content="{{this.meeting.plannedStart}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    <span property="http://www.w3.org/ns/prov#startedAtTime"
+          content="{{this.meeting.startedAt}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime" class="is-required"></span>
+    <span property="http://www.w3.org/ns/prov#endedAtTime"
+          content="{{this.meeting.endedAt}}"
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+    {{> treatment}}
+  </div>
+</div>

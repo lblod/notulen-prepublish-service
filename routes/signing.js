@@ -1,11 +1,13 @@
 import express from 'express';
-import {getZittingForBehandeling} from '../support/behandeling-queries';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
+import validateMeeting from '../support/validate-meeting';
+import validateTreatment from '../support/validate-treatment';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
 import {ensureVersionedBesluitenLijstForZitting, signVersionedBesluitenlijst} from '../support/besluit-exporter';
-import {ensureVersionedBehandelingForZitting, signVersionedBehandeling} from '../support/behandeling-exporter';
 import {ensureVersionedNotulenForZitting, signVersionedNotulen} from '../support/notule-exporter';
-
+import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-utils';
 const router = express.Router();
 
 /**
@@ -67,11 +69,19 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
   try {
     // TODO: we now assume this is the first signature.  we should
     // check and possibly support the second signature.
-    const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
-    const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
-    const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
-    await signVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
-    return res.send( { success: true } ).end();
+    const meeting = await Meeting.find(req.params.zittingIdentifier);
+    const treatment = await Treatment.find(req.params.behandelingUuid);
+    const meetingErrors = validateMeeting(meeting);
+    const treatmentErrors = await validateTreatment(treatment);
+    const errors = [...meetingErrors, ...treatmentErrors];
+    if (errors.length) {
+      return res.status(400).send({errors}).end();
+    }
+    else {
+      const extractUri = await ensureVersionedExtract(treatment, meeting);
+      await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "eerste handtekening" );
+      return res.send( { success: true } ).end();
+    }
   } catch (err) {
     console.log(err);
     const error = new Error(`An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`);

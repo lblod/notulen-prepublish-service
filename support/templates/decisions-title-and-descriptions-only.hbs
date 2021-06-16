@@ -1,0 +1,10 @@
+{{#each this.decisions}}
+  <div property="prov:generated" resource="{{this.uri}}" typeof="{{this.typesAsText}}">
+    <h3 property="eli:title">{{this.title}}</h3>
+    {{#if this.description}}
+      <p property="eli:description">{{this.description}}</p>
+    {{/if}}
+    <span property="eli:language" resource="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept"></span>
+  </div>
+{{/each}}
+

@@ -16,7 +16,7 @@ function hackedSparqlEscapeString( string ) {
   return `${sparqlEscapeString(string.replace(/\n/g, function() { return ''; }).replace(/\r/g, function() { return '';}))}`;
 }
 
-async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {  
+async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {
   const now = new Date();
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
@@ -61,7 +61,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         ext:sessionRole ?signatoryRole.
       BIND ("helloworldsecretbehere" AS ?signatorySecret)
     }`;
-  
+
   const updatePromise = await update( query );
   await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
   return updatePromise;
