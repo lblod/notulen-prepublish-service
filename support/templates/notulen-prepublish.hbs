@@ -30,7 +30,7 @@
     {{#if intermissions}}
       <h2>Onderbrekingen</h2>
       {{#each intermissions as |intermission|}}
-        <p typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
+        <p property="ext:hasIntermission" typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{intermission.uri}}">
           <strong>
             Van
             <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{intermission.startedAt.value}}">
@@ -43,14 +43,14 @@
               </span>
             {{/if}}
             {{#if intermission.apPosition.agendaPosUri}}
-              <span typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.agendaPosUri}}">
+              <span property="ext:agendaPosition" typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.agendaPosUri}}">
                 <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{intermission.apPosition.positionUri}}">
                   <span property="skos:prefLabel">
                     {{intermission.apPosition.positionLabel}}
                   </span>
                 </span>
                 <span property="dct:related" resource="{{intermission.apPosition.apUri}}" typeof="besluit:Agendapunt">
-                  <span property="dc:title">                  
+                  <span property="dc:title">
                     {{intermission.apPosition.apTitle}}
                   </span>
                 </span>
