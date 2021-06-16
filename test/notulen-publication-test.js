@@ -445,7 +445,6 @@ describe('decision list publication template', function() {
       factory.literal(String(stemming.abstentionVotes), 'http://www.w3.org/2001/XMLSchema#integer')
     );
     assert(this.dataset.has(abstentionVotesQuad));
-    console.log(stemming.positiveVoters[0].uri)
     const positiveVotersQuad = factory.quad(
       factory.namedNode(stemming.uri),
       factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftVoorstander'),
