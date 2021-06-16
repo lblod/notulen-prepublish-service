@@ -242,7 +242,7 @@ function constructNotulen() {
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
-describe('decision list publication template', function() {
+describe('notulen publication template', function() {
   before(async function() {
     setupHandleBars();
     const {html} = await constructNotulen();
