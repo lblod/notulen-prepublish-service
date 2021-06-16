@@ -42,16 +42,16 @@
                 {{intermission.endedAt.text}}
               </span>
             {{/if}}
-            {{#if intermission.apPosition.aPUri}}
-              <span typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.aPUri}}">
-                <span typeof="skos:concept">
+            {{#if intermission.apPosition.agendaPosUri}}
+              <span typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{intermission.apPosition.agendaPosUri}}">
+                <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{intermission.apPosition.positionUri}}">
                   <span property="skos:prefLabel">
-                    {{intermission.apPosition.position}}
+                    {{intermission.apPosition.positionLabel}}
                   </span>
                 </span>
-                <span typeof="besluit:Agendapunt">
+                <span property="dct:related" resource="{{intermission.apPosition.apUri}}" typeof="besluit:Agendapunt">
                   <span property="dc:title">                  
-                    {{intermission.apPosition.ap}}
+                    {{intermission.apPosition.apTitle}}
                   </span>
                 </span>
               </span>

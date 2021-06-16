@@ -247,9 +247,19 @@ async function fetchIntermissions(zittingUri) {
   const intermissions = intermissionsQuery.results.bindings.map(processIntermissions);
   return intermissions;
 }
-
+function translatePosLabel(label){
+  switch (label) {
+    case "before": 
+      return "Voor";
+    case "during":      
+      return "Tijdens";
+    case "after":
+      return "Na";
+    default:
+      break;
+  }
+}
 function processIntermissions(intermission) {
-
   return {
     uri: intermission.intermissionUri.value,
     startedAt: {
@@ -262,9 +272,13 @@ function processIntermissions(intermission) {
     },
     comment: intermission.comment ? intermission.comment.value : undefined,
     apPosition: {
-      aPUri: intermission.agendaPosUri ? intermission.agendaPosUri : undefined,
-      ap: intermission.positionApTitle ? intermission.positionApTitle.value : undefined,
-      position: intermission.positionLabel ? intermission.positionLabel.value : undefined
+      agendaPosUri: intermission.agendaPosUri ? intermission.agendaPosUri.value : undefined,
+      
+      apUri: intermission.posApUri ? intermission.posApUri.value : undefined,
+      apTitle: intermission.positionApTitle ? intermission.positionApTitle.value : undefined,
+      
+      positionLabel: intermission.positionLabel ? translatePosLabel(intermission.positionLabel.value) : undefined,
+      positionUri: intermission.posConceptUri ? intermission.posConceptUri.value : undefined
     }
   };
 }
