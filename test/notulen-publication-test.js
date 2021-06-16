@@ -2,14 +2,9 @@ import { strict as assert } from 'assert';
 import { before } from 'mocha';
 import { setupHandleBars } from '../support/setup-handlebars';
 import { extractNotulenContentFromZitting } from '../support/notule-exporter';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import Decision from '../models/decision';
-import AgendaPoint from '../models/agendapoint'
 import { loadDataset, htmlToRdf, shaclReportToMessage } from './helpers';
 import factory from '@rdfjs/dataset';
 import SHACLValidator from 'rdf-validate-shacl';
-import { extractBehandelingVanAgendapuntenFromZitting } from '../support/behandeling-exporter';
 import {DateTime} from 'luxon';
 
 const person1 = {
@@ -20,7 +15,7 @@ const person1 = {
   role: 'a role',
   roleUri: 'http://my-example.org/role/1',
   positionUri: 'http://my-example.org/position/1',
-}
+};
 
 const person2 = {
   uri: 'http://my-example.org/mandatee/2',
@@ -30,7 +25,7 @@ const person2 = {
   role: 'a role',
   roleUri: 'http://my-example.org/role/1',
   positionUri: 'http://my-example.org/position/1',
-}
+};
 
 const person3 = {
   uri: 'http://my-example.org/mandatee/3',
@@ -40,7 +35,7 @@ const person3 = {
   role: 'a role',
   roleUri: 'http://my-example.org/role/1',
   positionUri: 'http://my-example.org/position/1',
-}
+};
 
 const person4 = {
   uri: 'http://my-example.org/mandatee/1',
@@ -50,7 +45,7 @@ const person4 = {
   role: 'a role',
   roleUri: 'http://my-example.org/role/1',
   positionUri: 'http://my-example.org/position/1',
-}
+};
 
 const stemming = {
   uri: "http://my-example.org/stemming/1",
@@ -66,7 +61,7 @@ const stemming = {
   positiveVoters: [person1],
   negativeVoters: [person2],
   abstentionVoters: []
-}
+};
 
 const treatment1 = {
   uri: "http://my-example.org/behandeling/1",
@@ -120,7 +115,7 @@ const treatment1 = {
 
     </div>`
   }
-}
+};
 
 const treatment2 = {
   uri: "http://my-example.org/behandeling/2",
@@ -172,7 +167,7 @@ const treatment2 = {
 
     </div>`
   }
-}
+};
 
 const agendapoint1 = {
   uri: "http://my-example.org/agendapoints/1234",
@@ -193,7 +188,7 @@ const agendapoint2 = {
   description: "a description for agendapoint 2",
   position: 2,
   behandeling: treatment2,
-}
+};
 
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm:ss';
@@ -209,7 +204,7 @@ const intermission = {
     text: DateTime.fromISO("2021-05-01T18:00:00Z").toFormat(dateFormat)
   },
   comment: 'this is the comment'
-}
+};
 
 const meeting = {
   zittingUri: "http://my-example.org/meeting/uuid",
@@ -237,7 +232,7 @@ const meeting = {
   },
   intermissions: [intermission],
   agendapunten: [agendapoint1, agendapoint2]
-}
+};
 
 
 function constructNotulen() {
@@ -251,7 +246,6 @@ describe('decision list publication template', function() {
   before(async function() {
     setupHandleBars();
     const {html} = await constructNotulen();
-    console.log(html)
     this.dataset = await htmlToRdf(html);
   });
 
