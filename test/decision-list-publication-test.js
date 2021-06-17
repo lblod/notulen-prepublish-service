@@ -70,7 +70,6 @@ describe('decision list publication template', function() {
   before(async function() {
     setupHandleBars();
     const html = constructDecisionList();
-    console.log(html);
     this.dataset = await htmlToRdf(html);
   });
 

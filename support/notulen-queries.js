@@ -67,7 +67,7 @@ async function getZittingForNotulen(uuid) {
       ${prefixMap.get("pav").toSparqlString()}
       ${prefixMap.get("schema").toSparqlString()}
       ${prefixMap.get("mu").toSparqlString()}
-      SELECT * 
+      SELECT *
       WHERE {
         BIND (<${uri}> AS ?agendaUri)
         <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
@@ -140,7 +140,7 @@ async function getZittingForNotulen(uuid) {
   const participationList = await fetchParticipationList(uri.value);
 
   const intermissions = await fetchIntermissions(uri.value);
-  
+
   return {
     bestuursorgaan: {
       uri: bestuursorgaanUri.value,
@@ -226,7 +226,7 @@ async function fetchIntermissions(zittingUri) {
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(zittingUri)} ext:hasIntermission ?intermissionUri.
       ?intermissionUri prov:startedAtTime ?startedAt.
-      OPTIONAL{  
+      OPTIONAL{
         ?intermissionUri prov:endedAtTime ?endedAt.
       }
       OPTIONAL {
@@ -234,10 +234,10 @@ async function fetchIntermissions(zittingUri) {
       }
       OPTIONAL {
         ?intermissionUri ext:agendaPosition ?agendaPosUri.
-        
+
         ?agendaPosUri dct:related ?posApUri.
         ?agendaPosUri ext:location ?posConceptUri.
-        
+
         ?posConceptUri skos:prefLabel ?positionLabel.
 
         ?posApUri dct:title ?positionApTitle.
@@ -249,9 +249,9 @@ async function fetchIntermissions(zittingUri) {
 }
 function translatePosLabel(label){
   switch (label) {
-    case "before": 
+    case "before":
       return "Voor";
-    case "during":      
+    case "during":
       return "Tijdens";
     case "after":
       return "Na";
@@ -273,10 +273,10 @@ function processIntermissions(intermission) {
     comment: intermission.comment ? intermission.comment.value : undefined,
     apPosition: {
       agendaPosUri: intermission.agendaPosUri ? intermission.agendaPosUri.value : undefined,
-      
+
       apUri: intermission.posApUri ? intermission.posApUri.value : undefined,
       apTitle: intermission.positionApTitle ? intermission.positionApTitle.value : undefined,
-      
+
       positionLabel: intermission.positionLabel ? translatePosLabel(intermission.positionLabel.value) : undefined,
       positionUri: intermission.posConceptUri ? intermission.posConceptUri.value : undefined
     }
