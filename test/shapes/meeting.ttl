@@ -171,10 +171,10 @@
 		sh:maxCount 1 ;
 	] ;
   sh:property [
-    sh:name "volgt uit"
-    sh:description "een besluit volgt uit de behandeling van een agendapunt"
-    sh:inversePath	<http://www.w3.org/ns/prov#generated>
-		sh:class <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>
+    sh:name "volgt uit";
+    sh:description "een besluit volgt uit de behandeling van een agendapunt";
+    sh:inversePath	<http://www.w3.org/ns/prov#generated>;
+		sh:class <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
     sh:minCount 1;
     sh:maxCount 1;
 	] ;
