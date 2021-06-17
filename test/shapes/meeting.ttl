@@ -170,14 +170,6 @@
 		sh:datatype <http://www.w3.org/2001/XMLSchema#string> ;
 		sh:maxCount 1 ;
 	] ;
-  sh:property [
-    sh:name "volgt uit";
-    sh:description "een besluit volgt uit de behandeling van een agendapunt";
-    sh:inversePath	<http://www.w3.org/ns/prov#generated>;
-		sh:class <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>;
-    sh:minCount 1;
-    sh:maxCount 1;
-	] ;
 	sh:property [
 		sh:name "citeeropschrift" ;
 		sh:description "De beknopte titel of officiële korte naam van een decreet, wet, besluit... Deze wordt officieel vastgelegd. Deze benaming wordt in de praktijk gebruikt om naar de rechtsgrond te verwijzen." ;
@@ -311,12 +303,4 @@
  		sh:minCount 1 ;
  		sh:maxCount 1 ;
  	] ;
-  sh:property [
-		sh:name "realiseert" ;
-		sh:description "De rechtsgrond beschreven door dit artikel." ;
-		sh:path <http://data.europa.eu/eli/ontology#realizes> ;
-		sh:class <http://data.europa.eu/eli/ontology#LegalResourceSubdivision> ;
-		sh:minCount 1 ;
-		sh:maxCount 1 ;
-	] ;
  	sh:closed false .
