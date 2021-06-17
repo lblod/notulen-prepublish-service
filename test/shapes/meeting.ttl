@@ -43,26 +43,26 @@
 		sh:maxCount 1 ;
 	] ;
   sh:property [
-		sh:name "isGehoudenDoor" ;
-		sh:description "Duidt aan door welk orgaan de zitting is gehouden." ;
+		sh:name "heeftAanwezigeBijStart" ;
+		sh:description "Een mandataris (van het bestuursorsgaan die de zitting hield) die aanwezig was bij de start van de zitting." ;
 		sh:path <http://data.vlaanderen.be/ns/besluit#heeftAanwezigeBijStart> ;
 		sh:class <http://data.vlaanderen.be/ns/mandaat#Mandataris> ;
 	] ;
   sh:property [
-		sh:name "isGehoudenDoor" ;
-		sh:description "Duidt aan door welk orgaan de zitting is gehouden." ;
+		sh:name "heeftAfwezigeBijStart" ;
+		sh:description "Een mandataris (van het bestuursorsgaan die de zitting hield) die afwezig was bij de start van de zitting." ;
 		sh:path <http://mu.semte.ch/vocabularies/ext/heeftAfwezigeBijStart> ;
 		sh:class <http://data.vlaanderen.be/ns/mandaat#Mandataris> ;
 	] ;
   sh:property [
-		sh:name "isGehoudenDoor" ;
-		sh:description "Duidt aan door welk orgaan de zitting is gehouden." ;
+		sh:name "heeftVoorzitter" ;
+		sh:description "De mandataris die de rol als voorzitter heeft gedurende de zitting." ;
 		sh:path <http://data.vlaanderen.be/ns/besluit#heeftVoorzitter> ;
 		sh:class <http://data.vlaanderen.be/ns/mandaat#Mandataris> ;
 	] ;
   sh:property [
-		sh:name "isGehoudenDoor" ;
-		sh:description "Duidt aan door welk orgaan de zitting is gehouden." ;
+		sh:name "heeftSecretaris" ;
+		sh:description "De mandataris die de rol van secretaris heeft gedurende de zitting." ;
 		sh:path <http://data.vlaanderen.be/ns/besluit#heeftSecretaris> ;
 		sh:class <http://data.lblod.info/vocabularies/leidinggevenden/Functionaris> ;
 	] ;
