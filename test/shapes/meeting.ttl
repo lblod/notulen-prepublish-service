@@ -67,6 +67,59 @@
 		sh:class <http://data.lblod.info/vocabularies/leidinggevenden/Functionaris> ;
 	] ;
   	sh:closed false .
+<https://data.vlaanderen.be/shacl/besluit-publicatie#AgendapuntShape>
+	a sh:NodeShape ;
+	sh:targetClass <http://data.vlaanderen.be/ns/besluit#Agendapunt> ;
+	sh:property [
+		sh:name "aangebrachtNa" ;
+		sh:description "Het agendapunt dat op de agenda direct dit agendapunt voorafging." ;
+		sh:path <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> ;
+		sh:class <http://data.vlaanderen.be/ns/besluit#Agendapunt> ;
+		sh:maxCount 1 ;
+	] ;
+	sh:property [
+		sh:name "heeftOntwerpbesluit" ;
+		sh:description "Een (mogelijks nog aan te vullen of aan te passen) ontwerp voor het besluit dat uit dit agendapunt zou voortkomen." ;
+		sh:path <http://data.vlaanderen.be/ns/besluit#heeftOntwerpbesluit> ;
+		sh:class <http://xmlns.com/foaf/0.1/Document> ;
+	] ;
+	sh:property [
+		sh:name "refereertAan" ;
+		sh:description "Een ander agendapunt waarnaar verwezen wordt vanuit dit agendapunt." ;
+		sh:path <http://purl.org/dc/terms/references> ;
+		sh:class <http://data.vlaanderen.be/ns/besluit#Agendapunt> ;
+	] ;
+	sh:property [
+		sh:name "beschrijving" ;
+		sh:description "Korte beschrijving van het agendapunt." ;
+		sh:path <http://purl.org/dc/terms/description> ;
+		sh:datatype <http://www.w3.org/2001/XMLSchema#string> ;
+		sh:maxCount 1 ;
+	] ;
+	sh:property [
+		sh:name "geplandOpenbaar" ;
+		sh:description "Geeft aan of het agendapunt al dan niet bedoeld is om openbaar te bespreken." ;
+		sh:path <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> ;
+		sh:datatype <http://www.w3.org/2001/XMLSchema#boolean> ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+	] ;
+	sh:property [
+		sh:name "titel" ;
+		sh:description "De naam van het agendapunt." ;
+		sh:path <http://purl.org/dc/terms/title> ;
+		sh:datatype <http://www.w3.org/2001/XMLSchema#string> ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+	] ;
+	sh:property [
+		sh:name "type" ;
+		sh:description "Type van het agendapunt." ;
+		sh:path <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ;
+		sh:class <http://www.w3.org/2004/02/skos/core#Concept> ;
+		sh:minCount 1 ;
+	] ;
+	sh:closed false .
 <https://data.vlaanderen.be/shacl/besluit-publicatie#BehandelingVanAgendapuntShape>
 	a sh:NodeShape ;
 	sh:targetClass <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt> ;
@@ -107,7 +160,7 @@
 		sh:maxCount 1 ;
 	] ;
 	sh:closed false .
-  <https://data.vlaanderen.be/shacl/besluit-publicatie#BesluitShape>
+<https://data.vlaanderen.be/shacl/besluit-publicatie#BesluitShape>
 	a sh:NodeShape ;
 	sh:targetClass <http://data.vlaanderen.be/ns/besluit#Besluit> ;
 	sh:property [
@@ -116,6 +169,14 @@
 		sh:path <http://data.europa.eu/eli/ontology#description> ;
 		sh:datatype <http://www.w3.org/2001/XMLSchema#string> ;
 		sh:maxCount 1 ;
+	] ;
+  sh:property [
+    sh:name "volgt uit"
+    sh:description "een besluit volgt uit de behandeling van een agendapunt"
+    sh:inversePath	<http://www.w3.org/ns/prov#generated>
+		sh:class <http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt>
+    sh:minCount 1;
+    sh:maxCount 1;
 	] ;
 	sh:property [
 		sh:name "citeeropschrift" ;
@@ -139,6 +200,19 @@
 		sh:minCount 1 ;
 		sh:maxCount 1 ;
 		qb:codeList <http://publications.europa.eu/mdr/authority/language/index.html> ;
+	] ;
+  sh:property [
+		sh:name "heeftDeel" ;
+		sh:description "Duidt een artikel aan van dit besluit." ;
+		sh:path <http://data.europa.eu/eli/ontology#has_part> ;
+		sh:class <http://data.europa.eu/eli/ontology#LegalResourceSubdivision> ;
+		sh:minCount 1 ;
+	] ;
+  sh:property [
+		sh:name "citeert" ;
+		sh:description "Een citatie in de wettelijke tekst. Dit omvat zowel woordelijke citaten als citaten in verwijzingen." ;
+		sh:path <http://data.europa.eu/eli/ontology#cites> ;
+		sh:class <http://data.europa.eu/eli/ontology#LegalExpression> ;
 	] ;
 	sh:closed false .
 <https://data.vlaanderen.be/shacl/besluit-publicatie#StemmingShape>
@@ -237,4 +311,12 @@
  		sh:minCount 1 ;
  		sh:maxCount 1 ;
  	] ;
+  sh:property [
+		sh:name "realiseert" ;
+		sh:description "De rechtsgrond beschreven door dit artikel." ;
+		sh:path <http://data.europa.eu/eli/ontology#realizes> ;
+		sh:class <http://data.europa.eu/eli/ontology#LegalResourceSubdivision> ;
+		sh:minCount 1 ;
+		sh:maxCount 1 ;
+	] ;
  	sh:closed false .
