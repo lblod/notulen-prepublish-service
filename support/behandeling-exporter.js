@@ -3,6 +3,7 @@ import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
 import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import validateMeeting from './validate-meeting';
+import validateBehandeling from './validate-behandeling';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
@@ -69,28 +70,6 @@ function wrapZittingInfo(zitting, behandelingHTML) {
   const template = PUBLISHER_TEMPLATES.get("treatment");
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
   return html;
-}
-
-function validateBehandeling(agendapunt) {
-  const errors = [];
-  const document = agendapunt.behandeling.document.content;
-  const documentNode = new jsdom.JSDOM(document).window.document;
-  const documentContainers = documentNode.querySelectorAll(`[property='prov:generated']`);
-  for(let i = 0; i < documentContainers.length; i++) {
-    const documentContainer = documentContainers[i];
-    const typeOf = documentContainer ? documentContainer.getAttribute('typeof') : '';
-    const isBesluit = typeOf.includes('besluit:Besluit');
-    if(isBesluit) {
-
-      const containsBesluitType = typeOf.includes('besluittype:');
-      if(!containsBesluitType) {
-        const titleContainer = documentContainer.querySelector(`[property='eli:title']`);
-        const title = titleContainer.textContent;
-        errors.push(`Besluit with title ${title} must include a type`);
-      }
-    }
-  }
-  return errors;
 }
 
 function generateBehandelingHTML(agendapunt) {
