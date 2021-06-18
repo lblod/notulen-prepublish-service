@@ -11,10 +11,12 @@ const errorMessages = {
 export default async function validateBehandeling(agendapunt) {
   const errors = [];
   const document = agendapunt.behandeling.document.uuid;
-  const decisions = await Decision.extractDecisionsFromDocument(document);
-  for(let decision of decisions) {
-    if(!decision.typesAsText.includes('https://data.vlaanderen.be/id/concept/BesluitType/')) {
-      errors.push(errorMessages.nl.besluitTypeRequired(decision.title));
+  if(document){
+    const decisions = await Decision.extractDecisionsFromDocument(document);
+    for(let decision of decisions) {
+      if(!decision.typesAsText.includes('https://data.vlaanderen.be/id/concept/BesluitType/')) {
+        errors.push(errorMessages.nl.besluitTypeRequired(decision.title));
+      }
     }
   }
   return errors;
