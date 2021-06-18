@@ -6,7 +6,7 @@ const errorMessages = {
   en: {
     besluitTypeRequired: (title) => `Decision with title "${title}" does not have a type yet, a type is required to properly submit decisions to digitaal loket.`
   }
-}
+};
 
 export default async function validateBehandeling(agendapunt) {
   const errors = [];
@@ -14,7 +14,7 @@ export default async function validateBehandeling(agendapunt) {
   const decisions = await Decision.extractDecisionsFromDocument(document);
   for(let decision of decisions) {
     if(!decision.typesAsText.includes('https://data.vlaanderen.be/id/concept/BesluitType/')) {
-      errors.push(errorMessages.nl.besluitTypeRequired(decision.title))
+      errors.push(errorMessages.nl.besluitTypeRequired(decision.title));
     }
   }
   return errors;
