@@ -3,6 +3,7 @@ import { uuid, query, update, sparqlEscapeUri, sparqlEscapeString } from 'mu';
 import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import validateMeeting from './validate-meeting';
+import validateBehandeling from './validate-behandeling';
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
@@ -41,29 +42,34 @@ async function findVersionedBehandeling(uuid) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true, isPublic = true) {
+async function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true, isPublic = true) {
   let behandelingHTML;
   if(isPublic) {
     behandelingHTML = generateBehandelingHTML(agendapunt);
   } else {
     behandelingHTML = generatePrivateBehandelingHTML(agendapunt);
   }
+  const errors = [];
+  const behandelingErrors = await validateBehandeling(agendapunt);
+  errors.push(...behandelingErrors);
   if (isWrappedInZittingInfo) {
-    return wrapZittingInfo(zitting, behandelingHTML);
+    const zittingErrors = validateMeeting({
+      plannedStart: zitting.geplandeStart,
+      startedAt: zitting.start,
+      endedAt: zitting.end,
+    });
+    
+    errors.push(...zittingErrors);
+    return {html: wrapZittingInfo(zitting, behandelingHTML), errors};
   } else {
-    return behandelingHTML;
+    return {html: behandelingHTML, errors};
   }
 }
 
 function wrapZittingInfo(zitting, behandelingHTML) {
   const template = PUBLISHER_TEMPLATES.get("treatment");
   const html = template({behandelingHTML, zitting, prefixes: prefixes.join(" ")});
-  const errors = validateMeeting({
-    plannedStart: zitting.geplandeStart,
-    startedAt: zitting.start,
-    endedAt: zitting.end
-  });
-  return {html, errors};
+  return html;
 }
 
 function generateBehandelingHTML(agendapunt) {
@@ -105,16 +111,22 @@ function generatePrivateBehandelingHTML(agendapunt) {
   const openbaar = agendapunt.behandeling.openbaar === 'true';
   const document = agendapunt.behandeling.document.content;
   const documentNode = new jsdom.JSDOM(document).window.document;
-  const documentContainer = documentNode.querySelector(`[property='prov:generated']`);
-  const isBesluit = documentContainer && documentContainer.getAttribute('typeof').includes('besluit:Besluit');
-  if(isBesluit) {
-    const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
-    const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
-    documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit, document: documentContainer.outerHTML});
-  } else {
-    return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, isBesluit});
+  const documentContainers = documentNode.querySelectorAll(`[property='prov:generated']`);
+  let hasBesluit = false;
+  let finalHtml = '';
+  for(let i = 0; i < documentContainers.length; i++) {
+    const documentContainer = documentContainers[i];
+    const typeOf = documentContainer && documentContainer.getAttribute('typeof');
+    const isBesluit = typeOf.includes('besluit:Besluit') || typeOf.includes('http://data.vlaanderen.be/ns/besluit#Besluit');
+    if(isBesluit) {
+      hasBesluit = true;
+      const besluitTitle = documentContainer.querySelector(`[property='eli:title']`).outerHTML;
+      const besluitDescription = documentContainer.querySelector(`[property='eli:description']`).outerHTML;
+      documentContainer.innerHTML = `${besluitTitle}${besluitDescription}`;
+      finalHtml += documentContainer.outerHTML;
+    }
   }
+  return template({behandelingUri, agendapuntUri, agendapuntTitle, openbaar, hasBesluit, document: finalHtml});
 }
 
 /**
@@ -130,7 +142,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
   else {
     console.log(`creating a new versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
     const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid);
-    const {html, errors} = createBehandelingExtract(zitting, agendapunt);
+    const {html, errors} = await createBehandelingExtract(zitting, agendapunt);
     if(errors.length) {
       throw new Error(errors.join(', '));
     }
@@ -165,7 +177,7 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
   const agendapunten = zitting.agendapunten;
   const extracts = [];
   for (const agendapunt of agendapunten) {
-    const {html, errors} = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
+    const {html, errors} = await createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
     console.log(`creating temporary behandeling extract for ${zitting.uri}`);
     extracts.push({
       data: {

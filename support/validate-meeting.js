@@ -17,6 +17,5 @@ export default function validateMeeting(meeting) {
   if(!meeting.endedAt) {
     errors.push(errorMessages.nl.meetingEndRequired);
   }
-  console.log(errors);
   return errors;
 }
