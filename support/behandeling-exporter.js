@@ -42,7 +42,7 @@ async function findVersionedBehandeling(uuid) {
  * extracts a behandeling from the supplied document
  * searches for a BehandelingVanAgendapunt in the document with a matching uri and returns that node
  */
-function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true, isPublic = true) {
+async function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = true, isPublic = true) {
   let behandelingHTML;
   if(isPublic) {
     behandelingHTML = generateBehandelingHTML(agendapunt);
@@ -50,7 +50,7 @@ function createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo = 
     behandelingHTML = generatePrivateBehandelingHTML(agendapunt);
   }
   const errors = [];
-  const behandelingErrors = validateBehandeling(agendapunt);
+  const behandelingErrors = await validateBehandeling(agendapunt);
   errors.push(...behandelingErrors);
   if (isWrappedInZittingInfo) {
     const zittingErrors = validateMeeting({
@@ -142,7 +142,7 @@ async function ensureVersionedBehandelingForZitting(zitting, behandelingUuid) {
   else {
     console.log(`creating a new versioned behandeling for document ${zitting.uri} and behandeling ${behandelingUuid}`);
     const agendapunt = zitting.agendapunten.find((agendapunt) => agendapunt.behandeling.uuid === behandelingUuid);
-    const {html, errors} = createBehandelingExtract(zitting, agendapunt);
+    const {html, errors} = await createBehandelingExtract(zitting, agendapunt);
     if(errors.length) {
       throw new Error(errors.join(', '));
     }
@@ -177,7 +177,7 @@ async function extractBehandelingVanAgendapuntenFromZitting( zitting, isWrappedI
   const agendapunten = zitting.agendapunten;
   const extracts = [];
   for (const agendapunt of agendapunten) {
-    const {html, errors} = createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
+    const {html, errors} = await createBehandelingExtract(zitting, agendapunt, isWrappedInZittingInfo);
     console.log(`creating temporary behandeling extract for ${zitting.uri}`);
     extracts.push({
       data: {

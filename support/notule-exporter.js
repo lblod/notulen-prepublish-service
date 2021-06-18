@@ -20,7 +20,7 @@ const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/
  * If publicBehandelingUris is null, the snippet will contain all behandelingen.
  */
 async function extractNotulenContentFromZitting(zitting, publicBehandelingUris) {
-  const {behandelingsHtml, behandelingsErrors} = generateBehandelingsHtml(zitting, publicBehandelingUris);
+  const {behandelingsHtml, behandelingsErrors} = await generateBehandelingsHtml(zitting, publicBehandelingUris);
   const notulenData = Object.assign(zitting, {behandelingsHtml, prefixes: prefixes.join(' ')});
   const html = generateNotulenHtml(notulenData);
   const errors = validateMeeting( {
@@ -40,12 +40,12 @@ function generateNotulenHtml(notulenData) {
   return template(notulenData);
 }
 
-function generateBehandelingsHtml(zitting, publicBehandelingUris) {
+async function generateBehandelingsHtml(zitting, publicBehandelingUris) {
   let behandelingsHtml = '';
   const behandelingsErrors = [];
   for(const agendapunt of zitting.agendapunten) {
     const isPublic = !publicBehandelingUris || publicBehandelingUris.includes(agendapunt.behandeling.uri);
-    const {html, errors} = createBehandelingExtract(zitting, agendapunt, false, isPublic);
+    const {html, errors} = await createBehandelingExtract(zitting, agendapunt, false, isPublic);
     behandelingsHtml += html;
     behandelingsErrors.push(...errors);
   }
