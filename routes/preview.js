@@ -1,7 +1,7 @@
 import express from 'express';
 import {getZittingForBehandeling} from '../support/behandeling-queries';
 import {getZittingForNotulen} from '../support/notulen-queries';
-import {buildBesluitenLijstForZitting} from '../support/besluit-exporter';
+import {buildBesluitenLijstForMeetingId} from '../support/besluit-exporter';
 import {extractBehandelingVanAgendapuntenFromZitting} from '../support/behandeling-exporter';
 import {extractNotulenContentFromZitting} from '../support/notule-exporter';
 import {constructHtmlForAgenda } from '../support/agenda-utils';
@@ -44,7 +44,7 @@ router.get("/prepublish/agenda/:kindUuid/:meetingUuid", async function (req, res
 */
 router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, next) {
   try {
-    const {html, errors} = await buildBesluitenLijstForZitting(req.params.meetingUuid);
+    const {html, errors} = await buildBesluitenLijstForMeetingId(req.params.meetingUuid);
     return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(err);

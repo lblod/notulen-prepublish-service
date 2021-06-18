@@ -33,7 +33,14 @@ export async function htmlToRdf(html) {
   const dom = new jsdom.JSDOM( `<body>${html}</body>` );
   const topDomNode = dom.window.document.querySelector('body');
   const contexts = analyseRdfa(topDomNode).map(block => block.context).flat();
-  const triples = contexts.map((t) => t.toNT()).join("\n");
+  const triples = contexts.map((t) => {
+    try {
+      return t.toNT();
+    }
+    catch(e) {
+      return "";
+    }
+  }).join("\n");
   return await parse(triples);
 }
 
