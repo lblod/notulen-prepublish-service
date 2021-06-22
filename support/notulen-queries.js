@@ -122,7 +122,7 @@ async function getZittingForNotulen(uuid) {
     const defaultPlannedType = {
       uri: 'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0',
       label: 'gepland',
-    }
+    };
     const type = agendapunten.type && agendapunten.type.value;
     const typeName = agendapunten.typeName && agendapunten.typeName.value;
     return {
