@@ -20,8 +20,8 @@
           <span property="dc:title">{{this.title}}</span>
           {{#if this.type}}
             <span property="besluit:Agendapunt.type" resource="{{this.type}}" typeof="skos:Concept">{{this.typeName}}</span>
+          {{/if}}
         </h2>
-        {{/if}}
         {{#if this.description}}
           <p property="dc:description">{{this.description}}</p>
         {{/if}}
