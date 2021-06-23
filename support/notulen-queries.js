@@ -67,13 +67,14 @@ async function getZittingForNotulen(uuid) {
       ${prefixMap.get("pav").toSparqlString()}
       ${prefixMap.get("schema").toSparqlString()}
       ${prefixMap.get("mu").toSparqlString()}
+      ${prefixMap.get("skos").toSparqlString()}
       SELECT *
       WHERE {
-        BIND (<${uri}> AS ?agendaUri)
-        <${uri}> besluit:geplandOpenbaar ?geplandOpenbaar.
-        <${uri}> dct:title ?titel.
-        <${uri}> dct:description ?description.
-        ${sparqlEscapeUri(uri)} schema:position ?position.
+        BIND (${sparqlEscapeUri(uri)} AS ?agendaUri)
+        ${sparqlEscapeUri(uri)} besluit:geplandOpenbaar ?geplandOpenbaar;
+          dct:title ?titel;
+          dct:description ?description;
+          schema:position ?position.
         ?bva dct:subject ${sparqlEscapeUri(uri)}.
         ?bva mu:uuid ?bvaUuid.
         ?bva besluit:openbaar ?openbaar.
@@ -88,6 +89,10 @@ async function getZittingForNotulen(uuid) {
           ?document pav:hasCurrentVersion ?editorDocument.
           ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid;
           ext:editorDocumentContent ?documentContent.
+        }
+        OPTIONAL {
+          ${sparqlEscapeUri(uri)} besluit:Agendapunt.type ?type.
+          ?type skos:prefLabel ?typeName.
         }
       }
     `);
@@ -114,9 +119,17 @@ async function getZittingForNotulen(uuid) {
       familyName: mandatee.familyName.value
     }));
     const stemmings = await fetchStemmingen(agendapunten.bva.value);
+    const defaultPlannedType = {
+      uri: 'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0',
+      label: 'gepland',
+    };
+    const type = agendapunten.type && agendapunten.type.value;
+    const typeName = agendapunten.typeName && agendapunten.typeName.value;
     return {
       uri: agendapunten.agendaUri.value,
       geplandOpenbaar: agendapunten.geplandOpenbaar.value,
+      type: type ? type : defaultPlannedType.uri,
+      typeName: typeName ? typeName : defaultPlannedType.label,
       position: agendapunten.position.value,
       titel: agendapunten.titel.value,
       description: agendapunten.description.value,

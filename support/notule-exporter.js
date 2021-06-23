@@ -125,10 +125,11 @@ async function ensureVersionedNotulenForZitting( zitting, type, publicBehandelin
 
       INSERT DATA{
         ${sparqlEscapeUri(notulenUri)}
-           a ext:VersionedNotulen;
-           ext:content ${hackedSparqlEscapeString(html)};
-           mu:uuid ${sparqlEscapeString( notulenUuid )}.
+          a ext:VersionedNotulen;
+          ext:content ${hackedSparqlEscapeString(html)};
+          mu:uuid ${sparqlEscapeString( notulenUuid )}.
         ${sparqlEscapeUri(zitting.zittingUri)} ext:hasVersionedNotulen ${sparqlEscapeUri(notulenUri)}.
+        ${zitting.agendapunten.map((ap) => `${sparqlEscapeUri(ap.uri)} <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ${sparqlEscapeUri(ap.type)}.`).join("\n")}
       }`);
     if (type == 'publication')
       await addPublicContentOnVersionedNotulen(zitting, notulenUri, publicBehandelingUris);

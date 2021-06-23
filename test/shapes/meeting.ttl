@@ -112,7 +112,7 @@
 		sh:minCount 1 ;
 		sh:maxCount 1 ;
 	] ;
-	sh:property [
+  sh:property [
 		sh:name "type" ;
 		sh:description "Type van het agendapunt." ;
 		sh:path <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> ;
@@ -197,7 +197,7 @@
 		sh:name "heeftDeel" ;
 		sh:description "Duidt een artikel aan van dit besluit." ;
 		sh:path <http://data.europa.eu/eli/ontology#has_part> ;
-		sh:class <http://data.europa.eu/eli/ontology#LegalResourceSubdivision> ;
+		sh:class <http://data.vlaanderen.be/ns/besluit#Artikel> ;
 		sh:minCount 1 ;
 	] ;
   sh:property [
