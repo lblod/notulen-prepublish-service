@@ -6,7 +6,10 @@
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
         resource="{{bestuursorgaan.uri}}">
-          <span property='skos:prefLabel'>{{bestuursorgaan.name}}</span>
+          <span property="skos:prefLabel">{{bestuursorgaan.name}}</span>
+          <span property="besluit:bestuurt" resource="{{bestuursorgaan.bestuurseenheid}}"></span>
+          <span property="org:classification" resource="{{bestuursorgaan.classification}}"></span>
+
       </span>
       , van
       <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
