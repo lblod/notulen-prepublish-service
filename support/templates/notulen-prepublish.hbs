@@ -6,7 +6,7 @@
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
         resource="{{bestuursorgaan.uri}}">
-          {{bestuursorgaan.name}}
+          <span property='skos:prefLabel'>{{bestuursorgaan.name}}</span>
       </span>
       , van
       <span content="{{geplandeStart.value}}" datatype="xsd:dateTime" property="besluit:geplandeStart" class='is-required'>
