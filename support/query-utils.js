@@ -113,9 +113,3 @@ function processChairmanAndSecretary(bindings) {
   }
   return {chairman, secretary};
 }
-
-export async function fetchStemmingen(treatmentUri) {
-  const votes = await Vote.findAll(treatmentUri);
-  await Promise.all(votes.map((vote) => vote.fetchVoters()));
-  return votes;
-}

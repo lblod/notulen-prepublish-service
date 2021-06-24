@@ -4,35 +4,53 @@ import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { ensureAgendapointType } from './agenda-utils';
 import { handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
 import { createBehandelingExtract } from './behandeling-exporter';
+import { buildExtractDataForTreatment} from './extract-utils';
 import { prefixes } from "./prefixes";
+import { fetchIntermissions } from './notulen-queries';
 import Meeting from '../models/meeting';
 import AgendaPoint from '../models/agendapoint';
-import Concept from './agenda-utils';
+import Concept from '../models/concept';
 import Treatment from '../models/treatment';
 import validateMeeting from "./validate-meeting";
+import validateTreatment from "./validate-treatment";
+
 import * as path from "path";
 import * as fs from "fs";
 import Handlebars from "handlebars";
+import { fetchParticipationList } from './query-utils';
 const DRAFT_DECISON_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 const PLANNED_AGENDAPOINT_TYPE_ID = "bdf68a65-ce15-42c8-ae1b-19eeb39e20d0";
+
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
  */
 
 
 
-async function constructHtmlForMeetingNotes(meetingUuid) {
+export async function constructHtmlForMeetingNotes(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);
   const agendapoints = await AgendaPoint.findAll({meetingUuid});
   const defaultAgendaPointType = await Concept.find(PLANNED_AGENDAPOINT_TYPE_ID);
   ensureAgendapointType(agendapoints, defaultAgendaPointType);
   const treatments = await Treatment.findAll({meetingUuid});
-  const intermissions = fetchIntermissions(meeting.uri);
+  const treatmentsData = [];
+  let errors = validateMeeting(meeting);
+  for (const treatment of treatments) {
+    const data = await buildExtractDataForTreatment(treatment, meeting, true);
+    treatmentsData.push(data);
+    const treatmentErrors = await validateTreatment(treatment);
+    errors = [...errors, ...treatmentErrors];
+  }
+  const participationList = await fetchParticipationList(meeting.uri);
+  const intermissions = await fetchIntermissions(meeting.uri);
+  const html = constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatmentsData, intermissions, participationList});
+  return {errors, html};
 }
 
-function constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatments}) {
+function constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatmentsData, intermissions, participationList}) {
   const template = PUBLISHER_TEMPLATES.get("meetingNotes");
-  const html = template({meeting, agendapoints, treatments});
+  const html = template({meeting, agendapoints, treatmentsData, intermissions, participationList, prefixes});
+  return html;
 }
 
 /**

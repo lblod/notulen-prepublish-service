@@ -5,10 +5,9 @@
       <span
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
-        resource="{{this.adminBodyUri}}">
-          {{this.adminBodyName}}
-      </span>
-      , van
+        resource="{{this.meeting.adminBodyUri}}">
+          {{this.meeting.adminBodyName}},
+      </span> van
       <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime" class='is-required'>
         {{this.meeting.startedAtText}}
       </span>
@@ -108,14 +107,14 @@
         <li class="au-c-template-list__item" typeof="besluit:Agendapunt" resource="{{this.uri}}" property="besluit:behandelt">
           <span property="dc:subject">Agendapunt</span>
           -
-          <span content="{{this.geplandOpenbaar}}" datatype="xsd:boolean" property="besluit:geplandOpenbaar">
-            {{#if this.geplandOpenbaar}}
+          <span content="{{this.plannedPublic}}" datatype="xsd:boolean" property="besluit:geplandOpenbaar">
+            {{#if this.plannedPublic}}
               <span class="au-c-template-public">Gepland openbaar</span>
             {{else}}
               <span class="au-c-template-private">Gepland besloten</span>
             {{/if}}
           </span>
-          <h3 datatype="xsd:string" property="dc:title">{{this.titel}}</h3>
+          <h3 datatype="xsd:string" property="dc:title">{{this.title}}</h3>
           <p datatype="xsd:string" property="dc:description">{{this.description}}</p>
         </li>
       {{/each}}
@@ -123,18 +122,20 @@
 
     <h2>Behandeling van de Agendapunten</h2>
     <div class="c-template-content" property="http://mu.semte.ch/vocabularies/ext/behandelingVanAgendapuntenContainer">
-      {{{behandelingsHtml}}}
+      {{#each this.treatmentsData}}
+        {{> treatment}}
+      {{/each}}
     </div>
 
     <h2>
       De voorzitter sluit de zitting op
-      <span content="{{endedAt.value}}" datatype="xsd:dateTime" property="prov:endedAtTime" class="is-required">
-        {{endedAt.text}}
+      <span content="{{this.meeting.endedAt}}" datatype="xsd:dateTime" property="prov:endedAtTime" class="is-required">
+        {{this.meeting.endedAtText}}
       </span>.
     </h2>
-    {{#if outro}}
+    {{#if this.meeting.outro}}
       <p>
-        {{{outro}}}
+        {{{this.meeting.outro}}}
       </p>
     {{/if}}
   </div>

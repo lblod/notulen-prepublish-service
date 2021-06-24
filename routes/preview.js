@@ -1,7 +1,7 @@
 import express from 'express';
 import {getZittingForNotulen} from '../support/notulen-queries';
 import {buildBesluitenLijstForMeetingId} from '../support/besluit-exporter';
-import {extractNotulenContentFromZitting} from '../support/notule-exporter';
+import {extractNotulenContentFromZitting, constructHtmlForMeetingNotes} from '../support/notule-exporter';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {constructHtmlForAgenda } from '../support/agenda-utils';
@@ -83,16 +83,33 @@ router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, r
 */
 router.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next) {
   try {
-    const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
-    const {html, errors} = await extractNotulenContentFromZitting(zitting);
+    const {html, errors} = await constructHtmlForMeetingNotes(req.params.zittingIdentifier);
     return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
-  } catch (err) {
-    console.log(err);
+  }
+  catch(e) {
+    console.error(e);
     const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
   }
+  // try {
+  //   const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
+  //   const {html, errors} = await extractNotulenContentFromZitting(zitting);
+  //   return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
+  // } catch (err) {
+  //   console.log(err);
+  //   const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`);
+  //   // @ts-ignore
+  //   error.status = 500;
+  //   return next(error);
+  // }
+});
+
+router.post('/meeting-notes-previews', async function(req, res, next) {
+
+
+
 });
 
 router.post('/extract-previews', async function (req, res, next) {

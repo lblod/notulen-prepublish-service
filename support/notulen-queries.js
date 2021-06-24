@@ -184,7 +184,7 @@ async function getZittingForNotulen(uuid) {
 
 
 
-async function fetchIntermissions(zittingUri) {
+export async function fetchIntermissions(zittingUri) {
   const intermissionsQuery = await query(`
     ${prefixMap.get("ext").toSparqlString()}
     ${prefixMap.get("prov").toSparqlString()}
