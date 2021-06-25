@@ -87,7 +87,7 @@ router.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, ne
   }
   catch(e) {
     console.error(e);
-    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`);
+    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${e}`);
     // @ts-ignore
     error.status = 500;
     return next(error);
