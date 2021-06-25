@@ -67,7 +67,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
     const template =  PUBLISHER_TEMPLATES.get('decisionsTitleAndDescriptionOnly');
     content = template({decisions});
   }
-  return {treatment, agendapoint, meeting, prefixes, participationList, votes, content};
+  return {treatment, agendapoint, meeting, prefixes: prefixes.join(" "), participationList, votes, content};
 }
 
 export function constructHtmlForExtract(extractData) {

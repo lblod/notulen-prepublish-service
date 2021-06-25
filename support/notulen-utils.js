@@ -56,9 +56,9 @@ export async function buildDataForMeetingNotes({meeting, treatments, publicTreat
   return {meeting, agendapoints, treatmentsData, intermissions, participationList};
 }
 
-function constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatmentsData, intermissions, participationList}) {
+export function constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatmentsData, intermissions, participationList}) {
   const template = PUBLISHER_TEMPLATES.get("meetingNotes");
-  const html = template({meeting, agendapoints, treatmentsData, intermissions, participationList, prefixes});
+  const html = template({meeting, agendapoints, treatmentsData, intermissions, participationList, prefixes: prefixes.join(" ")});
   return html;
 }
 
