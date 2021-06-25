@@ -8,7 +8,7 @@
   </p>
   <h3 resource="{{this.treatment.agendapoint}}" property="dc:subject">
     <span property="dc:title">{{this.agendapoint.title}}</span>
-    {{#if agendapuntType}}
+    {{#if this.agendapoint.type}}
       <span property="besluit:Agendapunt.type" resource="{{this.agendapoint.type}}" typeof="skos:Concept">{{this.agendapoint.typeName}}</span>
     {{/if}}
   </h3>
