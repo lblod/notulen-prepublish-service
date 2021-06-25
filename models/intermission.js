@@ -3,6 +3,12 @@ import { query, sparqlEscapeUri } from "mu";
 import { DateTime } from 'luxon';
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
+const POSITION_LABEL_MAP = {
+  "before": "voor",
+  "during": "tijdens",
+  "after": "na"
+};
+
 export default class Intermission {
   static async findAll({ meetingUri }) {
     const result = await query(`
@@ -76,10 +82,11 @@ export default class Intermission {
     this.endedAt = endedAt;
     this.endedAtText = this.endedAt ? DateTime.fromISO(this.endedAt).toFormat(dateFormat) : "";
     this.comment = comment;
-    this.agendaPositionLabel = agendaPositionLabel;
+    this.agendaPositionLabel = POSITION_LABEL_MAP[agendaPositionLabel];
     this.agendapointUri = agendapointUri;
     this.agendaPosition = agendaPosition;
     this.agendapointTitle = agendapointTitle;
     this.agendaPositionConcept = agendaPositionConcept;
   }
 }
+
