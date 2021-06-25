@@ -74,7 +74,6 @@ async function editorDocumentFromUuid( uuid ){
             ext:editorDocumentContext ?context;
             <http://mu.semte.ch/vocabularies/core/uuid> ${sparqlEscapeString( uuid )}
      }`);
-  
   if( queryResult.results.bindings.length === 0 ) {
     console.log(`No content found for EditorDocument ${uuid} returning null`);
     return null;

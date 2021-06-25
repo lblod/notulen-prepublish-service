@@ -30,25 +30,25 @@
         <p property="ext:hasIntermission" typeof="http://mu.semte.ch/vocabularies/ext/Intermission" resource="{{this.uri}}">
           <strong>
             Van
-            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{this.startedAt.value}}">
-              {{this.startedAt.text}}
+            <span property="prov:startedAtTime" datatype="xsd:dateTime" content="{{this.startedAt}}">
+              {{this.startedAtText}}
             </span>
-            {{#if this.endedAt.text}}
+            {{#if this.endedAt}}
               tot
-              <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{this.endedAt.value}}">
-                {{this.endedAt.text}}
+              <span property="prov:endedAtTime" datatype="xsd:dateTime" content="{{this.endedAt}}">
+                {{this.endedAtText}}
               </span>
             {{/if}}
-            {{#if this.apPosition.agendaPosUri}}
-              <span property="ext:agendaPosition" typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{this.apPosition.agendaPosUri}}">
-                <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{this.apPosition.positionUri}}">
+            {{#if this.agendaPosition}}
+              <span property="ext:agendaPosition" typeof="http://mu.semte.ch/vocabularies/ext/AgendaPosition" resource="{{this.agendaPosition}}">
+                <span property="http://mu.semte.ch/vocabularies/ext/location" typeof="skos:Concept" resource="{{this.agendaPositionConcept}}">
                   <span property="skos:prefLabel">
-                    {{this.apPosition.positionLabel}}
+                    {{this.agendaPositionLabel}}
                   </span>
                 </span>
-                <span style="display: inline !important" property="dct:related" resource="{{this.apPosition.apUri}}" typeof="besluit:Agendapunt">
+                <span style="display: inline !important" property="dct:related" resource="{{this.agendapointUri}}" typeof="besluit:Agendapunt">
                   <span property="dc:title">
-                    {{this.apPosition.apTitle}}
+                    {{this.agendapointTitle}}
                   </span>
                 </span>
               </span>

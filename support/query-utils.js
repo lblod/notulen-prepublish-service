@@ -1,7 +1,6 @@
 import {query, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 import Mandatee from "../models/mandatee";
-import Vote from '../models/vote';
 
 export async function fetchParticipationListForTreatment(resourceUri) {
   return fetchParticipationList(resourceUri, "besluit:heeftAanwezige", "ext:heeftAfwezige");

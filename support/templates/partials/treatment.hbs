@@ -15,7 +15,6 @@
   {{#if this.participationList}}
     <h4>Aanwezigen bij agendapunt</h4>
     <div class="c-template-content c-template-content--present" property="ext:aanwezigenTable">
-      {{log this.particpationList}}
       {{> mandateeList mandatees=this.participationList.present property="besluit:heeftAanwezige" title="Aanwezige leden" includeRole=true}}
       {{> mandateeList mandatees=this.participationList.notPresent property="ext:heeftAfwezige" title="Afwezige leden" includeRole=true}}
       {{#if this.participationList.chairman}}

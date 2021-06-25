@@ -48,7 +48,7 @@ export function constructHtmlForAgendaFromData(meeting, agendapoints) {
 
 /**
  *
- * @param {Zitting} zitting
+ * @param {string} meetingId
  * @param {string} agendaKind
  * @return {Promise<string>}
  */

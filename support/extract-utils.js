@@ -122,3 +122,25 @@ async function updateStatusOfLinkedContainer(extractUri) {
     }
   `);
 }
+
+/**
+ * Checks if a behandeling has already been published or not.
+ * Returns true if published, false if not.
+ */
+export async function isPublished( behandelingUri ) {
+  const r = await query(`
+      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+      PREFIX pav: <http://purl.org/pav/>
+      PREFIX prov: <http://www.w3.org/ns/prov#>
+
+      SELECT ?versionedBehandeling
+      WHERE
+      {
+        ?versionedBehandeling a ext:VersionedBehandeling;
+                  ext:behandeling ${sparqlEscapeUri(behandelingUri)}.
+        FILTER EXISTS { ?publishedResource ext:publishesBehandeling ?versionedBehandeling }.
+      } LIMIT 1
+  `);
+  return r.results.bindings.length > 0;
+}

@@ -1,14 +1,13 @@
 import express from 'express';
-import {getZittingForNotulen} from '../support/notulen-queries';
-import {buildBesluitenLijstForMeetingId} from '../support/besluit-exporter';
-import {extractNotulenContentFromZitting, constructHtmlForMeetingNotes} from '../support/notule-exporter';
+import { uuid } from 'mu';
+import { constructHtmlForAgenda } from '../support/agenda-utils';
+import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
+import { buildAllExtractsForMeeting, buildExtractData, constructHtmlForExtract } from '../support/extract-utils';
+import InvalidRequest from '../support/invalid-request';
+import { constructHtmlForMeetingNotes } from '../support/notulen-utils';
+import { parseBody } from '../support/parse-body';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
-import {constructHtmlForAgenda } from '../support/agenda-utils';
-import InvalidRequest from '../support/invalid-request';
-import {parseBody} from '../support/parse-body';
-import {buildExtractData, constructHtmlForExtract, buildAllExtractsForMeeting} from '../support/extract-utils';
-import {uuid} from 'mu';
 const router = express.Router();
 
 /***
@@ -93,23 +92,6 @@ router.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, ne
     error.status = 500;
     return next(error);
   }
-  // try {
-  //   const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
-  //   const {html, errors} = await extractNotulenContentFromZitting(zitting);
-  //   return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
-  // } catch (err) {
-  //   console.log(err);
-  //   const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`);
-  //   // @ts-ignore
-  //   error.status = 500;
-  //   return next(error);
-  // }
-});
-
-router.post('/meeting-notes-previews', async function(req, res, next) {
-
-
-
 });
 
 router.post('/extract-previews', async function (req, res, next) {

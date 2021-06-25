@@ -46,7 +46,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
-        sign:signatorySecret ?signatorySecret;
         sign:status publicationStatus:unpublished;
         ${customSignaturePredicate ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};` : ''}
         dct:subject ${sparqlEscapeUri(versionedUri)}.
@@ -59,7 +58,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         muSession:account/^foaf:account ?userUri.
       ${sparqlEscapeUri(sessionId)}
         ext:sessionRole ?signatoryRole.
-      BIND ("helloworldsecretbehere" AS ?signatorySecret)
     }`;
 
   const updatePromise = await update( query );

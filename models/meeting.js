@@ -17,6 +17,7 @@ export default class Meeting {
     SELECT * WHERE {
       BIND(${sparqlEscapeUri(uri)} as ?uri)
       ?uri a besluit:Zitting;
+        mu:uuid ?uuid;
         besluit:isGehoudenDoor ?adminBodyUri;
         besluit:geplandeStart ?plannedStart.
         ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
@@ -54,10 +55,11 @@ export default class Meeting {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("notulen").toSparqlString()}
     SELECT * WHERE {
+        BIND(${sparqlEscapeString(uuid)} as ?uuid)
         ?uri a besluit:Zitting;
       besluit:isGehoudenDoor ?adminBodyUri;
       besluit:geplandeStart ?plannedStart;
-      mu:uuid ${sparqlEscapeString(uuid)}.
+      mu:uuid ?uuid.
         ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
         ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
         OPTIONAL {
@@ -85,6 +87,7 @@ export default class Meeting {
 
   static fromBinding(binding) {
     return new Meeting({
+      uuid: binding.uuid.value,
       uri: binding.uri.value,
       adminBodyUri: binding.adminBodyUri?.value,
       adminBodyName: binding.adminBodyName?.value,
@@ -98,6 +101,7 @@ export default class Meeting {
   }
   constructor(
     {
+      uuid,
       uri,
       adminBodyName = null,
       adminBodyUri = null,
@@ -109,6 +113,7 @@ export default class Meeting {
       location = null
     }
   ) {
+    this.uuid = uuid;
     this.uri = uri;
     this.adminBodyUri = adminBodyUri;
     this.adminBodyName = adminBodyName;
