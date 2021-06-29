@@ -6,7 +6,7 @@
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
         resource="{{this.meeting.adminBodyUri}}">
-          {{this.meeting.adminBodyName}},
+        {{this.meeting.adminBodyName}},
       </span> van
       <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime" class='is-required'>
         {{this.meeting.startedAtText}}
@@ -47,9 +47,7 @@
                   </span>
                 </span>
                 <span style="display: inline !important" property="dct:related" resource="{{this.agendapointUri}}" typeof="besluit:Agendapunt">
-                  <span property="dc:title">
                     {{this.agendapointTitle}}
-                  </span>
                 </span>
               </span>
             {{/if}}
@@ -92,7 +90,7 @@
   {{/if}}
     <h2>
       De voorzitter opent de zitting op
-      <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime" data-editor-position-level="0" data-editor-rdfa-position-level="0">
+      <span content="{{this.meeting.startedAt}}" datatype="xsd:dateTime" property="prov:startedAtTime">
         {{this.meeting.startedAtText}}
       </span>.
     </h2>
