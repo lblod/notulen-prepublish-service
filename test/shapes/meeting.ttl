@@ -278,7 +278,7 @@
  		sh:name "gevolg" ;
  		sh:description "Het gevolg van de stemming." ;
  		sh:path <http://data.vlaanderen.be/ns/besluit#gevolg> ;
- 		sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ;
+# 		sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ; # see https://github.com/rdfjs/N3.js/issues/252
  		sh:minCount 1 ;
  		sh:maxCount 1 ;
  	] ;
@@ -286,7 +286,7 @@
  		sh:name "onderwerp" ;
  		sh:description "De beschrijving van het onderwerp waarover de stemming gaat." ;
  		sh:path <http://data.vlaanderen.be/ns/besluit#onderwerp> ;
- 		sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ;
+# 		sh:datatype <http://www.w3.org/1999/02/22-rdf-syntax-ns#langString> ; see https://github.com/rdfjs/N3.js/issues/252
  		sh:minCount 1 ;
  		sh:maxCount 1 ;
  	] ;
