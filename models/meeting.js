@@ -1,10 +1,50 @@
 import { prefixMap } from "../support/prefixes";
 import { DateTime } from 'luxon';
-import { query, sparqlEscapeString } from "mu";
+import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
 import validateMeeting from "../support/validate-meeting";
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
+  static async findURI(uri) {
+    const queryString = `
+    ${prefixMap.get("ext").toSparqlString()}
+    ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("prov").toSparqlString()}
+    ${prefixMap.get("mu").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
+    ${prefixMap.get("mandaat").toSparqlString()}
+    ${prefixMap.get("notulen").toSparqlString()}
+    SELECT * WHERE {
+      BIND(${sparqlEscapeUri(uri)} as ?uri)
+      ?uri a besluit:Zitting;
+        mu:uuid ?uuid;
+        besluit:isGehoudenDoor ?adminBodyUri;
+        besluit:geplandeStart ?plannedStart.
+        ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
+        ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
+      OPTIONAL {
+        ?uri prov:atLocation ?location.
+      }
+      OPTIONAL {
+        ?uri prov:startedAtTime ?startedAt.
+      }
+      OPTIONAL {
+        ?uri prov:endedAtTime ?endedAt.
+      }
+      OPTIONAL {
+        ?uri notulen:intro ?intro.
+      }
+      OPTIONAL {
+        ?uri notulen:outro ?outro.
+      }
+    }`;
+    const result = await query(queryString);
+    if (result.results.bindings.length !== 1) {
+      throw `found ${result.results.bindings.length} meetings for uri ${uri}`;
+    }
+    return Meeting.fromBinding(result.results.bindings[0]);
+  }
+
   static async find(uuid) {
     const queryString = `
     ${prefixMap.get("ext").toSparqlString()}
@@ -15,10 +55,11 @@ export default class Meeting {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("notulen").toSparqlString()}
     SELECT * WHERE {
+        BIND(${sparqlEscapeString(uuid)} as ?uuid)
         ?uri a besluit:Zitting;
       besluit:isGehoudenDoor ?adminBodyUri;
       besluit:geplandeStart ?plannedStart;
-      mu:uuid ${sparqlEscapeString(uuid)}.
+      mu:uuid ?uuid.
         ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
         ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
         OPTIONAL {
@@ -46,6 +87,7 @@ export default class Meeting {
 
   static fromBinding(binding) {
     return new Meeting({
+      uuid: binding.uuid.value,
       uri: binding.uri.value,
       adminBodyUri: binding.adminBodyUri?.value,
       adminBodyName: binding.adminBodyName?.value,
@@ -59,6 +101,7 @@ export default class Meeting {
   }
   constructor(
     {
+      uuid,
       uri,
       adminBodyName = null,
       adminBodyUri = null,
@@ -70,6 +113,7 @@ export default class Meeting {
       location = null
     }
   ) {
+    this.uuid = uuid;
     this.uri = uri;
     this.adminBodyUri = adminBodyUri;
     this.adminBodyName = adminBodyName;

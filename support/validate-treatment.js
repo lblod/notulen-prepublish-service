@@ -8,11 +8,11 @@ const errorMessages = {
   }
 };
 
-export default async function validateBehandeling(agendapunt) {
+export default async function validateTreatment(treatment) {
   const errors = [];
-  const document = agendapunt.behandeling.document.uuid;
-  if(document){
-    const decisions = await Decision.extractDecisionsFromDocument(document);
+  const documentId = treatment.editorDocumentUuid;
+  if(documentId){
+    const decisions = await Decision.extractDecisionsFromDocument(documentId);
     for(let decision of decisions) {
       if(!decision.typesAsText.includes('https://data.vlaanderen.be/id/concept/BesluitType/')) {
         errors.push(errorMessages.nl.besluitTypeRequired(decision.title));

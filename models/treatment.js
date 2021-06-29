@@ -10,6 +10,7 @@ export default class Treatment {
      ${prefixMap.get("mu").toSparqlString()}
      ${prefixMap.get("skos").toSparqlString()}
      ${prefixMap.get("ext").toSparqlString()}
+     ${prefixMap.get("mu").toSparqlString()}
      ${prefixMap.get("pav").toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
@@ -17,6 +18,7 @@ export default class Treatment {
                    besluit:behandelt ?agendapoint.
           ?agendapoint schema:position ?position.
           ?uri a besluit:BehandelingVanAgendapunt;
+               mu:uuid ?uuid;
                dct:subject ?agendapoint;
                besluit:openbaar ?isPublic.
           ?uri ext:hasDocumentContainer ?container.
@@ -44,7 +46,55 @@ export default class Treatment {
     }
   }
 
+  static async find(treatmentUuid) {
+    const queryString = `
+     ${prefixMap.get("besluit").toSparqlString()}
+     ${prefixMap.get("dct").toSparqlString()}
+     ${prefixMap.get("schema").toSparqlString()}
+     ${prefixMap.get("mu").toSparqlString()}
+     ${prefixMap.get("skos").toSparqlString()}
+     ${prefixMap.get("ext").toSparqlString()}
+     ${prefixMap.get("pav").toSparqlString()}
+      SELECT * WHERE {
+       BIND(${sparqlEscapeString(treatmentUuid)} as ?uuid)
+       ?meeting a besluit:Zitting;
+                   besluit:behandelt ?agendapoint.
+          ?agendapoint schema:position ?position.
+      ?uri a besluit:BehandelingVanAgendapunt;
+           mu:uuid ?uuid;
+           dct:subject ?agendapoint;
+           besluit:openbaar ?isPublic;
+           ext:hasDocumentContainer ?container.
+      ?container pav:hasCurrentVersion ?editorDocument.
+      ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid.
+    OPTIONAL {
+        ?uri besluit:gebeurtNa ?executedAfter.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftVoorzitter ?chairman.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftSecretaris ?secretary.
+    }
+   }
+   `;
+    try {
+      const result = await query(queryString);
+      if (result.results.bindings.length === 1) {
+        return Treatment.fromBinding(result.results.bindings[0]);
+      }
+      else {
+        throw `did not find treatment with uuid ${treatmentUuid}`;
+      }
+    }
+    catch(e) {
+      console.error(e);
+      throw `failed to retrieve treatment with uuid ${treatmentUuid}`;
+    }
+  }
+
   static fromBinding({
+    uuid,
     uri,
     agendapoint,
     position,
@@ -56,6 +106,7 @@ export default class Treatment {
     secretary = null
   }) {
     return new Treatment({
+      uuid: uuid.value,
       uri: uri.value,
       agendapoint : agendapoint.value,
       position : position.value,
@@ -69,6 +120,7 @@ export default class Treatment {
   }
 
   constructor({
+    uuid,
     uri,
     agendapoint,
     position,
@@ -79,6 +131,7 @@ export default class Treatment {
     chairman = null,
     secretary = null
   }) {
+    this.uuid = uuid;
     this.uri = uri;
     this.agendapoint = agendapoint;
     this.position = position;

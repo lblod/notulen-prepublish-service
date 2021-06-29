@@ -1,11 +1,12 @@
 import express from 'express';
-import {getZittingForBehandeling} from '../support/behandeling-queries';
-import {getZittingForNotulen} from '../support/notulen-queries';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
+import validateMeeting from '../support/validate-meeting';
+import validateTreatment from '../support/validate-treatment';
 import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../support/agenda-utils';
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
-import {ensureVersionedBehandelingForZitting, publishVersionedBehandeling} from '../support/behandeling-exporter';
-import {ensureVersionedNotulenForZitting, publishVersionedNotulen} from '../support/notule-exporter';
-import {isPublished} from '../support/behandeling-exporter';
+import {ensureVersionedExtract, publishVersionedExtract, isPublished} from '../support/extract-utils';
+import {ensureVersionedNotulen, publishVersionedNotulen, NOTULEN_KIND_PUBLIC} from '../support/notulen-utils';
 
 
 const router = express.Router();
@@ -67,14 +68,22 @@ router.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function
  */
 router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', async function(req, res, next) {
   try {
-    const zitting =  await getZittingForBehandeling(req.params.zittingIdentifier);
-    const behandelingUuid = decodeURIComponent(req.params.behandelingUuid);
-    const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zitting, behandelingUuid);
-    await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
-    return res.send( { success: true } ).end();
+    const meeting = await Meeting.find(req.params.zittingIdentifier);
+    const treatment = await Treatment.find(req.params.behandelingUuid);
+    const meetingErrors = validateMeeting(meeting);
+    const treatmentErrors = await validateTreatment(treatment);
+    const errors = [...meetingErrors, ...treatmentErrors];
+    if (errors.length) {
+      return res.status(400).send({errors}).end();
+    }
+    else {
+      const extractUri = await ensureVersionedExtract(treatment, meeting);
+      await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      return res.send( { success: true } ).end();
+    }
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while publishing the behandeling ${req.params.zittingIdentifier}: ${err}`);
+    const error = new Error(`An error occurred while publishing the behandeling ${req.params.behandelingUuid}: ${err}`);
     return next(error);
   }
 });
@@ -85,20 +94,31 @@ router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', 
  */
 router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res, next) {
   try {
-    const zitting = await getZittingForNotulen( req.params.zittingIdentifier );
-    const publicBehandelingUris = req.body['public-behandeling-uris'];
-    const zittingForBehandeling =  await getZittingForBehandeling(req.params.zittingIdentifier);
-    for(let agendapunt of zitting.agendapunten) {
-      if(publicBehandelingUris && publicBehandelingUris.includes(agendapunt.behandeling.uri)) {
-        const isBehandelingPublished = await isPublished(agendapunt.behandeling.uri);
-        if(!isBehandelingPublished) {
-          const prepublishedBehandelingUri = await ensureVersionedBehandelingForZitting(zittingForBehandeling, agendapunt.behandeling.uuid);
-          await publishVersionedBehandeling( prepublishedBehandelingUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+    const meetingUuid = req.params.zittingIdentifier;
+    const meeting = await Meeting.find(meetingUuid);
+    const treatments = await Treatment.findAll({meetingUuid});
+    let errors = validateMeeting(meeting);
+    for (const treatment of treatments) {
+      const treatmentErrors = await validateTreatment(treatment);
+      errors = [...errors, ...treatmentErrors];
+    }
+    if (errors.length) {
+      return res.status(400).send({errors}).end();
+    }
+    else {
+      const publicBehandelingUris = req.body['public-behandeling-uris'];
+      const versionedNotulenUri = await ensureVersionedNotulen(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
+      await publishVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      for (const treatment of treatments) {
+        if (publicBehandelingUris.includes(treatment.uri)) {
+          const published = await isPublished(treatment.uri);
+          if (! published) {
+            const extractUri = await ensureVersionedExtract(treatment, meeting);
+            await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+          }
         }
       }
     }
-    const prepublishedNotulenUri = await ensureVersionedNotulenForZitting(zitting, 'publication', publicBehandelingUris);
-    await publishVersionedNotulen( prepublishedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
     return res.send( { success: true } ).end();
   } catch (err) {
     console.log(err);
