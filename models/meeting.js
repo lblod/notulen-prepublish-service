@@ -4,6 +4,21 @@ import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
 import validateMeeting from "../support/validate-meeting";
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
+const articlesBasedOnClassifcationMap = {
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/4955bd72cd0e4eb895fdbfab08da0284': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000006': 'het',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/e14fe683-e061-44a2-b7c8-e10cab4e6ed9': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000005': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000007': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/4c38734d-2cc1-4d33-b792-0bd493ae9fc2': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000009': 'het',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e00000d': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/180a2fba-6ca9-4766-9b94-82006bb9c709': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e00000c': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/53c0d8cd-f3a2-411d-bece-4bd83ae2bbc9': 'de',
+  'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000008': 'het'
+}
+
 export default class Meeting {
   static async findURI(uri) {
     const queryString = `
@@ -55,16 +70,17 @@ export default class Meeting {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("notulen").toSparqlString()}
     SELECT * WHERE {
-        BIND(${sparqlEscapeString(uuid)} as ?uuid)
-        ?uri a besluit:Zitting;
-      besluit:isGehoudenDoor ?adminBodyUri;
-      besluit:geplandeStart ?plannedStart;
-      mu:uuid ?uuid.
-        ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
-        ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
-        OPTIONAL {
-            ?uri prov:atLocation ?location.
-        }
+      BIND(${sparqlEscapeString(uuid)} as ?uuid)
+      ?uri a besluit:Zitting;
+        besluit:isGehoudenDoor ?adminBodyUri;
+        besluit:geplandeStart ?plannedStart;
+        mu:uuid ?uuid.
+      ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
+      ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
+      ?mainBestuursorgaanUri besluit:classificatie ?adminBodyClassification.
+      OPTIONAL {
+          ?uri prov:atLocation ?location.
+      }
       OPTIONAL {
           ?uri prov:startedAtTime ?startedAt.
       }
@@ -91,6 +107,7 @@ export default class Meeting {
       uri: binding.uri.value,
       adminBodyUri: binding.adminBodyUri?.value,
       adminBodyName: binding.adminBodyName?.value,
+      adminBodyClassification: binding.adminBodyClassification?.value,
       startedAt: binding.startedAt?.value,
       endedAt: binding.endedAt?.value,
       plannedStart: binding.plannedStart?.value,
@@ -110,13 +127,15 @@ export default class Meeting {
       plannedStart = null,
       intro = null,
       outro = null,
-      location = null
+      location = null,
+      adminBodyClassification = null,
     }
   ) {
     this.uuid = uuid;
     this.uri = uri;
     this.adminBodyUri = adminBodyUri;
     this.adminBodyName = adminBodyName;
+    this.adminBodyArticle = this.generateAdminBodyArticle(adminBodyClassification)
     this.startedAt = startedAt;
     this.endedAt = endedAt;
     this.plannedStart = plannedStart;
@@ -126,6 +145,9 @@ export default class Meeting {
     this.intro = intro;
     this.outro = outro;
     this.location = location;
+  }
+  generateAdminBodyArticle(adminBodyUri) {
+    return articlesBasedOnClassifcationMap[adminBodyUri];
   }
 
   validate() {
