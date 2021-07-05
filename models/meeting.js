@@ -17,7 +17,7 @@ const articlesBasedOnClassifcationMap = {
   'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e00000c': 'de',
   'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/53c0d8cd-f3a2-411d-bece-4bd83ae2bbc9': 'de',
   'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000008': 'het'
-}
+};
 
 export default class Meeting {
   static async findURI(uri) {
@@ -135,7 +135,7 @@ export default class Meeting {
     this.uri = uri;
     this.adminBodyUri = adminBodyUri;
     this.adminBodyName = adminBodyName;
-    this.adminBodyArticle = this.generateAdminBodyArticle(adminBodyClassification)
+    this.adminBodyArticle = this.generateAdminBodyArticle(adminBodyClassification);
     this.startedAt = startedAt;
     this.endedAt = endedAt;
     this.plannedStart = plannedStart;
