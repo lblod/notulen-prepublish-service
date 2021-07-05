@@ -69,7 +69,7 @@ export default class Vote {
       ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
     this.attendees = attendeesQuery.results.bindings.map((binding) => new Mandatee(binding));
     const votersQuery = await query(`
@@ -87,7 +87,7 @@ export default class Vote {
       ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
     this.voters = votersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
@@ -106,7 +106,7 @@ export default class Vote {
       ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
     this.positiveVoters = positiveVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
@@ -125,7 +125,7 @@ export default class Vote {
       ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
     this.negativeVoters = negativeVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
 
@@ -144,7 +144,7 @@ export default class Vote {
       ?roleUri skos:prefLabel ?role.
       ?personUri foaf:familyName ?familyName.
       ?personUri persoon:gebruikteVoornaam ?name.
-    }
+    } ORDER BY ASC(?familyName) ASC(?name)
   `);
     this.abstentionVoters = abstentionVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
   }
