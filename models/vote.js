@@ -1,7 +1,7 @@
 import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
 import Mandatee from './mandatee';
-import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils'
+import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 
 export default class Vote {
   static async findAll({treatmentUri}) {
@@ -61,16 +61,6 @@ export default class Vote {
     this.abstentionVotes = abstentionVotes;
     this.position = position;
     this.adminBodyClassification = adminBodyClassification;
-    console.log('==========================')
-    console.log('==========================')
-    console.log('==========================')
-    console.log('==========================')
-    console.log(adminBodyClassification)
-    console.log(whoVotesBasedOnClassifcationMap[adminBodyClassification])
-    console.log('==========================')
-    console.log('==========================')
-    console.log('==========================')
-
     this.whoVotesPhrase = whoVotesBasedOnClassifcationMap[adminBodyClassification];
   }
 

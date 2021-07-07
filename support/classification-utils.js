@@ -9,7 +9,7 @@ const DEPUTATIE = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassifica
 const GOUVERNEUR = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/180a2fba-6ca9-4766-9b94-82006bb9c709';
 const PROVINCIERAAD = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e00000c';
 const VOORZITTER_VAN_HET_BIJZONDER_COMITE_VOOR_DE_SOCIALE_DIENST = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/53c0d8cd-f3a2-411d-bece-4bd83ae2bbc9';
-const VAST_BUREAU = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000008'
+const VAST_BUREAU = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000008';
 
 export const articlesBasedOnClassifcationMap = {
   [BURGEMEESTER]: 'De',

@@ -2,7 +2,7 @@ import { prefixMap } from "../support/prefixes";
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
 import validateMeeting from "../support/validate-meeting";
-import {articlesBasedOnClassifcationMap} from '../support/classification-utils'
+import {articlesBasedOnClassifcationMap} from '../support/classification-utils';
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
