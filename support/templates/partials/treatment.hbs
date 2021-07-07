@@ -48,9 +48,9 @@
       <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
         <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
           {{#if this.isSecret}}
-            De leden stemmen geheim
+            {{this.whoVotesPhrase}} geheim
           {{else}}
-            De leden stemmen openbaar
+            {{this.whoVotesPhrase}} openbaar
           {{/if}}
         </p>
         <p lang="nl-BE" property="besluit:onderwerp">{{this.subject}}</p>

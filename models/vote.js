@@ -1,6 +1,7 @@
 import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
 import Mandatee from './mandatee';
+import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils'
 
 export default class Vote {
   static async findAll({treatmentUri}) {
@@ -8,17 +9,24 @@ export default class Vote {
       const result = await query(`
          ${prefixMap.get("besluit").toSparqlString()}
          ${prefixMap.get("schema").toSparqlString()}
+         ${prefixMap.get("dct").toSparqlString()}
+         ${prefixMap.get("mandaat").toSparqlString()}
          SELECT DISTINCT * WHERE {
            ${sparqlEscapeUri(treatmentUri)} a besluit:BehandelingVanAgendapunt;
                                             besluit:heeftStemming ?uri.
-           ?uri a besluit:Stemming.
-           ?uri besluit:onderwerp ?subject.
-           ?uri besluit:gevolg ?result.
-           ?uri besluit:aantalVoorstanders ?positiveVotes.
-           ?uri besluit:aantalTegenstanders ?negativeVotes.
-           ?uri besluit:aantalOnthouders ?abstentionVotes.
-           ?uri besluit:geheim ?isSecret.
-           OPTIONAL { ?uri schema:position ?position. }
+          ?uri a besluit:Stemming.
+          ?uri besluit:onderwerp ?subject.
+          ?uri besluit:gevolg ?result.
+          ?uri besluit:aantalVoorstanders ?positiveVotes.
+          ?uri besluit:aantalTegenstanders ?negativeVotes.
+          ?uri besluit:aantalOnthouders ?abstentionVotes.
+          ?uri besluit:geheim ?isSecret.
+          ${sparqlEscapeUri(treatmentUri)} dct:subject ?agendapuntUri.
+          ?zittingUri besluit:behandelt ?agendapuntUri.
+          ?zittingUri besluit:isGehoudenDoor ?adminBodyUri.
+          ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
+          ?mainBestuursorgaanUri besluit:classificatie ?adminBodyClassification.
+          OPTIONAL { ?uri schema:position ?position. }
         } ORDER BY ASC(?position)
       `);
       return result.results.bindings.map((binding) => Vote.fromBinding(binding));
@@ -29,7 +37,7 @@ export default class Vote {
     }
   }
 
-  static fromBinding({uri, subject, result, isSecret, positiveVotes, negativeVotes, abstentionVotes, position}) {
+  static fromBinding({uri, subject, result, isSecret, positiveVotes, negativeVotes, abstentionVotes, position, adminBodyClassification}) {
     return new Vote({
       uri: uri.value,
       subject: subject.value,
@@ -38,11 +46,12 @@ export default class Vote {
       positiveVotes: positiveVotes.value,
       negativeVotes: negativeVotes.value,
       abstentionVotes: abstentionVotes.value,
-      position: position?.value
+      position: position?.value,
+      adminBodyClassification: adminBodyClassification?.value
     });
   }
 
-  constructor({uri, subject, result, isSecret, positiveVotes, negativeVotes, abstentionVotes, position}) {
+  constructor({uri, subject, result, isSecret, positiveVotes, negativeVotes, abstentionVotes, position, adminBodyClassification}) {
     this.uri = uri;
     this.subject = subject;
     this.result = result;
@@ -51,6 +60,18 @@ export default class Vote {
     this.negativeVotes = negativeVotes;
     this.abstentionVotes = abstentionVotes;
     this.position = position;
+    this.adminBodyClassification = adminBodyClassification;
+    console.log('==========================')
+    console.log('==========================')
+    console.log('==========================')
+    console.log('==========================')
+    console.log(adminBodyClassification)
+    console.log(whoVotesBasedOnClassifcationMap[adminBodyClassification])
+    console.log('==========================')
+    console.log('==========================')
+    console.log('==========================')
+
+    this.whoVotesPhrase = whoVotesBasedOnClassifcationMap[adminBodyClassification];
   }
 
   async fetchVoters() {
