@@ -21,7 +21,7 @@ export const PUBLISHER_TEMPLATES = new Map();
 export function setupHandleBars() {
   registerPartials();
   compileTemplates();
-  registerHelpers()
+  registerHelpers();
 }
 
 function compileTemplates() {
@@ -41,6 +41,6 @@ function registerPartials() {
 
 function registerHelpers() {
   Handlebars.registerHelper("inc", (value) =>{
-        return parseInt(value) + 1;
+    return parseInt(value) + 1;
   });
 }
