@@ -2,6 +2,7 @@ import { prefixMap } from "../support/prefixes";
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
 import validateMeeting from "../support/validate-meeting";
+import {articlesBasedOnClassifcationMap} from '../support/classification-utils';
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
@@ -55,16 +56,17 @@ export default class Meeting {
     ${prefixMap.get("mandaat").toSparqlString()}
     ${prefixMap.get("notulen").toSparqlString()}
     SELECT * WHERE {
-        BIND(${sparqlEscapeString(uuid)} as ?uuid)
-        ?uri a besluit:Zitting;
-      besluit:isGehoudenDoor ?adminBodyUri;
-      besluit:geplandeStart ?plannedStart;
-      mu:uuid ?uuid.
-        ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
-        ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
-        OPTIONAL {
-            ?uri prov:atLocation ?location.
-        }
+      BIND(${sparqlEscapeString(uuid)} as ?uuid)
+      ?uri a besluit:Zitting;
+        besluit:isGehoudenDoor ?adminBodyUri;
+        besluit:geplandeStart ?plannedStart;
+        mu:uuid ?uuid.
+      ?adminBodyUri mandaat:isTijdspecialisatieVan ?mainBestuursorgaanUri.
+      ?mainBestuursorgaanUri skos:prefLabel ?adminBodyName.
+      ?mainBestuursorgaanUri besluit:classificatie ?adminBodyClassification.
+      OPTIONAL {
+          ?uri prov:atLocation ?location.
+      }
       OPTIONAL {
           ?uri prov:startedAtTime ?startedAt.
       }
@@ -91,6 +93,7 @@ export default class Meeting {
       uri: binding.uri.value,
       adminBodyUri: binding.adminBodyUri?.value,
       adminBodyName: binding.adminBodyName?.value,
+      adminBodyClassification: binding.adminBodyClassification?.value,
       startedAt: binding.startedAt?.value,
       endedAt: binding.endedAt?.value,
       plannedStart: binding.plannedStart?.value,
@@ -110,13 +113,15 @@ export default class Meeting {
       plannedStart = null,
       intro = null,
       outro = null,
-      location = null
+      location = null,
+      adminBodyClassification = null,
     }
   ) {
     this.uuid = uuid;
     this.uri = uri;
     this.adminBodyUri = adminBodyUri;
     this.adminBodyName = adminBodyName;
+    this.adminBodyArticle = this.generateAdminBodyArticle(adminBodyClassification);
     this.startedAt = startedAt;
     this.endedAt = endedAt;
     this.plannedStart = plannedStart;
@@ -126,6 +131,9 @@ export default class Meeting {
     this.intro = intro;
     this.outro = outro;
     this.location = location;
+  }
+  generateAdminBodyArticle(adminBodyUri) {
+    return articlesBasedOnClassifcationMap[adminBodyUri];
   }
 
   validate() {

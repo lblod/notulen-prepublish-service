@@ -1,7 +1,7 @@
 <div class="au-c-template au-c-template--notes notulen" prefix="{{this.prefixes}}">
   <div resource="{{this.meeting.uri}}" typeof="besluit:Zitting">
     <h1 property="dc:title">
-      Notulen van de/het
+      Notulen van {{this.meeting.adminBodyArticle}}
       <span
         property="http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"
         typeof="http://data.vlaanderen.be/ns/besluit#Bestuursorgaan"
