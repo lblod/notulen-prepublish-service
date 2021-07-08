@@ -112,7 +112,7 @@
               <span class="au-c-template-private">Gepland besloten</span>
             {{/if}}
           </span>
-          <h3 datatype="xsd:string" property="dc:title">{{this.title}}</h3>
+          <h3>{{inc this.position}}. <span datatype="xsd:string" property="dc:title">{{this.title}}</span></h3>
           <p datatype="xsd:string" property="dc:description">{{this.description}}</p>
         </li>
       {{/each}}

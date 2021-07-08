@@ -17,7 +17,7 @@
           <span property="besluit:aangebrachtNa" resource="{{this.addedAfter}}"></span>
         {{/if}}
         <h2>
-          <span property="dc:title">{{this.title}}</span>
+          {{inc this.position}}. <span property="dc:title">{{this.title}}</span>
           {{#if this.type}}
             <span property="besluit:Agendapunt.type" resource="{{this.type}}" typeof="skos:Concept">{{this.typeName}}</span>
           {{/if}}
