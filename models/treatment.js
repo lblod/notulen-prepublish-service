@@ -1,5 +1,6 @@
 import {prefixMap} from "../support/prefixes";
-import {query, sparqlEscapeString} from "mu";
+import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
+import Attachment from './attachment'
 
 export default class Treatment {
   static async findAll({meetingUuid}) {
@@ -43,6 +44,7 @@ export default class Treatment {
     }
     else {
       const treatments = result.results.bindings.map((binding) => Treatment.fromBinding(binding));
+      await Promise.all(treatments.map((treatment) => treatment.getAttachments()));
       return treatments.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
     }
   }
@@ -101,6 +103,7 @@ export default class Treatment {
     position,
     isPublic,
     meeting,
+    container,
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
@@ -113,6 +116,7 @@ export default class Treatment {
       position : position.value,
       isPublic : isPublic.value === "true",
       meeting : meeting.value,
+      documentContainerUri: container?.value,
       editorDocumentUuid : editorDocumentUuid.value,
       executedAfter : executedAfter?.value,
       chairman : chairman?.value,
@@ -127,6 +131,7 @@ export default class Treatment {
     position,
     isPublic,
     meeting,
+    documentContainerUri,
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
@@ -142,5 +147,31 @@ export default class Treatment {
     this.executedAfter = executedAfter;
     this.chairman = chairman;
     this.secretary = secretary;
+    this.documentContainerUri = documentContainerUri;
   }
+  async getAttachments() {
+    const queryString = `
+      ${prefixMap.get("ext").toSparqlString()}
+      ${prefixMap.get("dct").toSparqlString()}
+      ${prefixMap.get("mu").toSparqlString()}
+      ${prefixMap.get("nfo").toSparqlString()}
+      SELECT * WHERE {
+        ${sparqlEscapeUri(this.documentContainerUri)} ext:hasAttachments ?uri.
+        ?uri dct:isPartOf ?decision;
+          ext:hasFile ?file;
+          ext:attachmentType ?type.
+        ?file nfo:fileName ?filename;
+          mu:uuid ?fileUuid.
+      }
+    `;
+    try {
+      const result = await query(queryString);
+      const attachments = result.results.bindings.map(Attachment.fromBinding);
+      this.attachments = attachments;
+    } catch(e) {
+      console.error(e);
+      throw `failed to retrieve attachments from treatment with uuid ${this.uuid}`;
+    }
+  }
+
 }

@@ -59,7 +59,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
   await Promise.all(votes.map((vote) => vote.fetchVoters()));
   let content;
   if (isPublic) {
-    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid);
+    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments);
     content = document?.content ?? "";
   }
   else {
