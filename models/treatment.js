@@ -25,7 +25,8 @@ export default class Treatment {
           ?container pav:hasCurrentVersion ?editorDocument.
           ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid.
           OPTIONAL {
-            ?uri besluit:gebeurtNa ?executedAfter.
+            ?agendapoint besluit:aangebrachtNa ?earlierAgendapoint.
+            ?executedAfter dct:subject ?earlierAgendapoint.
           }
           OPTIONAL {
             ?uri besluit:heeftVoorzitter ?chairman.
