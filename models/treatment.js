@@ -158,10 +158,12 @@ export default class Treatment {
       SELECT * WHERE {
         ${sparqlEscapeUri(this.documentContainerUri)} ext:hasAttachments ?uri.
         ?uri dct:isPartOf ?decision;
-          ext:hasFile ?file;
-          ext:attachmentType ?type.
+          ext:hasFile ?file.
         ?file nfo:fileName ?filename;
           mu:uuid ?fileUuid.
+        OPTIONAL {
+          ?uri ext:attachmentType ?type.
+        }
       }
     `;
     try {

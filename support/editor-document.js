@@ -111,12 +111,17 @@ function appendAttachmentsToDocument(documentContent, attachments) {
 
 function generateAttachmentPart(attachmentGroup) {
   const publicationBaseUrl = process.env.PUBLICATION_BASE_URL || '';
+  const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c'
   return `
     <h5>Bijlagen</h5>
     <ul class="bullet-list">
-      ${attachmentGroup.map((attachment) => (
-        `<li><a rev="dct:isPartOf" property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`
-      ))}
+      ${attachmentGroup.map((attachment) => {
+        if(attachment.type === REGULATORY_ATTACHMENT_TYPE) {
+          return `<li><a rev="dct:isPartOf" property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`
+        } else {
+          return `<li><a property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`
+        }
+      }).join('')}
     </ul>
   `;
 }
