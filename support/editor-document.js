@@ -117,9 +117,9 @@ function generateAttachmentPart(attachmentGroup) {
     <ul class="bullet-list">
       ${attachmentGroup.map((attachment) => {
         if(attachment.type === REGULATORY_ATTACHMENT_TYPE) {
-          return `<li><a rev="dct:isPartOf" property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`
+          return `<li><a rev="dct:isPartOf" property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`;
         } else {
-          return `<li><a property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`
+          return `<li><a property="eli:related_to" href="${publicationBaseUrl}/files/${attachment.fileUuid}/download" typeof="foaf:Document">${attachment.filename}</a></li>`;
         }
       }).join('')}
     </ul>

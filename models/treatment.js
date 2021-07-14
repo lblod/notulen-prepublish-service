@@ -1,6 +1,6 @@
 import {prefixMap} from "../support/prefixes";
 import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
-import Attachment from './attachment'
+import Attachment from './attachment';
 
 export default class Treatment {
   static async findAll({meetingUuid}) {
