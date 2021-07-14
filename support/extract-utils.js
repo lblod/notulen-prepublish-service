@@ -76,12 +76,12 @@ export function constructHtmlForExtract(extractData) {
   return html;
 }
 
-export async function signVersionedExtract( uri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", uri, sessionId, targetStatus, 'ext:signsBehandeling');
+export async function signVersionedExtract( uri, sessionId, targetStatus, attachments ) {
+  await handleVersionedResource( "signature", uri, sessionId, targetStatus, 'ext:signsBehandeling', undefined, undefined, attachments);
 }
 
-export async function publishVersionedExtract( extractUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", extractUri, sessionId, targetStatus, 'ext:publishesBehandeling');
+export async function publishVersionedExtract( extractUri, sessionId, targetStatus, attachments ) {
+  await handleVersionedResource( "publication", extractUri, sessionId, targetStatus, 'ext:publishesBehandeling', undefined, undefined, attachments);
   await updateStatusOfLinkedContainer(extractUri);
 }
 

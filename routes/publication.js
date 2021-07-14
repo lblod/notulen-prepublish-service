@@ -78,7 +78,7 @@ router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', 
     }
     else {
       const extractUri = await ensureVersionedExtract(treatment, meeting);
-      await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd", treatment.attachments );
       return res.send( { success: true } ).end();
     }
   } catch (err) {
@@ -98,9 +98,13 @@ router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, r
     const meeting = await Meeting.find(meetingUuid);
     const treatments = await Treatment.findAll({meetingUuid});
     let errors = validateMeeting(meeting);
+    const attachments = [];
     for (const treatment of treatments) {
       const treatmentErrors = await validateTreatment(treatment);
       errors = [...errors, ...treatmentErrors];
+      if(treatment.attachments) {
+        attachments.push(...treatment.attachments);
+      }
     }
     if (errors.length) {
       return res.status(400).send({errors}).end();
@@ -108,13 +112,13 @@ router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, r
     else {
       const publicBehandelingUris = req.body['public-behandeling-uris'];
       const versionedNotulenUri = await ensureVersionedNotulen(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
-      await publishVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+      await publishVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "gepubliceerd", attachments);
       for (const treatment of treatments) {
         if (publicBehandelingUris.includes(treatment.uri)) {
           const published = await isPublished(treatment.uri);
           if (! published) {
             const extractUri = await ensureVersionedExtract(treatment, meeting);
-            await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
+            await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd", treatment.attachments );
           }
         }
       }

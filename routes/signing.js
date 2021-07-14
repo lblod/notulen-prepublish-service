@@ -72,7 +72,7 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
     }
     else {
       const extractUri = await ensureVersionedExtract(treatment, meeting);
-      await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "getekend" );
+      await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "getekend", treatment.attachments );
       return res.send( { success: true } ).end();
     }
   } catch (err) {
@@ -92,16 +92,18 @@ router.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res,
     const meeting = await Meeting.find(meetingUuid);
     const treatments = await Treatment.findAll({meetingUuid});
     let errors = validateMeeting(meeting);
+    const attachments = [];
     for (const treatment of treatments) {
       const treatmentErrors = await validateTreatment(treatment);
       errors = [...errors, ...treatmentErrors];
+      attachments.push(...treatment.attachments);
     }
     if (errors.length) {
       return res.status(400).send({errors}).end();
     }
     else {
       const versionedNotulenUri = await ensureVersionedNotulen(meeting, treatments, NOTULEN_KIND_FULL);
-      await signVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "getekend" );
+      await signVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "getekend", attachments);
       return res.send( { success: true } ).end();
     }
   } catch (err) {

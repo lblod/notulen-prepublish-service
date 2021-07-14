@@ -16,13 +16,14 @@ function hackedSparqlEscapeString( string ) {
   return `${sparqlEscapeString(string.replace(/\n/g, function() { return ''; }).replace(/\r/g, function() { return '';}))}`;
 }
 
-async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate ) {
+async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate, attachments ) {
   const now = new Date();
   const newResourceUuid = uuid();
   const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
   const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
   const statePredicate = customStatePredicate || "ext:stateString";
   const contentPredicate = customContentPredicate || "ext:content";
+  const attachmentsString = attachments ? attachments.map((attachment) => `${sparqlEscapeUri(newResourceUri)} ext:hasAttachments ${sparqlEscapeUri(attachment.uri)}.`).join(' ') : '';
   // TODO: get correct signatorySecret from ACMIDM
   const query = `
     ${prefixMap.get("bv").toSparqlString()}
@@ -51,6 +52,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         dct:subject ${sparqlEscapeUri(versionedUri)}.
       ${sparqlEscapeUri(versionedUri)}
         ${statePredicate} ${sparqlEscapeString(targetStatus)}.
+      ${attachmentsString}
     } WHERE {
       ${sparqlEscapeUri(versionedUri)}
         ${contentPredicate} ?content.
@@ -59,7 +61,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
       ${sparqlEscapeUri(sessionId)}
         ext:sessionRole ?signatoryRole.
     }`;
-
   const updatePromise = await update( query );
   await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
   return updatePromise;
