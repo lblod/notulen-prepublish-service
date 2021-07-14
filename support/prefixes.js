@@ -62,7 +62,8 @@ const prefixMap = new Map([
   ["locn", new Prefix("locn", "http://www.w3.org/ns/locn#")],
   ["adres", new Prefix("adres", "https://data.vlaanderen.be/ns/adres#")],
   ["persoon", new Prefix("persoon", "http://data.vlaanderen.be/ns/persoon#")],
-  ["notulen", new Prefix("notulen", "http://lblod.data.gift/vocabularies/notulen/")]
+  ["notulen", new Prefix("notulen", "http://lblod.data.gift/vocabularies/notulen/")],
+  ["nfo", new Prefix("nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")]
 ]);
 
 export {prefixes, prefixMap};
