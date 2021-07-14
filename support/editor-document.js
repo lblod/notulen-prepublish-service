@@ -111,7 +111,7 @@ function appendAttachmentsToDocument(documentContent, attachments) {
 
 function generateAttachmentPart(attachmentGroup) {
   const publicationBaseUrl = process.env.PUBLICATION_BASE_URL || '';
-  const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c'
+  const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c';
   return `
     <h5>Bijlagen</h5>
     <ul class="bullet-list">
