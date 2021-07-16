@@ -6,10 +6,12 @@ import AgendaPoint from '../models/agendapoint';
 import Intermission from '../models/intermission';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
+import Attachment from '../models/attachment';
 import { constructHtmlForMeetingNotesFromData } from '../support/notulen-utils';
 import { prefixes } from "../support/prefixes";
 import { setupHandleBars } from '../support/setup-handlebars';
 import { htmlToRdf, loadDataset, shaclReportToMessage } from './helpers';
+import {appendAttachmentsToDocument} from '../support/editor-document';
 
 const person1 = {
   uri: 'http://my-example.org/mandatee/1',
@@ -68,6 +70,7 @@ const stemming = {
   abstentionVotes: 0,
   subject : 'voting subject',
   result: 'voting result',
+  whoVotesPhrase: 'De burgemeester stemt',
   attendees: [person1, person2],
   voters: [person1, person2],
   positiveVoters: [person1],
@@ -97,6 +100,24 @@ const agendapoint2 = new AgendaPoint({
 
 const agendapoints = [agendapoint1, agendapoint2];
 
+const attachment1 = new Attachment({
+  uri: "http://my-example.org/attachment/1",
+  decision: "http://my-example.org/besluit/1",
+  file: "http://my-example.org/file/1",
+  type: "http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c",
+  filename: "file",
+  fileUuid: "1"
+});
+
+const attachment2 = new Attachment({
+  uri: "http://my-example.org/attachment/2",
+  decision: "http://my-example.org/besluit/1",
+  file: "http://my-example.org/file/2",
+  type: "",
+  filename: "file",
+  fileUuid: "2"
+});
+
 const treatmentData1 = {
   treatment: new Treatment({
     uri: "http://my-example.org/behandeling/1",
@@ -113,6 +134,7 @@ const treatmentData1 = {
   participationList: {
     present: [person1, person2]
   },
+  attachments: [attachment1],
   votes: [stemming],
   content: `<div property="prov:generated" resource="http://my-example.org/besluit/1" typeof="http://data.vlaanderen.be/ns/besluit#Besluit http://mu.semte.ch/vocabularies/ext/BesluitNieuweStijl https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793" data-editor-position-level="3" data-editor-rdfa-position-level="2"><span property="ext:hiddenBesluitType" class="u-hidden">https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793</span>
       <p>Openbare titel besluit:</p>
@@ -463,6 +485,34 @@ describe('notulen publication template', function() {
       factory.namedNode(stemming.negativeVoters[0].uri)
     );
     assert(this.dataset.has(negativeVotersQuad));
+  });
+
+  it('attachments are linked correctly to the behandeling', async function() {
+    setupHandleBars();
+    const html = appendAttachmentsToDocument(treatmentData1.content, [attachment1, attachment2]);
+    const dataset = await htmlToRdf(html);
+
+    const attachment1Quad = factory.quad(
+      factory.namedNode('http://my-example.org/besluit/1'),
+      factory.namedNode('eli:related_to'),
+      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download`)
+    );
+
+    const attachment1ReverseQuad = factory.quad(
+      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download`),
+      factory.namedNode('dct:isPartOf'),
+      factory.literal('http://my-example.org/besluit/1', 'http://www.w3.org/2001/XMLSchema#string')
+    );
+
+    const attachment2Quad = factory.quad(
+      factory.namedNode('http://my-example.org/besluit/1'),
+      factory.namedNode('eli:related_to'),
+      factory.namedNode(`http://my-example.org/files/${attachment2.fileUuid}/download`)
+    );
+
+    assert(dataset.has(attachment1Quad));
+    assert(dataset.has(attachment1ReverseQuad));
+    assert(dataset.has(attachment2Quad));
   });
 
   it('validates the basic shacl profile', async function() {

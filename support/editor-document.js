@@ -106,7 +106,7 @@ function appendAttachmentsToDocument(documentContent, attachments) {
     const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
     decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
   }
-  return dom.window.document.body.outerHTML;
+  return dom.window.document.body.innerHTML;
 }
 
 function generateAttachmentPart(attachmentGroup) {
@@ -129,4 +129,4 @@ function generateAttachmentPart(attachmentGroup) {
 
 
 export default EditorDocument;
-export { editorDocumentFromUuid };
+export { editorDocumentFromUuid, appendAttachmentsToDocument };
