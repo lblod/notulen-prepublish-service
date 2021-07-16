@@ -92,7 +92,7 @@ This service extends nvdk/mu-javascript-template, which is a fork of semtech/mu-
 
 Running tests can currently be done with the following command:
 ```
-docker run --rm -v `pwd`:/app -e NODE_ENV=test --name foo nvdk/mu-javascript-template
+docker run --rm -v `pwd`:/app -e NODE_ENV=test -e PUBLICATION_BASE_URL=http://my-example.org --name foo nvdk/mu-javascript-template
 ```
 ## compatibility with frontend-gelinkt-notuleren
 
