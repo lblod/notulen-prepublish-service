@@ -4,6 +4,7 @@
 
 import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 
 class EditorDocument {
   constructor(content) {
@@ -64,7 +65,7 @@ class EditorDocument {
  * @return {Promise} Promise which resolves to an object representing
  * the EditorDocument
  */
-async function editorDocumentFromUuid( uuid ){
+async function editorDocumentFromUuid( uuid, attachments ){
   // We have removed dc:title from here
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -79,17 +80,50 @@ async function editorDocumentFromUuid( uuid ){
     return null;
   }
   const result = queryResult.results.bindings[0];
-
+  const content = attachments ? appendAttachmentsToDocument(result.content.value, attachments) : result.content.value;
   const doc = new EditorDocument({
     uri: result.uri.value,
     // title: result.title,
     context: JSON.parse( result.context.value ),
-    content: result.content.value
+    content
   });
 
   return doc;
 }
 
 
+function appendAttachmentsToDocument(documentContent, attachments) {
+  const attachmentsGrouped = {};
+  for(let attachment of attachments) {
+    if(attachmentsGrouped[attachment.decision]) {
+      attachmentsGrouped[attachment.decision].push(attachment);
+    } else {
+      attachmentsGrouped[attachment.decision] = [attachment];
+    }
+  }
+  const dom = new jsdom.JSDOM( `<body>${documentContent}</body>` );
+  for(let decisionKey in attachmentsGrouped) {
+    const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey]);
+    const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
+    decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
+  }
+  return dom.window.document.body.innerHTML;
+}
+
+function generateAttachmentPart(attachmentGroup) {
+  const publicationBaseUrl = process.env.PUBLICATION_BASE_URL || '';
+  const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c';
+  const attachments = attachmentGroup.map((attachment) => {
+    attachment.isRegulatory = attachment.type === REGULATORY_ATTACHMENT_TYPE;
+    attachment.link = `${publicationBaseUrl}/files/${attachment.fileUuid}/download`;
+    return attachment;
+  });
+  const template = PUBLISHER_TEMPLATES.get('attachments');
+  const html = template({attachments});
+  return html;
+}
+
+
+
 export default EditorDocument;
-export { editorDocumentFromUuid };
+export { editorDocumentFromUuid, appendAttachmentsToDocument };

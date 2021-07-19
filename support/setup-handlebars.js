@@ -8,7 +8,8 @@ const templateNameToFile = {
   meetingNotes: "notulen-prepublish.hbs",
   treatment: "behandeling-prepublish.hbs",
   extract: "extract.hbs",
-  decisionsTitleAndDescriptionOnly: "decisions-title-and-descriptions-only.hbs"
+  decisionsTitleAndDescriptionOnly: "decisions-title-and-descriptions-only.hbs",
+  attachments: 'attachments.hbs'
 };
 
 const partialNameToFile = {

@@ -86,12 +86,12 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
 }
 
 
-export async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen');
+export async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus, attachments ) {
+  await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen', undefined, undefined, attachments);
 }
 
-export async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", versionedNotulenUri, sessionId, targetStatus, 'ext:publishesNotulen');
+export async function publishVersionedNotulen( versionedNotulenUri, sessionId, targetStatus, attachments) {
+  await handleVersionedResource( "publication", versionedNotulenUri, sessionId, targetStatus, 'ext:publishesNotulen', undefined, undefined, attachments);
   await updateLinkedDocuments( versionedNotulenUri );
 }
 
