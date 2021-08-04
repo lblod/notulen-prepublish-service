@@ -80,7 +80,7 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
       const data = await buildDataForMeetingNotes({meeting, treatments, publicTreatments});
       html = constructHtmlForMeetingNotesFromData(data);
     }
-    const versionedNotulen = await VersionedNotulen.create({meeting, html, kind});
+    const versionedNotulen = await VersionedNotulen.create({meeting, html, kind, publicTreatments});
     return versionedNotulen.uri;
   }
 }

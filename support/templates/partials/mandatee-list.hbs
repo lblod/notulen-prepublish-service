@@ -7,7 +7,7 @@
       <ul class="au-c-template-list-inline">
         {{#each mandatees}}
           <li class="au-c-template-list-inline__item" typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{../property}}">
-            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan">
+            <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan" typeof="person:Person">
               <span property="persoon:gebruikteVoornaam">{{this.name}}</span>
               <span property="foaf:familyName">{{this.familyName}} </span>
             </span>

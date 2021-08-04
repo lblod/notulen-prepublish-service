@@ -30,7 +30,7 @@ export default class VersionedNotulen {
     }
   }
 
-  static async create({kind, meeting, html}) {
+  static async create({kind, meeting, html, publicTreatments}) {
     const versionedNotulenUuid = uuid();
     const versionedNotulenUri = `http://data.lblod.info/prepublished-behandelingen/${versionedNotulenUuid}`;
     await update( `
@@ -45,6 +45,7 @@ export default class VersionedNotulen {
           ext:content ${hackedSparqlEscapeString(html)};
           ext:notulenKind ${sparqlEscapeString(kind)};
           mu:uuid ${sparqlEscapeString( versionedNotulenUuid )}.
+        ${publicTreatments.map((uri) => ` ${sparqlEscapeUri(versionedNotulenUri)} ext:publicBehandeling ${sparqlEscapeUri(uri)}.`).join(' ')}
         ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)}.
       }`);
     await update(`
