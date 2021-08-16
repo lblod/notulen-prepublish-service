@@ -1,7 +1,7 @@
 import express from 'express';
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
-import { buildBesluitenLijstForMeetingId, publishVersionedBesluitenlijst } from '../support/besluit-exporter';
+import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
 import { buildAllExtractsForMeeting, buildExtractData, constructHtmlForExtract } from '../support/extract-utils';
 import InvalidRequest from '../support/invalid-request';
 import { constructHtmlForMeetingNotes } from '../support/notulen-utils';
