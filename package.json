@@ -28,11 +28,6 @@
     "type": "git",
     "url": "https://github.com/lblod/notulen-prepublish-service"
   },
-  "release-it": {
-    "npm": {
-      "publish": false
-    }
-  },
   "author": "redpencil.io",
   "license": "MIT"
 }
