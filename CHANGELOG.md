@@ -1,3 +1,15 @@
+## 1.0.0 (2021-08-18)
+
+#### :rocket: Enhancement
+* [#55](https://github.com/lblod/notulen-prepublish-service/pull/55) Use a job for a pre-publishing ([@madnificent](https://github.com/madnificent))
+
+#### :bug: Bug Fix
+* [#55](https://github.com/lblod/notulen-prepublish-service/pull/55) Use a job for a pre-publishing ([@madnificent](https://github.com/madnificent))
+
+#### Committers: 1
+- Aad Versteden ([@madnificent](https://github.com/madnificent))
+
+
 ## 0.15.0 (2021-08-17)
 
 #### :rocket: Enhancement
