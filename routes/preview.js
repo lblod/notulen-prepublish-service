@@ -17,6 +17,61 @@ const router = express.Router();
  */
 
 /**
+ * Contains the job results.
+ */
+const prepublishJobResults = new Map();
+
+/**
+ * Adds a job result.
+ *
+ * @param {string} uuid The uuid of the job.
+ * @param {number} status HTTP status code.
+ * @param {object} result The response to send to the user.
+ */
+function pushJobResult( uuid, status, result ) {
+  prepublishJobResults.set( uuid, { status, result } );
+}
+
+/**
+ * Creates a new job.
+ *
+ * @param res Ngenix response object.
+ * @return job Uuid
+ */
+function yieldJobId(res) {
+  const jobUuid = uuid();
+  res
+    .status(200)
+    .send({
+      data: {
+        attributes: {
+          jobId: jobUuid
+        },
+        type: "prebulish-jobs"
+      }
+    });
+
+  return jobUuid;
+}
+
+router.get('/prepublish/job-result/:jobUuid', (req, res) => {
+  const jobUuid = req.params.jobUuid;
+
+  if( prepublishJobResults.has(jobUuid) ) {
+    const { status, result } = prepublishJobResults.get(jobUuid);
+    prepublishJobResults.delete(jobUuid);
+    res
+      .status( status )
+      .send( result );
+  } else {
+    res
+      .status( 404 )
+      .send("UUID not found, production may be ongoing yet.");
+  }
+});
+
+
+/**
 * Prepublish an agenda as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
@@ -62,17 +117,18 @@ router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, n
  * Prepublish besluiten as HTML+RDFa snippet for a given document
  * The snippets are not persisted in the store
  */
-router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
+router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res) {
+  const jobUuid = yieldJobId( res );
+
   try {
     const extracts = await buildAllExtractsForMeeting(req.params.zittingIdentifier);
-    return res.send(extracts).end();
+    pushJobResult(jobUuid, 200, extracts);
+    // return res.send(extracts).end();
   }
   catch (err) {
     console.log(err);
-    const error = new Error(`An error occured while fetching contents for prepublished besluiten ${req.params.documentIdentifier}: ${err}`);
-    // @ts-ignore
-    error.status = 500;
-    return next(error);
+    const errorString = `An error occured while fetching contents for prepublished besluiten ${req.params.zittingIdentifier}: ${err}`;
+    pushJobResult(jobUuid, 500, errorString);
   }
 });
 
