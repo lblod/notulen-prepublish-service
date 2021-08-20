@@ -8,8 +8,8 @@ import { constructHtmlForMeetingNotes } from '../support/notulen-utils';
 import { parseBody } from '../support/parse-body';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
+import { performance } from 'perf_hooks';
 const router = express.Router();
-
 /***
  *
  * PREPUBLICATION ENDPOINTS
@@ -64,7 +64,11 @@ router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, n
  */
 router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, res, next) {
   try {
+    const t1=performance.now();
     const extracts = await buildAllExtractsForMeeting(req.params.zittingIdentifier);
+    const t2=performance.now();
+    console.log("Call to buildAllExtractsForMeeting took " + (t2 - t1) + " milliseconds.")
+    debugger;
     return res.send(extracts).end();
   }
   catch (err) {

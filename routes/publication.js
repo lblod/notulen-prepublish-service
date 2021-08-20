@@ -7,7 +7,7 @@ import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../suppor
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedExtract, publishVersionedExtract, isPublished} from '../support/extract-utils';
 import {ensureVersionedNotulen, publishVersionedNotulen, NOTULEN_KIND_PUBLIC} from '../support/notulen-utils';
-
+import { performance } from 'perf_hooks';
 
 const router = express.Router();
 

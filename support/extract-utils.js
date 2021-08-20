@@ -12,6 +12,10 @@ import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import {handleVersionedResource} from './pre-importer';
+import { performance } from 'perf_hooks';
+import {prefixMap} from "../support/prefixes";
+import Mandatee from "../models/mandatee";
+import extractPerformanceHack from "./extract-performance-hack";
 
 const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 /**
@@ -23,24 +27,14 @@ const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4
 // here for legacy purposes
 export async function buildAllExtractsForMeeting(meetingUuid) {
   const treatments = await Treatment.findAll({meetingUuid});
-  const extracts = [];
+  // const extracts = [];
   const meeting = await Meeting.find(meetingUuid);
   const meetingErrors = validateMeeting(meeting);
-  for (const treatment of treatments) {
-    const data = await buildExtractDataForTreatment(treatment, meeting, true);
-    const html = constructHtmlForExtract(data);
-    const treatmentErrors = await validateTreatment(treatment);
-    extracts.push( {
-      data: {
-        attributes: {
-          content: html,
-          errors: [...meetingErrors, ...treatmentErrors],
-          behandeling: treatment.uri,
-          uuid: treatment.uuid
-        }
-      }
-    });
-  }
+  // for (const treatment of treatments) {
+  //   const extract=await extractPerformanceHack(treatment, meeting, true, meetingErrors);
+  //   extracts.push(extract);
+  // }
+  const extracts=await Promise.all(treatments.map(treatment=>extractPerformanceHack(treatment, meeting, true, meetingErrors)));
   return extracts;
 }
 
@@ -52,6 +46,7 @@ export async function buildExtractData(treatmentUuid, isPublic = true) {
 }
 
 export async function buildExtractDataForTreatment(treatment, meeting, isPublic = true) {
+  
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   const participationList = await fetchParticipationListForTreatment(treatment.uri);
 
@@ -67,6 +62,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
     const template =  PUBLISHER_TEMPLATES.get('decisionsTitleAndDescriptionOnly');
     content = template({decisions});
   }
+  
   return {treatment, agendapoint, meeting, prefixes: prefixes.join(" "), participationList, votes, content};
 }
 
