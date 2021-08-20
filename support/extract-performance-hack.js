@@ -36,7 +36,7 @@ export default async function extractPerformanceHack(treatment, meeting, isPubli
   const resourceUri = treatment.uri;
   const presentPredicate = "besluit:heeftAanwezige";
   const absentPredicate = "ext:heeftAfwezige";
-  const apParticipationVotesQuery = `
+  let apParticipationVotesQuery = `
 
     ${prefixMap.get("besluit").toSparqlString()}
     ${prefixMap.get("mandaat").toSparqlString()}
@@ -109,82 +109,6 @@ export default async function extractPerformanceHack(treatment, meeting, isPubli
         ?SEsecretaryBestuursfunctieCodeUri skos:prefLabel ?SEsecretaryRole.
         ?SEsecretaryPersonUri foaf:familyName ?SEsecretaryFamilyName.
         ?SEsecretaryPersonUri persoon:gebruikteVoornaam ?SEsecretaryName.
-      }`+
-      //VOTES QUERY
-      `
-      OPTIONAL{
-        ${sparqlEscapeUri(resourceUri)} a besluit:BehandelingVanAgendapunt;
-          besluit:heeftStemming ?VOuri.
-        ?VOuri a besluit:Stemming.
-        ?VOuri besluit:onderwerp ?VOsubject.
-        ?VOuri besluit:gevolg ?VOresult.
-        ?VOuri besluit:aantalVoorstanders ?VOpositiveVotes.
-        ?VOuri besluit:aantalTegenstanders ?VOnegativeVotes.
-        ?VOuri besluit:aantalOnthouders ?VOabstentionVotes.
-        ?VOuri besluit:geheim ?VOisSecret.
-        ${sparqlEscapeUri(resourceUri)} dct:subject ?VOagendapuntUri.
-        ?VOzittingUri besluit:behandelt ?VOagendapuntUri.
-        ?VOzittingUri besluit:isGehoudenDoor ?VOadminBodyUri.
-        ?VOadminBodyUri mandaat:isTijdspecialisatieVan ?VOmainBestuursorgaanUri.
-        ?VOmainBestuursorgaanUri besluit:classificatie ?VOadminBodyClassification.
-        OPTIONAL { 
-          ?VOuri schema:position ?VOposition. 
-        }`+
-        //VOTES PARTICIPANTS QUERY
-        `
-        OPTIONAL{
-          ?VOuri besluit:heeftAanwezige ?VPmandatarisUri.
-          ?VPmandatarisUri mandaat:isBestuurlijkeAliasVan ?VPpersonUri.
-          ?VPmandatarisUri org:holds ?VPpositionUri.
-          ?VPpositionUri org:role ?VProleUri.
-          ?VProleUri skos:prefLabel ?VProle.
-          ?VPpersonUri foaf:familyName ?VPfamilyName.
-          ?VPpersonUri persoon:gebruikteVoornaam ?VPname.
-        }`+
-        //VOTERS QUERY
-        `
-        OPTIONAL{
-          ?VOuri besluit:heeftStemmer ?VSmandatarisUri.
-          ?VSmandatarisUri mandaat:isBestuurlijkeAliasVan ?VSpersonUri.
-          ?VSmandatarisUri org:holds ?VSpositionUri.
-          ?VSpositionUri org:role ?VSroleUri.
-          ?VSroleUri skos:prefLabel ?VSrole.
-          ?VSpersonUri foaf:familyName ?VSfamilyName.
-          ?VSpersonUri persoon:gebruikteVoornaam ?VSname.
-        }`+
-        //POSITIVE VOTERS QUERY
-        `
-        OPTIONAL{
-          ?VOuri besluit:heeftVoorstander ?PVmandatarisUri.
-          ?PVmandatarisUri mandaat:isBestuurlijkeAliasVan ?PVpersonUri.
-          ?PVmandatarisUri org:holds ?PVpositionUri.
-          ?PVpositionUri org:role ?PVroleUri.
-          ?PVroleUri skos:prefLabel ?PVrole.
-          ?PVpersonUri foaf:familyName ?PVfamilyName.
-          ?PVpersonUri persoon:gebruikteVoornaam ?PVname.
-        }`+
-        //NEGATIVE VOTERS QUERY
-        `
-        OPTIONAL{
-          ?VOuri besluit:heeftTegenstander ?NVmandatarisUri.
-          ?NVmandatarisUri mandaat:isBestuurlijkeAliasVan ?NVpersonUri.
-          ?NVmandatarisUri org:holds ?NVpositionUri.
-          ?NVpositionUri org:role ?NVroleUri.
-          ?NVroleUri skos:prefLabel ?NVrole.
-          ?NVpersonUri foaf:familyName ?NVfamilyName.
-          ?NVpersonUri persoon:gebruikteVoornaam ?NVname.
-        }`+
-        //ABSENTEE VOTERS QUERY
-        `
-        OPTIONAL{
-          ?VOuri besluit:heeftOnthouder ?AVmandatarisUri.
-          ?AVmandatarisUri mandaat:isBestuurlijkeAliasVan ?AVpersonUri.
-          ?AVmandatarisUri org:holds ?AVpositionUri.
-          ?AVpositionUri org:role ?AVroleUri.
-          ?AVroleUri skos:prefLabel ?AVrole.
-          ?AVpersonUri foaf:familyName ?AVfamilyName.
-          ?AVpersonUri persoon:gebruikteVoornaam ?AVname.
-        }
       }
     }
   `;
@@ -197,8 +121,8 @@ export default async function extractPerformanceHack(treatment, meeting, isPubli
   }
 
   //CREATE AP OBJECT
-  const apBindings=apAndParticipationVotesResult.results.bindings;
-  const firstApBinding=apAndParticipationVotesResult.results.bindings[0];
+  let apBindings=apAndParticipationVotesResult.results.bindings;
+  let firstApBinding=apAndParticipationVotesResult.results.bindings[0];
   
   const agendapointTest=new AgendaPoint({
     uri: firstApBinding.APuri.value,
@@ -278,6 +202,105 @@ export default async function extractPerformanceHack(treatment, meeting, isPubli
   } else {
     participationListTest=undefined;
   }
+
+  apParticipationVotesQuery=`
+
+    ${prefixMap.get("besluit").toSparqlString()}
+    ${prefixMap.get("mandaat").toSparqlString()}
+    ${prefixMap.get("org").toSparqlString()}
+    ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
+    ${prefixMap.get("schema").toSparqlString()}
+    ${prefixMap.get("skos").toSparqlString()}
+    ${prefixMap.get("persoon").toSparqlString()}
+    ${prefixMap.get("ext").toSparqlString()}
+
+    SELECT * WHERE {`+
+      //VOTES QUERY
+      `
+      ${sparqlEscapeUri(resourceUri)} a besluit:BehandelingVanAgendapunt;
+      besluit:heeftStemming ?VOuri.
+      ?VOuri a besluit:Stemming.
+      ?VOuri besluit:onderwerp ?VOsubject.
+      ?VOuri besluit:gevolg ?VOresult.
+      ?VOuri besluit:aantalVoorstanders ?VOpositiveVotes.
+      ?VOuri besluit:aantalTegenstanders ?VOnegativeVotes.
+      ?VOuri besluit:aantalOnthouders ?VOabstentionVotes.
+      ?VOuri besluit:geheim ?VOisSecret.
+      ${sparqlEscapeUri(resourceUri)} dct:subject ?VOagendapuntUri.
+      ?VOzittingUri besluit:behandelt ?VOagendapuntUri.
+      ?VOzittingUri besluit:isGehoudenDoor ?VOadminBodyUri.
+      ?VOadminBodyUri mandaat:isTijdspecialisatieVan ?VOmainBestuursorgaanUri.
+      ?VOmainBestuursorgaanUri besluit:classificatie ?VOadminBodyClassification.
+      OPTIONAL { 
+        ?VOuri schema:position ?VOposition. 
+      }`+
+      //VOTES PARTICIPANTS QUERY
+      `
+      OPTIONAL{
+        ?VOuri besluit:heeftAanwezige ?VPmandatarisUri.
+        ?VPmandatarisUri mandaat:isBestuurlijkeAliasVan ?VPpersonUri.
+        ?VPmandatarisUri org:holds ?VPpositionUri.
+        ?VPpositionUri org:role ?VProleUri.
+        ?VProleUri skos:prefLabel ?VProle.
+        ?VPpersonUri foaf:familyName ?VPfamilyName.
+        ?VPpersonUri persoon:gebruikteVoornaam ?VPname.
+      }`+
+      //VOTERS QUERY
+      `
+      OPTIONAL{
+        ?VOuri besluit:heeftStemmer ?VSmandatarisUri.
+        ?VSmandatarisUri mandaat:isBestuurlijkeAliasVan ?VSpersonUri.
+        ?VSmandatarisUri org:holds ?VSpositionUri.
+        ?VSpositionUri org:role ?VSroleUri.
+        ?VSroleUri skos:prefLabel ?VSrole.
+        ?VSpersonUri foaf:familyName ?VSfamilyName.
+        ?VSpersonUri persoon:gebruikteVoornaam ?VSname.
+      }`+
+      //POSITIVE VOTERS QUERY
+      `
+      OPTIONAL{
+        ?VOuri besluit:heeftVoorstander ?PVmandatarisUri.
+        ?PVmandatarisUri mandaat:isBestuurlijkeAliasVan ?PVpersonUri.
+        ?PVmandatarisUri org:holds ?PVpositionUri.
+        ?PVpositionUri org:role ?PVroleUri.
+        ?PVroleUri skos:prefLabel ?PVrole.
+        ?PVpersonUri foaf:familyName ?PVfamilyName.
+        ?PVpersonUri persoon:gebruikteVoornaam ?PVname.
+      }`+
+      //NEGATIVE VOTERS QUERY
+      `
+      OPTIONAL{
+        ?VOuri besluit:heeftTegenstander ?NVmandatarisUri.
+        ?NVmandatarisUri mandaat:isBestuurlijkeAliasVan ?NVpersonUri.
+        ?NVmandatarisUri org:holds ?NVpositionUri.
+        ?NVpositionUri org:role ?NVroleUri.
+        ?NVroleUri skos:prefLabel ?NVrole.
+        ?NVpersonUri foaf:familyName ?NVfamilyName.
+        ?NVpersonUri persoon:gebruikteVoornaam ?NVname.
+      }`+
+      //ABSENTEE VOTERS QUERY
+      `
+      OPTIONAL{
+        ?VOuri besluit:heeftOnthouder ?AVmandatarisUri.
+        ?AVmandatarisUri mandaat:isBestuurlijkeAliasVan ?AVpersonUri.
+        ?AVmandatarisUri org:holds ?AVpositionUri.
+        ?AVpositionUri org:role ?AVroleUri.
+        ?AVroleUri skos:prefLabel ?AVrole.
+        ?AVpersonUri foaf:familyName ?AVfamilyName.
+        ?AVpersonUri persoon:gebruikteVoornaam ?AVname.
+      }
+    }
+  `;
+
+  try {
+    apAndParticipationVotesResult=await query(apParticipationVotesQuery);
+  } catch (error) {
+    debugger;
+  }
+  
+  apBindings=apAndParticipationVotesResult.results.bindings;
+  firstApBinding=apAndParticipationVotesResult.results.bindings[0];
 
   //CREATE VOTE OBJECT
   const uniqueVO=findUnique('VOuri', apBindings);

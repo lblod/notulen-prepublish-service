@@ -67,7 +67,7 @@ router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, r
     const t1=performance.now();
     const extracts = await buildAllExtractsForMeeting(req.params.zittingIdentifier);
     const t2=performance.now();
-    console.log("Call to buildAllExtractsForMeeting took " + (t2 - t1) + " milliseconds.")
+    console.log("call to buildAllExtractsForMeeting took " + (t2 - t1) + " milliseconds.")
     debugger;
     return res.send(extracts).end();
   }
