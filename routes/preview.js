@@ -177,7 +177,16 @@ router.post('/extract-previews', async function (req, res, next) {
               id: treatmentUuid,
               type: "behandeling-van-agendapunt"
             }
+          },
+          meeting: {
+            data: {
+              id: extractData.meeting.uuid,
+              type: "zitting"
+            }
           }
+        },
+        meta: {
+          validationErrors: errors
         }
       }
     ).end();
