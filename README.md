@@ -13,14 +13,14 @@ Once a specific document is generated for signing or publication the content is 
 * `POST /extract-previews`: JSON:API compliant endpoint that creates a preview, expects the following post body
 ``` json
 {
-        data: {
-          type: "extract-preview",
+        "data": {
+          "type": "extract-preview",
         },
-        relationships: {
-          treatment: {
-            data: {
-              id: treatmentUuid,
-              type: "behandeling-van-agendapunt"
+        "relationships": {
+          "treatment": {
+            "data": {
+              "id": "{{treatmentUuid}}",
+              "type": "behandeling-van-agendapunt"
             }
           }
       }
