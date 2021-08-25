@@ -160,8 +160,8 @@ router.post('/extract-previews', async function (req, res, next) {
     const extractData = await buildExtractData(treatmentUuid);
     const html = constructHtmlForExtract(extractData);
 
-    const errors = validateMeeting(extractData.meeting);
-    errors.concat(validateTreatment(extractData.treatment));
+    let errors = validateMeeting(extractData.meeting);
+    errors = errors.concat(await validateTreatment(extractData.treatment));
     return res.status(201).send(
       {
         data: {
