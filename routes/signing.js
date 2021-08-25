@@ -1,6 +1,12 @@
 import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
+import Task from '../models/task';
+import { TASK_STATUS_FAILURE,
+         TASK_STATUS_RUNNING,
+         TASK_STATUS_SUCCESS,
+         TASK_TYPE_SIGNING_DECISION_LIST
+       } from '../models/task';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
@@ -39,19 +45,52 @@ router.post("/signing/agenda/sign/:agendaKindUuid/:meetingUuid", async function 
   }
 });
 
+router.get('signing-tasks/:id', async function (req, res, next) {
+  const taskUuid = req.params.id;
+  const task = await Task.find(taskUuid);
+  if (task) {
+    res.status(200).send({
+      data: {
+        id: task.id,
+        status: task.status,
+        type: "signing-task",
+        taskType: task.type,
+      }
+    });
+  }
+  else {
+    res.status(404).send(`task with id ${taskUuid} was not found`);
+  }
+});
+
 /**
  * Makes the current user sign the besluitenlijst for the supplied document.
  * Ensures the prepublished besluitenlijst that is signed is persisted in the store and attached to the document container
  */
 router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(req, res, next) {
+  let signingTask;
   try {
-    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(req.params.zittingIdentifier);
-    await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "getekend" );
-    return res.send( { success: true } ).end();
-  } catch (err) {
+    const meetingUuid = req.params.zittingIdentifier;
+    const meeting = await Meeting.find(meetingUuid);
+    signingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST});
+    if (!signingTask) {
+      signingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
+    }
+    return res.send({ data: { id: signingTask.id, status: "accepted" , type:"signing-task"}});
+  }
+  catch (err) {
     console.log(err);
     const error = new Error(`An error occurred while signing the besluitenlijst ${req.params.documentIdentifier}: ${err}`);
     return next(error);
+  }
+  try {
+    await signingTask.updateStatus(TASK_STATUS_RUNNING);
+    const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(req.params.zittingIdentifier);
+    await signVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "getekend" );
+    await signingTask.updateStatus(TASK_STATUS_SUCCESS);
+  }
+  catch (err) {
+    signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
   }
 });
 
