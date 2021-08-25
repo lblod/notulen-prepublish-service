@@ -168,7 +168,8 @@ router.post('/extract-previews', async function (req, res, next) {
           type: "extract-preview",
           id: uuid(),
           attributes: {
-            html: html
+            html: html,
+            "validation-errors": errors
           }
         },
         relationships: {
@@ -177,8 +178,14 @@ router.post('/extract-previews', async function (req, res, next) {
               id: treatmentUuid,
               type: "behandeling-van-agendapunt"
             }
+          },
+          meeting: {
+            data: {
+              id: extractData.meeting.uuid,
+              type: "zitting"
+            }
           }
-        }
+        },
       }
     ).end();
   }

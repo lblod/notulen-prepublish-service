@@ -8,9 +8,24 @@ Once a specific document is generated for signing or publication the content is 
 
 * `POST /prepublish/agenda/:kindUuid,:zittingIdentifier`: builds a publication from the agenda of a zitting present in the database, and returns it without persisting it
 * `POST /prepublish/besluitenlijst/:zittingIdentifier`: returns a publication of an agenda without persisting it.
-* `POST /prepublish/behandelingen/:zittingIdentifier`: returns a publication for each "behandeling" linked to the zitting without persisting it.
+* `POST /prepublish/behandelingen/:zittingIdentifier`: returns a publication for each "behandeling" linked to the zitting without persisting it, deprecated
 * `POST /prepublish/notulen/:documentIdentifier`: returns a publication of a notulen without persisting it.
-
+* `POST /extract-previews`: JSON:API compliant endpoint that creates a preview, expects the following post body
+``` json
+{
+        "data": {
+          "type": "extract-preview",
+        },
+        "relationships": {
+          "treatment": {
+            "data": {
+              "id": "{{treatmentUuid}}",
+              "type": "behandeling-van-agendapunt"
+            }
+          }
+      }
+}
+```
 ## creating a signed document
 * `POST /signing/agenda/sign/:kindUuid/:zittingIdentifier`: persists (if it doesn't exist yet) an agenda publication for :kind and creates a signedResource linked to the agenda.
 * `POST /signing/besluitenlijst/sign/:zittingIdentifier`: persists (if it doesn't exist yet) a besluitenlijst publication and creates a signedResource linked to the besluitenlijst.
