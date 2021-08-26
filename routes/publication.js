@@ -7,6 +7,12 @@ import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../suppor
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedExtract, publishVersionedExtract, isPublished} from '../support/extract-utils';
 import {ensureVersionedNotulen, publishVersionedNotulen, NOTULEN_KIND_PUBLIC} from '../support/notulen-utils';
+import Task, { 
+  TASK_STATUS_FAILURE,
+  TASK_STATUS_RUNNING,
+  TASK_STATUS_SUCCESS,
+  TASK_TYPE_SIGNING_DECISION_LIST
+}from '../models/task';
 
 
 const router = express.Router();
@@ -34,7 +40,7 @@ router.post('/signing/agenda/publish/:agendaKindUuid/:meetingUuid', async functi
     console.log(err);
     const error = new Error(
       `An error occurred while publishing the agenda ${
-        req.params.zittingIdentifier
+        req.params.meetingUuid
       }: ${err}`
     );
     return next(error);
@@ -49,15 +55,29 @@ router.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function
   // TODO this is 99% the same as
   // /signing/besluitenlijst/sign/:kind/:documentIdentifier, it just uses the
   // publishVersionedBesluitenlijst instead.  We can likely clean this up.
-
+  let publishingTask;
   try {
+    const meetingUuid = req.params.zittingIdentifier;
+    const meeting = await Meeting.find(meetingUuid);
+    publishingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST});
+    if (!publishingTask) {
+      publishingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
+    }
+    res.json({ data: { id: publishingTask.id, status: "accepted" , type: publishingTask.type}});
+  }
+  catch (err) {
+    console.log(err);
+    const error = new Error(`An error occurred while publishing the besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
+    return next(error);
+  }
+  try {
+    await publishingTask.updateStatus(TASK_STATUS_RUNNING);
     const prepublishedBesluitenlijstUri = await ensureVersionedBesluitenLijstForZitting(req.params.zittingIdentifier);
     await publishVersionedBesluitenlijst( prepublishedBesluitenlijstUri, req.header("MU-SESSION-ID"), "gepubliceerd" );
-    return res.send( { success: true } ).end();
-  } catch (err) {
-    console.log(err);
-    const error = new Error(`An error occurred while published the besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
-    return next(error);
+    await publishingTask.updateStatus(TASK_STATUS_SUCCESS);
+  }
+  catch (err) {
+    publishingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
   }
 } );
 

@@ -38,30 +38,14 @@ router.post("/signing/agenda/sign/:agendaKindUuid/:meetingUuid", async function 
     console.log(err);
     const error = new Error(
       `An error occurred while signing the agenda ${
-        req.params.documentIdentifier
+        req.params.meetingUuid
       }: ${err}`
     );
     return next(error);
   }
 });
 
-router.get('signing-tasks/:id', async function (req, res, next) {
-  const taskUuid = req.params.id;
-  const task = await Task.find(taskUuid);
-  if (task) {
-    res.status(200).send({
-      data: {
-        id: task.id,
-        status: task.status,
-        type: "signing-task",
-        taskType: task.type,
-      }
-    });
-  }
-  else {
-    res.status(404).send(`task with id ${taskUuid} was not found`);
-  }
-});
+
 
 /**
  * Makes the current user sign the besluitenlijst for the supplied document.
@@ -76,11 +60,11 @@ router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(re
     if (!signingTask) {
       signingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
     }
-    return res.send({ data: { id: signingTask.id, status: "accepted" , type:"signing-task"}});
+    res.json({ data: { id: signingTask.id, status: "accepted" , type: signingTask.type}});
   }
   catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while signing the besluitenlijst ${req.params.documentIdentifier}: ${err}`);
+    const error = new Error(`An error occurred while signing the besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
     return next(error);
   }
   try {

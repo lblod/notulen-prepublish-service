@@ -8,6 +8,7 @@ import {
   sparqlEscapeInt} from 'mu';
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = "decisionListSignature";
+export const TASK_TYPE_PUBLISHING_DECISION_LIST = "decisionListPublication";
 export const TASK_STATUS_FAILURE =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/failure";
 export const TASK_STATUS_CREATED =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/created";
 export const TASK_STATUS_SUCCESS =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/success";
@@ -85,7 +86,7 @@ export default class Task {
      }
    `);
     if (result.results.bindings.length) {
-      return Task.fromBinding(result.results.bindings[0]);
+      return Task.fromBinding({...result.results.bindings[0], type: type, involves: meetingUri});
     }
     else
       return null;
@@ -119,6 +120,8 @@ export default class Task {
      PREFIX    nuao: <http://www.semanticdesktop.org/ontologies/2010/01/25/nuao#>
      PREFIX    task: <http://redpencil.data.gift/vocabularies/tasks/>
      PREFIX    dct: <http://purl.org/dc/terms/>
+     PREFIX adms: <http://www.w3.org/ns/adms#>
+     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 
      DELETE {
        ?uri adms:status ?status.
