@@ -100,7 +100,7 @@ router.get("/prepublish/agenda/:kindUuid/:meetingUuid", async function (req, res
 * Prepublish a besluitenlijst as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, next) {
+router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res) {
   const jobUuid = yieldJobId( res );
   try {
     const {html, errors} = await buildBesluitenLijstForMeetingId(req.params.meetingUuid);

@@ -3,7 +3,7 @@ import Task from '../models/task';
 
 const router = express.Router();
 
-router.get('/publication-tasks/:id', async function (req, res, next) {
+router.get('/publication-tasks/:id', async function (req, res) {
   const taskUuid = req.params.id;
   const task = await Task.find(taskUuid);
   if (task) {
