@@ -1,3 +1,14 @@
+## 1.1.0 (2021-08-27)
+
+#### :rocket: Enhancement
+* [#57](https://github.com/lblod/notulen-prepublish-service/pull/57) build extracts in parallel ([@Asergey91](https://github.com/Asergey91))
+* [#59](https://github.com/lblod/notulen-prepublish-service/pull/59) support async creation of preview, signature and publication for the decision list ([@nvdk](https://github.com/nvdk))
+* [#58](https://github.com/lblod/notulen-prepublish-service/pull/58) validation error on treatment preview ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 2
+- Niels V ([@nvdk](https://github.com/nvdk))
+- Sergey Andreev ([@Asergey91](https://github.com/Asergey91))
+
 ## 1.0.0 (2021-08-18)
 
 #### :rocket: Enhancement
