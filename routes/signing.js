@@ -1,13 +1,13 @@
 import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
-import Task from '../models/task';
+import { ensureTask } from '../support/task-utils';
 import { TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
   TASK_TYPE_SIGNING_MEETING_NOTES,
-  TASK_TYPE_PUBLISHING_MEETING_NOTES} from '../models/task';
+  } from '../models/task';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
@@ -17,22 +17,6 @@ import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-u
 import {fetchCurrentUser} from '../support/query-utils';
 const router = express.Router();
 
-/**
- * @param {Zitting} meeting
- * @param {string} userUri
- * @param {string} taskType
- * */
-async function ensureTask(meeting, userUri, taskType) {
-  let task = await Task.query({
-    meetingUri: meeting.uri,
-    type: taskType,
-    userUri,
-  });
-  if (!task) {
-    task = await Task.create(meeting, taskType);
-  }
-  return task;
-}
 
 /**
  *
@@ -76,7 +60,7 @@ router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(re
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
     const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
-    signingTask = await ensureTask(meeting, userUri, TASK_TYPE_SIGNING_DECISION_LIST);
+    signingTask = await ensureTask(meeting, TASK_TYPE_SIGNING_DECISION_LIST, userUri);
 
     res.json({ data: { id: signingTask.id, status: "accepted" , type: signingTask.type}});
   }
@@ -133,7 +117,7 @@ router.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res,
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
     const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
-    signingTask = await ensureTask(meeting, userUri, TASK_TYPE_SIGNING_MEETING_NOTES);
+    signingTask = await ensureTask(meeting, TASK_TYPE_SIGNING_MEETING_NOTES, userUri);
 
     res.json({ data: { id: signingTask.id, status: "accepted" , type: signingTask.type}});
   } catch(err){
