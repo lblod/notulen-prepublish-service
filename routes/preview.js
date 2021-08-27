@@ -47,7 +47,7 @@ function yieldJobId(res) {
         attributes: {
           jobId: jobUuid
         },
-        type: "prebulish-jobs"
+        type: "prepublish-jobs"
       }
     });
 
@@ -100,16 +100,15 @@ router.get("/prepublish/agenda/:kindUuid/:meetingUuid", async function (req, res
 * Prepublish a besluitenlijst as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res, next) {
+router.get('/prepublish/besluitenlijst/:meetingUuid', async function(req, res) {
+  const jobUuid = yieldJobId( res );
   try {
     const {html, errors} = await buildBesluitenLijstForMeetingId(req.params.meetingUuid);
-    return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
+    pushJobResult(jobUuid, 200, { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" }});
+    // return res.send( { data: { attributes: { content: html, errors }, type: "imported-besluitenlijst-contents" } } ).end();
   } catch (err) {
     console.log(err);
-    const error = new Error(`An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${err}`);
-    // @ts-ignore
-    error.status = 500;
-    return next(error);
+    pushJobResult(jobUuid, 500, {    errors: [ {title: `An error occurred while fetching contents for prepublished besluitenlijst ${req.params.zittingIdentifier}: ${err}`} ]});
   }
 });
 
