@@ -67,7 +67,7 @@ export default class Task {
       return null;
   }
 
-  static async query({meetingUri, type}) {
+  static async query({meetingUri, type, userUri = null}) {
     const result = await query(`
      PREFIX    mu: <http://mu.semte.ch/vocabularies/core/>
      PREFIX    nuao: <http://www.semanticdesktop.org/ontologies/2010/01/25/nuao#>
@@ -83,6 +83,7 @@ export default class Task {
             nuao:involves ${sparqlEscapeUri(meetingUri)};
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
+       ${userUri ? `?uri nuao:involves ${sparqlEscapeUri(userUri)}.` : ''}
      }
    `);
     if (result.results.bindings.length) {

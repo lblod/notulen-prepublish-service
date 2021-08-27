@@ -13,6 +13,7 @@ import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/a
 import {ensureVersionedBesluitenLijstForZitting, signVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedNotulen, NOTULEN_KIND_FULL, signVersionedNotulen} from '../support/notulen-utils';
 import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-utils';
+import {fetchCurrentUser} from '../support/query-utils';
 const router = express.Router();
 
 /**
@@ -56,7 +57,8 @@ router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(re
   try {
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
-    signingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST});
+    const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
+    signingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST, userUri });
     if (!signingTask) {
       signingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
     }
