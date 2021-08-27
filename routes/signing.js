@@ -2,12 +2,12 @@ import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
 import { ensureTask } from '../support/task-utils';
-import { TASK_STATUS_FAILURE,
+import {
+  TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
-  TASK_TYPE_SIGNING_MEETING_NOTES,
-  } from '../models/task';
+  TASK_TYPE_SIGNING_MEETING_NOTES} from '../models/task';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
