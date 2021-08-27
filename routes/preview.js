@@ -135,17 +135,27 @@ router.get('/prepublish/behandelingen/:zittingIdentifier', async function(req, r
 * Prepublish notulen as HTML+RDFa snippet for a given document
 * The snippet is not persisted in the store
 */
-router.get('/prepublish/notulen/:zittingIdentifier', async function(req, res, next) {
+router.get("/prepublish/notulen/:zittingIdentifier", async function (req, res) {
+  const jobUuid = yieldJobId(res);
   try {
-    const {html, errors} = await constructHtmlForMeetingNotes(req.params.zittingIdentifier);
-    return res.send( { data: { attributes: { content: html, errors }, type: "imported-notulen-contents" } } ).end();
-  }
-  catch(e) {
-    console.error(e);
-    const error = new Error(`An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${e}`);
-    // @ts-ignore
-    error.status = 500;
-    return next(error);
+    const { html, errors } = await constructHtmlForMeetingNotes(
+      req.params.zittingIdentifier
+    );
+    pushJobResult(jobUuid, 200, {
+      data: {
+        attributes: { content: html, errors },
+        type: "imported-notulen-contents",
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    pushJobResult(jobUuid, 500, {
+      errors: [
+        {
+          title: `An error occurred while fetching contents for prepublished notulen ${req.params.zittingIdentifier}: ${err}`,
+        },
+      ],
+    });
   }
 });
 

@@ -9,6 +9,8 @@ import {
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = "decisionListSignature";
 export const TASK_TYPE_PUBLISHING_DECISION_LIST = "decisionListPublication";
+export const TASK_TYPE_SIGNING_MEETING_NOTES = "meetingNotesSignature";
+export const TASK_TYPE_PUBLISHING_MEETING_NOTES = "meetingNotesPublication";
 export const TASK_STATUS_FAILURE =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/failure";
 export const TASK_STATUS_CREATED =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/created";
 export const TASK_STATUS_SUCCESS =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/success";

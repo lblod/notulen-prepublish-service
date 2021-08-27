@@ -5,8 +5,9 @@ import Task from '../models/task';
 import { TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
-  TASK_TYPE_SIGNING_DECISION_LIST
-} from '../models/task';
+  TASK_TYPE_SIGNING_DECISION_LIST,
+  TASK_TYPE_SIGNING_MEETING_NOTES,
+  TASK_TYPE_PUBLISHING_MEETING_NOTES} from '../models/task';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {ensureVersionedAgendaForMeeting, signVersionedAgenda} from '../support/agenda-utils';
@@ -15,6 +16,23 @@ import {ensureVersionedNotulen, NOTULEN_KIND_FULL, signVersionedNotulen} from '.
 import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-utils';
 import {fetchCurrentUser} from '../support/query-utils';
 const router = express.Router();
+
+/**
+ * @param {Zitting} meeting
+ * @param {string} userUri
+ * @param {string} taskType
+ * */
+async function ensureTask(meeting, userUri, taskType) {
+  let task = await Task.query({
+    meetingUri: meeting.uri,
+    type: taskType,
+    userUri,
+  });
+  if (!task) {
+    task = await Task.create(meeting, taskType);
+  }
+  return task;
+}
 
 /**
  *
@@ -58,10 +76,8 @@ router.post('/signing/besluitenlijst/sign/:zittingIdentifier', async function(re
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
     const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
-    signingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST, userUri });
-    if (!signingTask) {
-      signingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
-    }
+    signingTask = await ensureTask(meeting, userUri, TASK_TYPE_SIGNING_DECISION_LIST);
+
     res.json({ data: { id: signingTask.id, status: "accepted" , type: signingTask.type}});
   }
   catch (err) {
@@ -112,7 +128,23 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
 router.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res, next) {
+  let signingTask;
   try {
+    const meetingUuid = req.params.zittingIdentifier;
+    const meeting = await Meeting.find(meetingUuid);
+    const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
+    signingTask = await ensureTask(meeting, userUri, TASK_TYPE_SIGNING_MEETING_NOTES);
+
+    res.json({ data: { id: signingTask.id, status: "accepted" , type: signingTask.type}});
+  } catch(err){
+    console.log(err);
+    await signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
+    const error = new Error(`An error occurred while signing the meeting notes ${req.params.zittingIdentifier}: ${err}`);
+    return next(error);
+  }
+
+  try {
+    await signingTask.updateStatus(TASK_STATUS_RUNNING);
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
     const treatments = await Treatment.findAll({meetingUuid});
@@ -123,18 +155,15 @@ router.post('/signing/notulen/sign/:zittingIdentifier', async function(req, res,
       errors = [...errors, ...treatmentErrors];
       attachments.push(...treatment.attachments);
     }
-    if (errors.length) {
-      return res.status(400).send({errors}).end();
+    if(errors.length) {
+      throw new Error(errors.join(', '));
     }
-    else {
-      const versionedNotulenUri = await ensureVersionedNotulen(meeting, treatments, NOTULEN_KIND_FULL);
-      await signVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "getekend", attachments);
-      return res.send( { success: true } ).end();
-    }
+    const versionedNotulenUri = await ensureVersionedNotulen(meeting, treatments, NOTULEN_KIND_FULL);
+    await signVersionedNotulen( versionedNotulenUri, req.header("MU-SESSION-ID"), "getekend", attachments);
+
+    await signingTask.updateStatus(TASK_STATUS_SUCCESS);
   } catch (err) {
-    console.log(err);
-    const error = new Error(`An error occurred while signing the notulen ${req.params.zittingIdentifier}: ${err}`);
-    return next(error);
+    await signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
   }
 });
 
