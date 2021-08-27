@@ -6,6 +6,24 @@ export async function fetchParticipationListForTreatment(resourceUri) {
   return fetchParticipationList(resourceUri, "besluit:heeftAanwezige", "ext:heeftAfwezige");
 }
 
+export async function fetchCurrentUser(sessionId) {
+  const q = `
+    ${prefixMap.get("muSession").toSparqlString()}
+    ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get("foaf").toSparqlString()}
+  SELECT ?userUri
+  WHERE {
+    ${sparqlEscapeUri(sessionId)} muSession:account/^foaf:account ?userUri.
+  }
+  `;
+  const result = query(q);
+  if (result?.results?.bindings.length === 1) {
+    return result.results.bindings.userUri.value;
+  }
+  else {
+    return null;
+  }
+}
 export async function fetchParticipationList(resourceUri, presentPredicate = "besluit:heeftAanwezigeBijStart", absentPredicate = "ext:heeftAfwezigeBijStart") {
   const presentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}

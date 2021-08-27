@@ -19,28 +19,29 @@ const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4
  * an extract is the treatment of one agendapoint and all it's related info
  */
 
+async function buildExtractForTreatment(treatment, meeting, meetingErrors) {
+  const data = await buildExtractDataForTreatment(treatment, meeting, true);
+  const html = constructHtmlForExtract(data);
+  const treatmentErrors = await validateTreatment(treatment);
+  return {
+    data: {
+      attributes: {
+        content: html,
+        errors: [...meetingErrors, ...treatmentErrors],
+        behandeling: treatment.uri,
+        uuid: treatment.uuid
+      }
+    }
+  };
+}
 
 // here for legacy purposes
 export async function buildAllExtractsForMeeting(meetingUuid) {
-  const treatments = await Treatment.findAll({meetingUuid});
-  const extracts = [];
+  const treatments = await Treatment.findAll({ meetingUuid });
   const meeting = await Meeting.find(meetingUuid);
   const meetingErrors = validateMeeting(meeting);
-  for (const treatment of treatments) {
-    const data = await buildExtractDataForTreatment(treatment, meeting, true);
-    const html = constructHtmlForExtract(data);
-    const treatmentErrors = await validateTreatment(treatment);
-    extracts.push( {
-      data: {
-        attributes: {
-          content: html,
-          errors: [...meetingErrors, ...treatmentErrors],
-          behandeling: treatment.uri,
-          uuid: treatment.uuid
-        }
-      }
-    });
-  }
+  const extractBuilders = treatments.map( (treatment) => buildExtractForTreatment(treatment, meeting, meetingErrors) );
+  const extracts = await Promise.all(extractBuilders);
   return extracts;
 }
 
