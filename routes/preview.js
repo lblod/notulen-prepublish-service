@@ -160,15 +160,16 @@ router.post('/extract-previews', async function (req, res, next) {
     const extractData = await buildExtractData(treatmentUuid);
     const html = constructHtmlForExtract(extractData);
 
-    const errors = validateMeeting(extractData.meeting);
-    errors.concat(validateTreatment(extractData.treatment));
+    let errors = validateMeeting(extractData.meeting);
+    errors = errors.concat(await validateTreatment(extractData.treatment));
     return res.status(201).send(
       {
         data: {
           type: "extract-preview",
           id: uuid(),
           attributes: {
-            html: html
+            html: html,
+            "validation-errors": errors
           }
         },
         relationships: {
@@ -177,8 +178,14 @@ router.post('/extract-previews', async function (req, res, next) {
               id: treatmentUuid,
               type: "behandeling-van-agendapunt"
             }
+          },
+          meeting: {
+            data: {
+              id: extractData.meeting.uuid,
+              type: "zitting"
+            }
           }
-        }
+        },
       }
     ).end();
   }
