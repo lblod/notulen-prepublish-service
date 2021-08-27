@@ -19,7 +19,7 @@ const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4
  * an extract is the treatment of one agendapoint and all it's related info
  */
 
-async function performanceHack(treatment, meeting, meetingErrors){
+async function buildExtractForTreatment(treatment, meeting, meetingErrors) {
   const data = await buildExtractDataForTreatment(treatment, meeting, true);
   const html = constructHtmlForExtract(data);
   const treatmentErrors = await validateTreatment(treatment);
@@ -34,12 +34,14 @@ async function performanceHack(treatment, meeting, meetingErrors){
     }
   };
 }
+
 // here for legacy purposes
 export async function buildAllExtractsForMeeting(meetingUuid) {
-  const treatments = await Treatment.findAll({meetingUuid});
+  const treatments = await Treatment.findAll({ meetingUuid });
   const meeting = await Meeting.find(meetingUuid);
   const meetingErrors = validateMeeting(meeting);
-  const extracts=await Promise.all(treatments.map(treatment=>performanceHack(treatment, meeting, meetingErrors)));
+  const extractBuilders = treatments.map( (treatment) => buildExtractForTreatment(treatment, meeting, meetingErrors) );
+  const extracts = await Promise.all(extractBuilders);
   return extracts;
 }
 
