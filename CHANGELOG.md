@@ -1,3 +1,11 @@
+## 1.2.0 (2021-08-30)
+
+#### :rocket: Enhancement
+* [#61](https://github.com/lblod/notulen-prepublish-service/pull/61) Implement task flow for notulen ([@abeforgit](https://github.com/abeforgit))
+
+#### Committers: 1
+- Arne Bertrand ([@abeforgit](https://github.com/abeforgit))
+
 ## 1.1.0 (2021-08-27)
 
 #### :rocket: Enhancement
