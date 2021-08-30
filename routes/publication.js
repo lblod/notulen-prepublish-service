@@ -7,12 +7,14 @@ import {ensureVersionedAgendaForMeeting, publishVersionedAgenda} from '../suppor
 import {ensureVersionedBesluitenLijstForZitting, publishVersionedBesluitenlijst} from '../support/besluit-exporter';
 import {ensureVersionedExtract, publishVersionedExtract, isPublished} from '../support/extract-utils';
 import {ensureVersionedNotulen, publishVersionedNotulen, NOTULEN_KIND_PUBLIC} from '../support/notulen-utils';
-import Task, { 
+import { ensureTask } from '../support/task-utils';
+import { 
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
-  TASK_TYPE_SIGNING_DECISION_LIST
-}from '../models/task';
+  TASK_TYPE_PUBLISHING_DECISION_LIST,
+  TASK_TYPE_PUBLISHING_MEETING_NOTES
+} from '../models/task';
 
 
 const router = express.Router();
@@ -59,10 +61,7 @@ router.post('/signing/besluitenlijst/publish/:zittingIdentifier', async function
   try {
     const meetingUuid = req.params.zittingIdentifier;
     const meeting = await Meeting.find(meetingUuid);
-    publishingTask = await Task.query({meetingUri: meeting.uri, type: TASK_TYPE_SIGNING_DECISION_LIST});
-    if (!publishingTask) {
-      publishingTask = await Task.create(meeting, TASK_TYPE_SIGNING_DECISION_LIST);
-    }
+    publishingTask = await ensureTask(meeting, TASK_TYPE_PUBLISHING_DECISION_LIST);
     res.json({ data: { id: publishingTask.id, status: "accepted" , type: publishingTask.type}});
   }
   catch (err) {
@@ -113,9 +112,22 @@ router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', 
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
 router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, res, next) {
+  let publishingTask;
+  let meetingUuid;
+  let meeting;
   try {
-    const meetingUuid = req.params.zittingIdentifier;
-    const meeting = await Meeting.find(meetingUuid);
+    meetingUuid = req.params.zittingIdentifier;
+    meeting = await Meeting.find(meetingUuid);
+    publishingTask = await ensureTask(meeting, TASK_TYPE_PUBLISHING_MEETING_NOTES);
+
+    res.json({ data: { id: publishingTask.id, status: "accepted" , type: publishingTask.type}});
+  } catch (err) {
+    console.log(err);
+    const error = new Error(`An error occurred while publishing the notulen ${req.params.zittingIdentifier}:${err}`);
+    return next(error);
+  }
+  try {
+    await publishingTask.updateStatus(TASK_STATUS_RUNNING);
     const treatments = await Treatment.findAll({meetingUuid});
     let errors = validateMeeting(meeting);
     const attachments = [];
@@ -127,7 +139,7 @@ router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, r
       }
     }
     if (errors.length) {
-      return res.status(400).send({errors}).end();
+      throw new Error(errors.join(","));
     }
     else {
       const publicBehandelingUris = req.body['public-behandeling-uris'];
@@ -143,11 +155,9 @@ router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, r
         }
       }
     }
-    return res.send( { success: true } ).end();
+    await publishingTask.updateStatus(TASK_STATUS_SUCCESS);
   } catch (err) {
-    console.log(err);
-    const error = new Error(`An error occurred while published the notulen ${req.params.zittingIdentifier}: ${err}`);
-    return next(error);
+    await publishingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
   }
 } );
 
