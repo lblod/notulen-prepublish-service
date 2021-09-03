@@ -10,7 +10,7 @@ import { ensureAgendapointType } from './agenda-utils';
 import { buildExtractDataForTreatment } from './extract-utils';
 import { handleVersionedResource } from './pre-importer';
 import { prefixes } from "./prefixes";
-import { fetchParticipationList } from './query-utils';
+import { fetchParticipationList, buildParticipantCache } from './query-utils';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import validateMeeting from "./validate-meeting";
 import validateTreatment from "./validate-treatment";
@@ -22,6 +22,7 @@ export const NOTULEN_KIND_PUBLIC="public";
 /**
  * This file contains helpers for exporting, signing and publishing content from the notule.
  */
+
 
 
 
@@ -43,16 +44,21 @@ export async function buildDataForMeetingNotes({meeting, treatments, publicTreat
   const defaultAgendaPointType = await Concept.find(PLANNED_AGENDAPOINT_TYPE_ID);
   ensureAgendapointType(agendapoints, defaultAgendaPointType);
   const participationList = await fetchParticipationList(meeting.uri);
+  let participantCache;
+  if (participationList) {
+    participantCache = buildParticipantCache(participationList);
+  }
   const intermissions = await Intermission.findAll({meetingUri: meeting.uri});
   const treatmentsData = [];
-  for (const treatment of treatments) {
+  const treatmentBuilders = treatments.map(async (treatment) => {
     let isPublic = false;
     if (allPublic || publicTreatments.includes(treatment.uri)) {
       isPublic = true;
     }
-    const data = await buildExtractDataForTreatment(treatment, meeting, isPublic);
+    const data = await buildExtractDataForTreatment(treatment, meeting, isPublic, participantCache );
     treatmentsData.push(data);
-  }
+  });
+  await Promise.all(treatmentBuilders);
   return {meeting, agendapoints, treatmentsData, intermissions, participationList};
 }
 

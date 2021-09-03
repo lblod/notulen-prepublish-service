@@ -2,6 +2,7 @@ import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
 import Mandatee from './mandatee';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
+import { sortMandatees } from '../support/query-utils';
 
 export default class Vote {
   static async findAll({treatmentUri}) {
@@ -64,81 +65,35 @@ export default class Vote {
     this.whoVotesPhrase = whoVotesBasedOnClassifcationMap[adminBodyClassification];
   }
 
-  async fetchVoters() {
+  async fetchVoters(participantCache) {
     const attendeesQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftAanwezige ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?positionUri.
-      ?positionUri org:role ?roleUri.
-      ?roleUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
   `);
-    this.attendees = attendeesQuery.results.bindings.map((binding) => new Mandatee(binding));
+    this.attendees = sortMandatees(attendeesQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
     const votersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftStemmer ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?positionUri.
-      ?positionUri org:role ?roleUri.
-      ?roleUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
   `);
-    this.voters = votersQuery.results.bindings.map((binding) => new Mandatee(binding));
+    this.voters = sortMandatees(votersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
 
     const positiveVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftVoorstander ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?positionUri.
-      ?positionUri org:role ?roleUri.
-      ?roleUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
+    }
   `);
-    this.positiveVoters = positiveVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
+    this.positiveVoters = sortMandatees(positiveVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
 
     const negativeVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftTegenstander ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?positionUri.
-      ?positionUri org:role ?roleUri.
-      ?roleUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
+    }
   `);
-    this.negativeVoters = negativeVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
+    this.negativeVoters = sortMandatees(negativeVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
 
     const abstentionVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
@@ -149,14 +104,7 @@ export default class Vote {
   ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftOnthouder ?mandatarisUri.
-      ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
-      ?mandatarisUri org:holds ?positionUri.
-      ?positionUri org:role ?roleUri.
-      ?roleUri skos:prefLabel ?role.
-      ?personUri foaf:familyName ?familyName.
-      ?personUri persoon:gebruikteVoornaam ?name.
-    } ORDER BY ASC(?familyName) ASC(?name)
   `);
-    this.abstentionVoters = abstentionVotersQuery.results.bindings.map((binding) => new Mandatee(binding));
+    this.abstentionVoters = sortMandatees(abstentionVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
   }
 }
