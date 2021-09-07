@@ -44,7 +44,7 @@ export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
     SELECT ?present WHERE {
       {${sparqlEscapeUri(treatment.uri)} ext:heeftAfwezige ?mandatarisUri.}
     }`);
-  let notPresent = presentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
+  let notPresent = notPresentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
   notPresent = sortMandatees(notPresent);
   return {secretary, chairman, present, notPresent};
 }

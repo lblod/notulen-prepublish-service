@@ -1,6 +1,5 @@
 import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
-import Mandatee from './mandatee';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 import { sortMandatees } from '../support/query-utils';
 

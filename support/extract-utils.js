@@ -6,9 +6,9 @@ import Decision from '../models/decision';
 import { query, update, sparqlEscapeUri} from 'mu';
 import {prefixes} from "./prefixes";
 import {fetchParticipationListForTreatment,
-        fetchTreatmentParticipantsWithCache,
-        fetchParticipationList,
-        buildParticipantCache} from './query-utils';
+  fetchTreatmentParticipantsWithCache,
+  fetchParticipationList,
+  buildParticipantCache} from './query-utils';
 import { editorDocumentFromUuid } from './editor-document';
 import { PUBLISHER_TEMPLATES} from './setup-handlebars';
 import validateMeeting from './validate-meeting';
