@@ -5,7 +5,10 @@ import Vote from '../models/vote';
 import Decision from '../models/decision';
 import { query, update, sparqlEscapeUri} from 'mu';
 import {prefixes} from "./prefixes";
-import {fetchParticipationListForTreatment} from './query-utils';
+import {fetchParticipationListForTreatment,
+  fetchTreatmentParticipantsWithCache,
+  fetchParticipationList,
+  buildParticipantCache} from './query-utils';
 import { editorDocumentFromUuid } from './editor-document';
 import { PUBLISHER_TEMPLATES} from './setup-handlebars';
 import validateMeeting from './validate-meeting';
@@ -39,8 +42,13 @@ async function buildExtractForTreatment(treatment, meeting, meetingErrors) {
 export async function buildAllExtractsForMeeting(meetingUuid) {
   const treatments = await Treatment.findAll({ meetingUuid });
   const meeting = await Meeting.find(meetingUuid);
+  const participationList = await fetchParticipationList(meeting.uri);
+  let participantCache;
+  if (participationList) {
+    participantCache = buildParticipantCache(participationList);
+  }
   const meetingErrors = validateMeeting(meeting);
-  const extractBuilders = treatments.map( (treatment) => buildExtractForTreatment(treatment, meeting, meetingErrors) );
+  const extractBuilders = treatments.map( (treatment) => buildExtractForTreatment(treatment, meeting, meetingErrors, participantCache) );
   const extracts = await Promise.all(extractBuilders);
   return extracts;
 }
@@ -52,12 +60,23 @@ export async function buildExtractData(treatmentUuid, isPublic = true) {
 
 }
 
-export async function buildExtractDataForTreatment(treatment, meeting, isPublic = true) {
+export async function buildExtractDataForTreatment(treatment, meeting, isPublic = true, participantCache = null) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
-  const participationList = await fetchParticipationListForTreatment(treatment.uri);
-
+  let participationList;
+  if (participantCache) {
+    participationList = fetchTreatmentParticipantsWithCache(treatment.uri, participantCache);
+  }
+  else {
+    participationList = await fetchParticipationListForTreatment(treatment.uri);
+    if (participationList) {
+      participantCache = buildParticipantCache(participationList);
+    }
+  }
   const votes = await Vote.findAll({treatmentUri: treatment.uri});
-  await Promise.all(votes.map((vote) => vote.fetchVoters()));
+  if (participationList && participationList.present.length > 0) {
+    // only try fetching voters if people were present
+    await Promise.all(votes.map((vote) => vote.fetchVoters(participantCache)));
+  }
   let content;
   if (isPublic) {
     const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments);

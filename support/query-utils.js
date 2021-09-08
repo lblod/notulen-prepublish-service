@@ -2,9 +2,53 @@ import {query, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 import Mandatee from "../models/mandatee";
 
+
+export function buildParticipantCache({present, notPresent, chairman, secretary}) {
+  const mandatees = [
+    ...present,
+    ...notPresent,
+    chairman,
+    secretary
+  ];
+  const cache = new Map();
+  for (const mandatee of mandatees) {
+    if (mandatee) {
+      cache.set(mandatee.uri, mandatee);
+    }
+  }
+}
+
 export async function fetchParticipationListForTreatment(resourceUri) {
   return fetchParticipationList(resourceUri, "besluit:heeftAanwezige", "ext:heeftAfwezige");
 }
+
+export function sortMandatees(mandatees) {
+  return mandatees.sort((mandateeA, mandateeB) => {
+    return mandateeA.familyName.localeCompare(mandateeB.familyName)
+      || mandateeA.name.localeCompare(mandateeB.name);
+  });
+}
+
+export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
+  const secretary = treatment.secretary ? cache.get(treatment.secretary) : null;
+  const chairman = treatment.chairman ? cache.get(treatment.chairman) : null;
+  const presentQuery = await query(`
+    ${prefixMap.get("besluit").toSparqlString()}
+    SELECT ?present WHERE {
+      {${sparqlEscapeUri(treatment.uri)} besluit:heeftAanwezige ?mandatarisUri.}
+    }`);
+  let present = presentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
+  present = sortMandatees(present);
+  const notPresentQuery = await query(`
+    ${prefixMap.get("besluit").toSparqlString()}
+    SELECT ?present WHERE {
+      {${sparqlEscapeUri(treatment.uri)} ext:heeftAfwezige ?mandatarisUri.}
+    }`);
+  let notPresent = notPresentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
+  notPresent = sortMandatees(notPresent);
+  return {secretary, chairman, present, notPresent};
+}
+
 
 export async function fetchCurrentUser(sessionId) {
   const q = `
