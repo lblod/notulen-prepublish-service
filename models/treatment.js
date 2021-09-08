@@ -84,7 +84,9 @@ export default class Treatment {
     try {
       const result = await query(queryString);
       if (result.results.bindings.length === 1) {
-        return Treatment.fromBinding(result.results.bindings[0]);
+        const treatment = Treatment.fromBinding(result.results.bindings[0]);
+        await treatment.getAttachments();
+        return treatment;
       }
       else {
         throw `did not find treatment with uuid ${treatmentUuid}`;
