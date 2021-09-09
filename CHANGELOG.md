@@ -1,3 +1,18 @@
+## 1.3.0 (2021-09-09)
+
+#### :rocket: Enhancement
+* [#63](https://github.com/lblod/notulen-prepublish-service/pull/63) performance improvements for building notulen/extracts ([@nvdk](https://github.com/nvdk))
+
+#### :bug: Bug Fix
+* [#64](https://github.com/lblod/notulen-prepublish-service/pull/64) Fixed attachments were not present in extracts ([@lagartoverde](https://github.com/lagartoverde))
+
+#### :house: Internal
+* [#62](https://github.com/lblod/notulen-prepublish-service/pull/62) Bump tar from 6.1.8 to 6.1.11 ([@dependabot[bot]](https://github.com/apps/dependabot))
+
+#### Committers: 2
+- Niels V ([@nvdk](https://github.com/nvdk))
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.2.0 (2021-08-30)
 
 #### :rocket: Enhancement
