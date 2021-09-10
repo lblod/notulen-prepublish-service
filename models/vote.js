@@ -96,13 +96,9 @@ export default class Vote {
 
     const abstentionVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
-  ${prefixMap.get("mandaat").toSparqlString()}
-  ${prefixMap.get("org").toSparqlString()}
-  ${prefixMap.get("skos").toSparqlString()}
-  ${prefixMap.get("foaf").toSparqlString()}
-  ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftOnthouder ?mandatarisUri.
+    }
   `);
     this.abstentionVoters = sortMandatees(abstentionVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
   }
