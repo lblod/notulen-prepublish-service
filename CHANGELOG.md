@@ -1,3 +1,8 @@
+## 1.3.1 (2021-09-10)
+
+bugfix: typo in query
+
+
 ## 1.3.0 (2021-09-09)
 
 #### :rocket: Enhancement
