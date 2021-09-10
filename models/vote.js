@@ -69,6 +69,7 @@ export default class Vote {
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftAanwezige ?mandatarisUri.
+    }
   `);
     this.attendees = sortMandatees(attendeesQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
     const votersQuery = await query(`
