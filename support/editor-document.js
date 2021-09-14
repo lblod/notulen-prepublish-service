@@ -2,20 +2,19 @@
  * Represents an rdfa-document as entered by the user in the frontend.
  */
 
+// @ts-ignore
 import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 
 class EditorDocument {
   constructor(content) {
-    for( var key in content )
+    this.content = undefined;
+    this.context = {};
+    for( var key in content ) {
       this[key] = content[key];
+    }
   }
-
-  // uri = null
-  // title = null
-  // context = null
-  // content = null
 
   getDom() {
     if( this.dom ) {
@@ -33,7 +32,7 @@ class EditorDocument {
       return this.topDomNode;
     } else {
       const dom = this.getDom();
-      const topDomNode = dom.window.document.querySelector('body');
+      const topDomNode = dom.window._document.querySelector('body');
       topDomNode.setAttribute( 'vocab', this.context.vocab );
       topDomNode.setAttribute( 'prefix', ( () => {
         var str = "";
@@ -104,10 +103,10 @@ function appendAttachmentsToDocument(documentContent, attachments) {
   const dom = new jsdom.JSDOM( `<body>${documentContent}</body>` );
   for(let decisionKey in attachmentsGrouped) {
     const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey]);
-    const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
+    const decisionContainer = dom.window._document.querySelector(`[resource="${decisionKey}"]`);
     decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
   }
-  return dom.window.document.body.innerHTML;
+  return dom.window._document.body.innerHTML;
 }
 
 function generateAttachmentPart(attachmentGroup) {

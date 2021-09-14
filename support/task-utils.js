@@ -1,7 +1,7 @@
 import Task from "../models/task";
 
 /**
- * @param {Zitting} meeting
+ * @param meeting
  * @param {string} taskType
  * @param {string} [userUri]
  * */

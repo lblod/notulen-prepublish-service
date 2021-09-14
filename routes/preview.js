@@ -1,4 +1,6 @@
+// @ts-ignore
 import express from 'express';
+// @ts-ignore
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
 import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
@@ -208,6 +210,7 @@ router.post('/extract-previews', async function (req, res, next) {
       );
       // @ts-ignore
       console.error(e);
+      // @ts-ignore
       error.status = 500;
       return next(error);
     }

@@ -1,3 +1,4 @@
+// @ts-ignore
 import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
 import { hackedSparqlEscapeString } from '../support/pre-importer';
 

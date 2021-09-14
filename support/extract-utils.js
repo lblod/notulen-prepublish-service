@@ -3,6 +3,7 @@ import AgendaPoint from '../models/agendapoint';
 import Meeting from '../models/meeting';
 import Vote from '../models/vote';
 import Decision from '../models/decision';
+// @ts-ignore
 import { query, update, sparqlEscapeUri} from 'mu';
 import {prefixes} from "./prefixes";
 import {fetchParticipationListForTreatment,
@@ -22,8 +23,8 @@ const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4
  * an extract is the treatment of one agendapoint and all it's related info
  */
 
-async function buildExtractForTreatment(treatment, meeting, meetingErrors) {
-  const data = await buildExtractDataForTreatment(treatment, meeting, true);
+async function buildExtractForTreatment(treatment, meeting, meetingErrors, participantCache) {
+  const data = await buildExtractDataForTreatment(treatment, meeting, true, participantCache);
   const html = constructHtmlForExtract(data);
   const treatmentErrors = await validateTreatment(treatment);
   return {
@@ -64,7 +65,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   let participationList;
   if (participantCache) {
-    participationList = fetchTreatmentParticipantsWithCache(treatment.uri, participantCache);
+    participationList = await fetchTreatmentParticipantsWithCache(treatment.uri, participantCache);
   }
   else {
     participationList = await fetchParticipationListForTreatment(treatment.uri);

@@ -111,11 +111,11 @@ async function updateLinkedDocuments( versionedNotulenUri ) {
     } INSERT {
       ?container ext:editorDocumentStatus ${sparqlEscapeUri(DRAFT_DECISON_PUBLISHED_STATUS)}
     } WHERE {
-       ?meeting ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)};
+      ?meeting ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)};
                 besluit:behandelt ?agendapunt.
-       ?behandeling dct:subject ?agendapunt;
+      ?behandeling dct:subject ?agendapunt;
                     ext:hasDocumentContainer ?container.
-       ?container ext:editorDocumentStatus ?status
+      ?container ext:editorDocumentStatus ?status
     }
   `);
 }
