@@ -111,11 +111,10 @@ function appendAttachmentsToDocument(documentContent, attachments) {
 }
 
 function generateAttachmentPart(attachmentGroup) {
-  const publicationBaseUrl = process.env.PUBLICATION_BASE_URL || '';
   const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c';
   const attachments = attachmentGroup.map((attachment) => {
     attachment.isRegulatory = attachment.type === REGULATORY_ATTACHMENT_TYPE;
-    attachment.link = `${publicationBaseUrl}/files/${attachment.fileUuid}/download`;
+    attachment.link = `/files/${attachment.fileUuid}/download?name=${attachment.filename}`;
     return attachment;
   });
   const template = PUBLISHER_TEMPLATES.get('attachments');
