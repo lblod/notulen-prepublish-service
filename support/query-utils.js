@@ -16,6 +16,7 @@ export function buildParticipantCache({present, notPresent, chairman, secretary}
       cache.set(mandatee.uri, mandatee);
     }
   }
+  return cache;
 }
 
 export async function fetchParticipationListForTreatment(resourceUri) {
