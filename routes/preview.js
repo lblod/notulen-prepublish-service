@@ -139,7 +139,8 @@ router.get("/prepublish/notulen/:zittingIdentifier", async function (req, res) {
   const jobUuid = yieldJobId(res);
   try {
     const { html, errors } = await constructHtmlForMeetingNotes(
-      req.params.zittingIdentifier
+      req.params.zittingIdentifier,
+      true
     );
     pushJobResult(jobUuid, 200, {
       data: {
@@ -166,7 +167,7 @@ router.post('/extract-previews', async function (req, res, next) {
     if (!treatmentUuid) {
       throw new InvalidRequest("no valid treatment provided");
     }
-    const extractData = await buildExtractData(treatmentUuid);
+    const extractData = await buildExtractData(treatmentUuid, true);
     const html = constructHtmlForExtract(extractData);
 
     let errors = validateMeeting(extractData.meeting);

@@ -53,14 +53,14 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
   return extracts;
 }
 
-export async function buildExtractData(treatmentUuid, isPublic = true) {
+export async function buildExtractData(treatmentUuid, isPreview, isPublic = true) {
   const treatment = await Treatment.find(treatmentUuid);
   const meeting = await Meeting.findURI(treatment.meeting);
-  return await buildExtractDataForTreatment(treatment, meeting, isPublic);
+  return await buildExtractDataForTreatment(treatment, meeting, isPreview, isPublic);
 
 }
 
-export async function buildExtractDataForTreatment(treatment, meeting, isPublic = true, participantCache = null) {
+export async function buildExtractDataForTreatment(treatment, meeting, isPreview, isPublic = true, participantCache = null) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   let participationList;
   if (participantCache) {
@@ -79,7 +79,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
   }
   let content;
   if (isPublic) {
-    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments);
+    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments, isPreview);
     content = document?.content ?? "";
   }
   else {
@@ -112,7 +112,7 @@ export async function ensureVersionedExtract(treatment, meeting) {
     return versionedExtract.uri;
   }
   else {
-    const data = await buildExtractDataForTreatment(treatment, meeting, true);
+    const data = await buildExtractDataForTreatment(treatment, meeting, false, true);
     const html = constructHtmlForExtract(data);
     const extract = await VersionedExtract.create({meeting, treatment, html});
     return extract.uri;

@@ -495,11 +495,11 @@ describe('notulen publication template', function() {
     const attachment1Quad = factory.quad(
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
-      factory.namedNode(`undefined/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`)
+      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`)
     );
 
     const attachment1ReverseQuad = factory.quad(
-      factory.namedNode(`undefined/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`),
+      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`),
       factory.namedNode('dct:isPartOf'),
       factory.literal('http://my-example.org/besluit/1', 'http://www.w3.org/2001/XMLSchema#string')
     );
@@ -507,7 +507,7 @@ describe('notulen publication template', function() {
     const attachment2Quad = factory.quad(
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
-      factory.namedNode(`undefined/files/${attachment2.fileUuid}/download?name=${attachment2.filename}`)
+      factory.namedNode(`http://my-example.org/files/${attachment2.fileUuid}/download?name=${attachment2.filename}`)
     );
 
     assert(dataset.has(attachment1Quad));

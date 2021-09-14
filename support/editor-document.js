@@ -65,7 +65,7 @@ class EditorDocument {
  * @return {Promise} Promise which resolves to an object representing
  * the EditorDocument
  */
-async function editorDocumentFromUuid( uuid, attachments ){
+async function editorDocumentFromUuid( uuid, attachments, isPreview ){
   // We have removed dc:title from here
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -80,7 +80,7 @@ async function editorDocumentFromUuid( uuid, attachments ){
     return null;
   }
   const result = queryResult.results.bindings[0];
-  const content = attachments ? appendAttachmentsToDocument(result.content.value, attachments) : result.content.value;
+  const content = attachments ? appendAttachmentsToDocument(result.content.value, attachments, isPreview) : result.content.value;
   const doc = new EditorDocument({
     uri: result.uri.value,
     // title: result.title,
@@ -92,7 +92,7 @@ async function editorDocumentFromUuid( uuid, attachments ){
 }
 
 
-function appendAttachmentsToDocument(documentContent, attachments) {
+function appendAttachmentsToDocument(documentContent, attachments, isPreview) {
   const attachmentsGrouped = {};
   for(let attachment of attachments) {
     if(attachmentsGrouped[attachment.decision]) {
@@ -103,18 +103,22 @@ function appendAttachmentsToDocument(documentContent, attachments) {
   }
   const dom = new jsdom.JSDOM( `<body>${documentContent}</body>` );
   for(let decisionKey in attachmentsGrouped) {
-    const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey]);
+    const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey], isPreview);
     const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
     decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
   }
   return dom.window.document.body.innerHTML;
 }
 
-function generateAttachmentPart(attachmentGroup) {
+function generateAttachmentPart(attachmentGroup, isPreview) {
+  let publicationBaseUrl = '';
+  if(process.env.PUBLICATION_BASE_URL && !isPreview) {
+    publicationBaseUrl = process.env.PUBLICATION_BASE_URL;
+  }
   const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c';
   const attachments = attachmentGroup.map((attachment) => {
     attachment.isRegulatory = attachment.type === REGULATORY_ATTACHMENT_TYPE;
-    attachment.link = `/files/${attachment.fileUuid}/download?name=${attachment.filename}`;
+    attachment.link = `${publicationBaseUrl}/files/${attachment.fileUuid}/download`;
     return attachment;
   });
   const template = PUBLISHER_TEMPLATES.get('attachments');
