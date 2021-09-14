@@ -1,3 +1,11 @@
+## 1.3.2 (2021-09-14)
+
+#### :bug: Bug Fix
+* [#66](https://github.com/lblod/notulen-prepublish-service/pull/66) bugfix cache ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 1
+- Niels V ([@nvdk](https://github.com/nvdk))
+
 ## 1.3.1 (2021-09-10)
 
 bugfix: typo in query
