@@ -8,6 +8,7 @@ import { constructHtmlForMeetingNotes } from '../support/notulen-utils';
 import { parseBody } from '../support/parse-body';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
+import {IS_PREVIEW} from '../support/constants';
 const router = express.Router();
 
 /***
@@ -167,7 +168,6 @@ router.post('/extract-previews', async function (req, res, next) {
     if (!treatmentUuid) {
       throw new InvalidRequest("no valid treatment provided");
     }
-    const IS_PREVIEW = true;
     const extractData = await buildExtractData(treatmentUuid, IS_PREVIEW);
     const html = constructHtmlForExtract(extractData);
 

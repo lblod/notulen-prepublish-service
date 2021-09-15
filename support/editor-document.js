@@ -5,6 +5,7 @@
 import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
+import { IS_FINAL } from './constants';
 
 class EditorDocument {
   constructor(content) {
@@ -65,7 +66,7 @@ class EditorDocument {
  * @return {Promise} Promise which resolves to an object representing
  * the EditorDocument
  */
-async function editorDocumentFromUuid( uuid, attachments, isPreview ){
+async function editorDocumentFromUuid( uuid, attachments, previewType ){
   // We have removed dc:title from here
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -80,7 +81,7 @@ async function editorDocumentFromUuid( uuid, attachments, isPreview ){
     return null;
   }
   const result = queryResult.results.bindings[0];
-  const content = attachments ? appendAttachmentsToDocument(result.content.value, attachments, isPreview) : result.content.value;
+  const content = attachments ? appendAttachmentsToDocument(result.content.value, attachments, previewType) : result.content.value;
   const doc = new EditorDocument({
     uri: result.uri.value,
     // title: result.title,
@@ -92,7 +93,7 @@ async function editorDocumentFromUuid( uuid, attachments, isPreview ){
 }
 
 
-function appendAttachmentsToDocument(documentContent, attachments, isPreview) {
+function appendAttachmentsToDocument(documentContent, attachments, previewType) {
   const attachmentsGrouped = {};
   for(let attachment of attachments) {
     if(attachmentsGrouped[attachment.decision]) {
@@ -103,16 +104,16 @@ function appendAttachmentsToDocument(documentContent, attachments, isPreview) {
   }
   const dom = new jsdom.JSDOM( `<body>${documentContent}</body>` );
   for(let decisionKey in attachmentsGrouped) {
-    const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey], isPreview);
+    const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey], previewType);
     const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
     decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
   }
   return dom.window.document.body.innerHTML;
 }
 
-function generateAttachmentPart(attachmentGroup, isPreview) {
+function generateAttachmentPart(attachmentGroup, previewType) {
   let publicationBaseUrl = '';
-  if(process.env.PUBLICATION_BASE_URL && !isPreview) {
+  if(process.env.PUBLICATION_BASE_URL && previewType === IS_FINAL) {
     publicationBaseUrl = process.env.PUBLICATION_BASE_URL;
   }
   const REGULATORY_ATTACHMENT_TYPE = 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c';

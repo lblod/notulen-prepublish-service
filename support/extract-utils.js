@@ -15,6 +15,7 @@ import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import {handleVersionedResource} from './pre-importer';
+import { IS_FINAL } from './constants';
 
 const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 /**
@@ -53,14 +54,14 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
   return extracts;
 }
 
-export async function buildExtractData(treatmentUuid, isPreview, isPublic = true) {
+export async function buildExtractData(treatmentUuid, previewType, isPublic = true) {
   const treatment = await Treatment.find(treatmentUuid);
   const meeting = await Meeting.findURI(treatment.meeting);
-  return await buildExtractDataForTreatment(treatment, meeting, isPreview, isPublic);
+  return await buildExtractDataForTreatment(treatment, meeting, previewType, isPublic);
 
 }
 
-export async function buildExtractDataForTreatment(treatment, meeting, isPreview, isPublic = true, participantCache = null) {
+export async function buildExtractDataForTreatment(treatment, meeting, previewType, isPublic = true, participantCache = null) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   let participationList;
   if (participantCache) {
@@ -79,7 +80,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPreview
   }
   let content;
   if (isPublic) {
-    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments, isPreview);
+    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments, previewType);
     content = document?.content ?? "";
   }
   else {
@@ -112,8 +113,7 @@ export async function ensureVersionedExtract(treatment, meeting) {
     return versionedExtract.uri;
   }
   else {
-    const IS_PREVIEW = false;
-    const data = await buildExtractDataForTreatment(treatment, meeting, IS_PREVIEW, true);
+    const data = await buildExtractDataForTreatment(treatment, meeting, IS_FINAL, true);
     const html = constructHtmlForExtract(data);
     const extract = await VersionedExtract.create({meeting, treatment, html});
     return extract.uri;

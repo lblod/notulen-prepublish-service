@@ -26,7 +26,7 @@ export const NOTULEN_KIND_PUBLIC="public";
 
 
 
-export async function constructHtmlForMeetingNotes(meetingUuid, isPreview) {
+export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
   const meeting = await Meeting.find(meetingUuid);
   const treatments = await Treatment.findAll({meetingUuid});
   let errors = validateMeeting(meeting);
@@ -34,12 +34,12 @@ export async function constructHtmlForMeetingNotes(meetingUuid, isPreview) {
     const treatmentErrors = await validateTreatment(treatment);
     errors = [...errors, ...treatmentErrors];
   }
-  const meetingNotesData = await buildDataForMeetingNotes({meeting, treatments, isPreview, allPublic: true});
+  const meetingNotesData = await buildDataForMeetingNotes({meeting, treatments, previewType, allPublic: true});
   const html = constructHtmlForMeetingNotesFromData(meetingNotesData);
   return {errors, html};
 }
 
-export async function buildDataForMeetingNotes({meeting, treatments, isPreview, publicTreatments = [], allPublic = false}) {
+export async function buildDataForMeetingNotes({meeting, treatments, previewType, publicTreatments = [], allPublic = false}) {
   const agendapoints = await AgendaPoint.findAll({meetingUuid: meeting.uuid});
   const defaultAgendaPointType = await Concept.find(PLANNED_AGENDAPOINT_TYPE_ID);
   ensureAgendapointType(agendapoints, defaultAgendaPointType);
@@ -55,7 +55,7 @@ export async function buildDataForMeetingNotes({meeting, treatments, isPreview, 
     if (allPublic || publicTreatments.includes(treatment.uri)) {
       isPublic = true;
     }
-    const data = await buildExtractDataForTreatment(treatment, meeting, isPreview, isPublic, participantCache );
+    const data = await buildExtractDataForTreatment(treatment, meeting, previewType, isPublic, participantCache );
     treatmentsData.push(data);
   });
   await Promise.all(treatmentBuilders);
@@ -79,11 +79,11 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
     console.log(`Creating a new versioned notulen of kind ${kind} for ${meeting.uri}`);
     let html;
     if (kind === NOTULEN_KIND_FULL) {
-      const data = await buildDataForMeetingNotes({meeting, treatments, isPreview: false, allPublic: true});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: false, allPublic: true});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     else {
-      const data = await buildDataForMeetingNotes({meeting, treatments, isPreview: false, publicTreatments});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: false, publicTreatments});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     const versionedNotulen = await VersionedNotulen.create({meeting, html, kind, publicTreatments});

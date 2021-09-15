@@ -3,8 +3,8 @@ import {cleanupTriples} from '../support/pre-importer';
 import { editorDocumentFromUuid } from '../support/editor-document';
 
 export default class Decision {
-  static async extractDecisionsFromDocument(editorDocumentUuid, isPreview) {
-    const doc = await editorDocumentFromUuid(editorDocumentUuid, isPreview);
+  static async extractDecisionsFromDocument(editorDocumentUuid, previewType) {
+    const doc = await editorDocumentFromUuid(editorDocumentUuid, previewType);
     const decisions = [];
     if (doc) {
       const contexts = analyse( doc.getTopDomNode() ).map((c) => c.context);
