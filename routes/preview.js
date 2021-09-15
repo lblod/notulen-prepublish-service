@@ -167,7 +167,8 @@ router.post('/extract-previews', async function (req, res, next) {
     if (!treatmentUuid) {
       throw new InvalidRequest("no valid treatment provided");
     }
-    const extractData = await buildExtractData(treatmentUuid, true);
+    const IS_PREVIEW = true;
+    const extractData = await buildExtractData(treatmentUuid, IS_PREVIEW);
     const html = constructHtmlForExtract(extractData);
 
     let errors = validateMeeting(extractData.meeting);

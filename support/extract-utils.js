@@ -112,7 +112,8 @@ export async function ensureVersionedExtract(treatment, meeting) {
     return versionedExtract.uri;
   }
   else {
-    const data = await buildExtractDataForTreatment(treatment, meeting, false, true);
+    const IS_PREVIEW = false;
+    const data = await buildExtractDataForTreatment(treatment, meeting, IS_PREVIEW, true);
     const html = constructHtmlForExtract(data);
     const extract = await VersionedExtract.create({meeting, treatment, html});
     return extract.uri;
