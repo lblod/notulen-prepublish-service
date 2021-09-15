@@ -36,17 +36,17 @@ export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
   const chairman = treatment.chairman ? cache.get(treatment.chairman) : null;
   const presentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
-    SELECT ?present WHERE {
+    SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} besluit:heeftAanwezige ?mandatarisUri.}
     }`);
-  let present = presentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
+  let present = presentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value));
   present = sortMandatees(present);
   const notPresentQuery = await query(`
-    ${prefixMap.get("besluit").toSparqlString()}
-    SELECT ?present WHERE {
+    ${prefixMap.get("ext").toSparqlString()}
+    SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} ext:heeftAfwezige ?mandatarisUri.}
     }`);
-  let notPresent = notPresentQuery.results.bindings.map((binding) => cache.get(binding.present.value));
+  let notPresent = notPresentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value));
   notPresent = sortMandatees(notPresent);
   return {secretary, chairman, present, notPresent};
 }
@@ -131,18 +131,18 @@ export async function fetchChairmanAndSecretary(uri){
       OPTIONAL {
         ${sparqlEscapeUri(uri)} besluit:heeftVoorzitter ?chairmanUri.
           ?chairmanUri mandaat:isBestuurlijkeAliasVan ?chairmanPersonUri.
-          ?chairmanUri org:holds ?chairmanRoleUri.
-          ?chairmanRoleUri org:role ?chairmanBestuursfunctieCodeUri.
-          ?chairmanBestuursfunctieCodeUri skos:prefLabel ?chairmanRole.
+          ?chairmanUri org:holds ?chairmanPositionUri.
+          ?chairmanPositionUri org:role ?chairmanRoleUri.
+          ?chairmanRoleUri skos:prefLabel ?chairmanRole.
           ?chairmanPersonUri foaf:familyName ?chairmanFamilyName.
           ?chairmanPersonUri persoon:gebruikteVoornaam ?chairmanName.
       }
       OPTIONAL {
         ${sparqlEscapeUri(uri)} besluit:heeftSecretaris ?secretaryUri.
           ?secretaryUri mandaat:isBestuurlijkeAliasVan ?secretaryPersonUri.
-          ?secretaryUri org:holds ?secretaryRoleUri.
-          ?secretaryRoleUri org:role ?secretaryBestuursfunctieCodeUri.
-          ?secretaryBestuursfunctieCodeUri skos:prefLabel ?secretaryRole.
+          ?secretaryUri org:holds ?secretaryPositionUri.
+          ?secretaryPositionUri org:role ?secretaryRoleUri.
+          ?secretaryRoleUri skos:prefLabel ?secretaryRole.
           ?secretaryPersonUri foaf:familyName ?secretaryFamilyName.
           ?secretaryPersonUri persoon:gebruikteVoornaam ?secretaryName.
       }
@@ -159,6 +159,7 @@ function processChairmanAndSecretary(bindings) {
       personUri: bindings.chairmanPersonUri.value,
       name: bindings.chairmanName.value,
       familyName: bindings.chairmanFamilyName.value,
+      positionUri: bindings.chairmanPositionUri.value,
       roleUri: bindings.chairmanRoleUri.value,
       role: bindings.chairmanRole.value
     };
@@ -170,6 +171,7 @@ function processChairmanAndSecretary(bindings) {
       personUri: bindings.secretaryPersonUri.value,
       name: bindings.secretaryName.value,
       familyName: bindings.secretaryFamilyName.value,
+      positionUri: bindings.secretaryPositionUri.value,
       roleUri: bindings.secretaryRoleUri.value,
       role: bindings.secretaryRole.value
     };

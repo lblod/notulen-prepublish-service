@@ -65,7 +65,7 @@ export async function buildExtractDataForTreatment(treatment, meeting, isPublic 
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   let participationList;
   if (participantCache) {
-    participationList = fetchTreatmentParticipantsWithCache(treatment, participantCache);
+    participationList = await fetchTreatmentParticipantsWithCache(treatment, participantCache);
   }
   else {
     participationList = await fetchParticipationListForTreatment(treatment.uri);
