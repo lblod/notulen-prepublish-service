@@ -32,7 +32,7 @@ class EditorDocument {
       return this.topDomNode;
     } else {
       const dom = this.getDom();
-      const topDomNode = dom.window._document.querySelector('body');
+      const topDomNode = dom.window.document.querySelector('body');
       topDomNode.setAttribute( 'vocab', this.context.vocab );
       topDomNode.setAttribute( 'prefix', ( () => {
         var str = "";
@@ -103,10 +103,10 @@ function appendAttachmentsToDocument(documentContent, attachments) {
   const dom = new jsdom.JSDOM( `<body>${documentContent}</body>` );
   for(let decisionKey in attachmentsGrouped) {
     const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey]);
-    const decisionContainer = dom.window._document.querySelector(`[resource="${decisionKey}"]`);
+    const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
     decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
   }
-  return dom.window._document.body.innerHTML;
+  return dom.window.document.body.innerHTML;
 }
 
 function generateAttachmentPart(attachmentGroup) {
