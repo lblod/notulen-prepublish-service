@@ -1,6 +1,7 @@
 import {prefixMap} from "../support/prefixes";
 import {hackedSparqlEscapeString} from "../support/pre-importer";
 
+// @ts-ignore
 import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
 
 export default class VersionedAgenda {

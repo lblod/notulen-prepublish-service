@@ -1,5 +1,6 @@
 import { prefixMap } from "../support/prefixes";
 import { DateTime } from 'luxon';
+// @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
 import validateMeeting from "../support/validate-meeting";
 import {articlesBasedOnClassifcationMap} from '../support/classification-utils';

@@ -1,4 +1,5 @@
 import { prefixMap } from "../support/prefixes";
+// @ts-ignore
 import { query, sparqlEscapeUri } from "mu";
 import { DateTime } from 'luxon';
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';

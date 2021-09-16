@@ -2,20 +2,19 @@
  * Represents an rdfa-document as entered by the user in the frontend.
  */
 
+// @ts-ignore
 import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 
 class EditorDocument {
   constructor(content) {
-    for( var key in content )
+    this.content = undefined;
+    this.context = {};
+    for( var key in content ) {
       this[key] = content[key];
+    }
   }
-
-  // uri = null
-  // title = null
-  // context = null
-  // content = null
 
   getDom() {
     if( this.dom ) {

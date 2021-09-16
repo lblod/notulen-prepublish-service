@@ -32,7 +32,6 @@ export function ensureAgendapointType(agendapoints, type) {
 }
 /**
  * This file contains helpers for exporting, signing and publishing content from the agenda.
- * @param {Support.Zitting} zitting
  * @returns {Promise<string>}
  */
 export async function constructHtmlForAgenda(meetingUuid, agendaKindUuid = null) {
@@ -48,8 +47,8 @@ export function constructHtmlForAgendaFromData(meeting, agendapoints) {
 
 /**
  *
- * @param {string} meetingId
- * @param {string} agendaKind
+ * @param {string} meetingUuid
+ * @param {string} agendaKindUuid
  * @return {Promise<string>}
  */
 export async function ensureVersionedAgendaForMeeting(meetingUuid, agendaKindUuid) {

@@ -5,6 +5,7 @@ import {
   sparqlEscapeUri,
   sparqlEscapeString,
   sparqlEscapeDateTime,
+  // @ts-ignore
   sparqlEscapeInt} from 'mu';
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = "decisionListSignature";
