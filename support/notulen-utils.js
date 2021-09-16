@@ -7,6 +7,7 @@ import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
 import VersionedNotulen from '../models/versioned-notulen';
 import { ensureAgendapointType } from './agenda-utils';
+import { IS_FINAL } from './constants';
 import { buildExtractDataForTreatment } from './extract-utils';
 import { handleVersionedResource } from './pre-importer';
 import { prefixes } from "./prefixes";
@@ -79,11 +80,11 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
     console.log(`Creating a new versioned notulen of kind ${kind} for ${meeting.uri}`);
     let html;
     if (kind === NOTULEN_KIND_FULL) {
-      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: false, allPublic: true});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, allPublic: true});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     else {
-      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: false, publicTreatments});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, publicTreatments});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     const versionedNotulen = await VersionedNotulen.create({meeting, html, kind, publicTreatments});
