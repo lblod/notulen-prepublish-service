@@ -1,3 +1,16 @@
+## 1.3.3 (2021-09-17)
+
+#### :rocket: Enhancement
+* [#65](https://github.com/lblod/notulen-prepublish-service/pull/65) removed base url to work in the frontend and added filename ([@lagartoverde](https://github.com/lagartoverde))
+
+#### :bug: Bug Fix
+* [#68](https://github.com/lblod/notulen-prepublish-service/pull/68) Solved all linting errors and  bugs ([@lagartoverde](https://github.com/lagartoverde))
+* [#67](https://github.com/lblod/notulen-prepublish-service/pull/67) fetchTreatmentParticipantsWithCache takes a treatment not a uri ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 2
+- Niels V ([@nvdk](https://github.com/nvdk))
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.3.2 (2021-09-14)
 
 #### :bug: Bug Fix
