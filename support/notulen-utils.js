@@ -7,6 +7,7 @@ import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
 import VersionedNotulen from '../models/versioned-notulen';
 import { ensureAgendapointType } from './agenda-utils';
+import { IS_FINAL } from './constants';
 import { buildExtractDataForTreatment } from './extract-utils';
 import { handleVersionedResource } from './pre-importer';
 import { prefixes } from "./prefixes";
@@ -26,7 +27,7 @@ export const NOTULEN_KIND_PUBLIC="public";
 
 
 
-export async function constructHtmlForMeetingNotes(meetingUuid) {
+export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
   const meeting = await Meeting.find(meetingUuid);
   const treatments = await Treatment.findAll({meetingUuid});
   let errors = validateMeeting(meeting);
@@ -34,12 +35,12 @@ export async function constructHtmlForMeetingNotes(meetingUuid) {
     const treatmentErrors = await validateTreatment(treatment);
     errors = [...errors, ...treatmentErrors];
   }
-  const meetingNotesData = await buildDataForMeetingNotes({meeting, treatments, allPublic: true});
+  const meetingNotesData = await buildDataForMeetingNotes({meeting, treatments, previewType, allPublic: true});
   const html = constructHtmlForMeetingNotesFromData(meetingNotesData);
   return {errors, html};
 }
 
-export async function buildDataForMeetingNotes({meeting, treatments, publicTreatments = [], allPublic = false}) {
+export async function buildDataForMeetingNotes({meeting, treatments, previewType, publicTreatments = [], allPublic = false}) {
   const agendapoints = await AgendaPoint.findAll({meetingUuid: meeting.uuid});
   const defaultAgendaPointType = await Concept.find(PLANNED_AGENDAPOINT_TYPE_ID);
   ensureAgendapointType(agendapoints, defaultAgendaPointType);
@@ -55,7 +56,7 @@ export async function buildDataForMeetingNotes({meeting, treatments, publicTreat
     if (allPublic || publicTreatments.includes(treatment.uri)) {
       isPublic = true;
     }
-    const data = await buildExtractDataForTreatment(treatment, meeting, isPublic, participantCache );
+    const data = await buildExtractDataForTreatment(treatment, meeting, previewType, isPublic, participantCache );
     treatmentsData.push(data);
   });
   await Promise.all(treatmentBuilders);
@@ -79,11 +80,11 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
     console.log(`Creating a new versioned notulen of kind ${kind} for ${meeting.uri}`);
     let html;
     if (kind === NOTULEN_KIND_FULL) {
-      const data = await buildDataForMeetingNotes({meeting, treatments, allPublic: true});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, allPublic: true});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     else {
-      const data = await buildDataForMeetingNotes({meeting, treatments, publicTreatments});
+      const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, publicTreatments});
       html = constructHtmlForMeetingNotesFromData(data);
     }
     const versionedNotulen = await VersionedNotulen.create({meeting, html, kind, publicTreatments});
