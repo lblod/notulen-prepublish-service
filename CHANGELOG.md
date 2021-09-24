@@ -1,3 +1,11 @@
+## 1.4.0 (2021-09-24)
+
+#### :rocket: Enhancement
+* [#69](https://github.com/lblod/notulen-prepublish-service/pull/69) add brackets around type ([@Dietr](https://github.com/Dietr))
+
+#### Committers: 1
+- Dieter Peirs ([@Dietr](https://github.com/Dietr))
+
 ## 1.3.3 (2021-09-17)
 
 #### :rocket: Enhancement
