@@ -33,7 +33,7 @@ export default class VersionedNotulen {
 
   static async create({kind, meeting, html, publicTreatments}) {
     const versionedNotulenUuid = uuid();
-    const versionedNotulenUri = `http://data.lblod.info/prepublished-behandelingen/${versionedNotulenUuid}`;
+    const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
     await update( `
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
