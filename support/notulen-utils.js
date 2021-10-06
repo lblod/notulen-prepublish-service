@@ -50,16 +50,14 @@ export async function buildDataForMeetingNotes({meeting, treatments, previewType
     participantCache = buildParticipantCache(participationList);
   }
   const intermissions = await Intermission.findAll({meetingUri: meeting.uri});
-  const treatmentsData = [];
-  const treatmentBuilders = treatments.map(async (treatment) => {
+  const treatmentsData = await Promise.all(treatments.map(async (treatment) => {
     let isPublic = false;
     if (allPublic || publicTreatments.includes(treatment.uri)) {
       isPublic = true;
     }
     const data = await buildExtractDataForTreatment(treatment, meeting, previewType, isPublic, participantCache );
-    treatmentsData.push(data);
-  });
-  await Promise.all(treatmentBuilders);
+    return data;
+  }));
   return {meeting, agendapoints, treatmentsData, intermissions, participationList};
 }
 
