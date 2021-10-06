@@ -46,7 +46,7 @@ export default class Treatment {
     else {
       const treatments = result.results.bindings.map((binding) => Treatment.fromBinding(binding));
       await Promise.all(treatments.map((treatment) => treatment.getAttachments()));
-      return treatments.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
+      return treatments;
     }
   }
 
