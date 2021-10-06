@@ -1,3 +1,13 @@
+## 1.4.1 (2021-10-06)
+
+#### :bug: Bug Fix
+* [#71](https://github.com/lblod/notulen-prepublish-service/pull/71) Bugfix/treatment sorting ([@lagartoverde](https://github.com/lagartoverde))
+* [#70](https://github.com/lblod/notulen-prepublish-service/pull/70) use the correct base-uri for versioned-notulen ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 2
+- Niels V ([@nvdk](https://github.com/nvdk))
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.4.0 (2021-09-24)
 
 #### :rocket: Enhancement
