@@ -1,10 +1,10 @@
 import Decision from '../models/decision';
 const errorMessages = {
   nl: {
-    besluitTypeRequired: (title) => `Besluit met titel "${title}" heeft nog geen type, een type is vereist om besluiten correct te melden bij het digitaal loket`
+    besluitTypeRequired: (title) => `Besluit met titel "${title}" heeft nog geen type, een type is vereist om besluiten correct te publiceren`
   },
   en: {
-    besluitTypeRequired: (title) => `Decision with title "${title}" does not have a type yet, a type is required to properly submit decisions to digitaal loket.`
+    besluitTypeRequired: (title) => `Decision with title "${title}" does not have a type yet, a type is required to properly publish decisions.`
   }
 };
 
