@@ -1,3 +1,11 @@
+## 1.4.2 (2021-10-08)
+
+#### :bug: Bug Fix
+* [#72](https://github.com/lblod/notulen-prepublish-service/pull/72) Clarify types are also needed for publication ([@abeforgit](https://github.com/abeforgit))
+
+#### Committers: 1
+- Arne Bertrand ([@abeforgit](https://github.com/abeforgit))
+
 ## 1.4.1 (2021-10-06)
 
 #### :bug: Bug Fix
