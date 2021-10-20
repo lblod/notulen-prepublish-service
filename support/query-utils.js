@@ -2,6 +2,7 @@
 import {query, sparqlEscapeUri} from "mu";
 import {prefixMap} from "./prefixes";
 import Mandatee from "../models/mandatee";
+import ParticipantCache from './participant-cache';
 
 
 export function buildParticipantCache({present, notPresent, chairman, secretary}) {
@@ -11,7 +12,7 @@ export function buildParticipantCache({present, notPresent, chairman, secretary}
     chairman,
     secretary
   ];
-  const cache = new Map();
+  const cache = new ParticipantCache();
   for (const mandatee of mandatees) {
     if (mandatee) {
       cache.set(mandatee.uri, mandatee);
@@ -32,21 +33,21 @@ export function sortMandatees(mandatees) {
 }
 
 export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
-  const secretary = treatment.secretary ? cache.get(treatment.secretary) : null;
-  const chairman = treatment.chairman ? cache.get(treatment.chairman) : null;
+  const secretary = treatment.secretary ? (await cache.get(treatment.secretary)) : null;
+  const chairman = treatment.chairman ? (await cache.get(treatment.chairman)) : null;
   const presentQuery = await query(`
     ${prefixMap.get("besluit").toSparqlString()}
     SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} besluit:heeftAanwezige ?mandatarisUri.}
     }`);
-  let present = presentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value));
+  let present = await Promise.all(presentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value)));
   present = sortMandatees(present);
   const notPresentQuery = await query(`
     ${prefixMap.get("ext").toSparqlString()}
     SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} ext:heeftAfwezige ?mandatarisUri.}
     }`);
-  let notPresent = notPresentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value));
+  let notPresent = await Promise.all(notPresentQuery.results.bindings.map((binding) => cache.get(binding.mandatarisUri.value)));
   notPresent = sortMandatees(notPresent);
   return {secretary, chairman, present, notPresent};
 }
