@@ -72,37 +72,39 @@ export default class Vote {
       ${sparqlEscapeUri(this.uri)} besluit:heeftAanwezige ?mandatarisUri.
     }
   `);
-    this.attendees = sortMandatees(attendeesQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.attendees = await Promise.all(attendeesQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.attendees = sortMandatees(this.attendees);
     const votersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftStemmer ?mandatarisUri.
     }
   `);
-    this.voters = sortMandatees(votersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
-
+    this.voters = await Promise.all(votersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.voters = sortMandatees(this.voters);
     const positiveVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftVoorstander ?mandatarisUri.
     }
   `);
-    this.positiveVoters = sortMandatees(positiveVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
-
+    this.positiveVoters = await Promise.all(positiveVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.positiveVoters = sortMandatees(this.positiveVoters);
     const negativeVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftTegenstander ?mandatarisUri.
     }
   `);
-    this.negativeVoters = sortMandatees(negativeVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
-
+    this.negativeVoters = await Promise.all(negativeVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.negativeVoters = sortMandatees(this.negativeVoters);
     const abstentionVotersQuery = await query(`
   ${prefixMap.get("besluit").toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftOnthouder ?mandatarisUri.
     }
   `);
-    this.abstentionVoters = sortMandatees(abstentionVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.abstentionVoters = await Promise.all(abstentionVotersQuery.results.bindings.map((binding) => participantCache.get(binding.mandatarisUri.value)));
+    this.abstentionVoters = sortMandatees(this.abstentionVoters);
   }
 }
