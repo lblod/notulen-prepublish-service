@@ -105,7 +105,9 @@ function appendAttachmentsToDocument(documentContent, attachments, previewType) 
   for(let decisionKey in attachmentsGrouped) {
     const htmlToAdd = generateAttachmentPart(attachmentsGrouped[decisionKey], previewType);
     const decisionContainer = dom.window.document.querySelector(`[resource="${decisionKey}"]`);
-    decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
+    if(decisionContainer) {
+      decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
+    }
   }
   return dom.window.document.body.innerHTML;
 }
