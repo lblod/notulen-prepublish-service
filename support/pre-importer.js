@@ -9,7 +9,11 @@ import {
 } from 'mu';
 import { prefixMap } from './prefixes';
 import { signDocument } from './sign-document';
-import { getFileContentForUri } from './file-utils';
+import {
+  getFileContentForUri,
+  persistContentToFile,
+  writeFileMetadataToDb
+} from './file-utils';
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -33,6 +37,7 @@ function hackedSparqlEscapeString(string) {
 }
 
 async function getVersionedContent(uri, contentPredicate) {
+
   const contentQuery = `
         ${prefixMap.get('nie').toSparqlString()}
         ${prefixMap.get('prov').toSparqlString()}
@@ -88,6 +93,9 @@ async function handleVersionedResource(
         .join(' ')
     : '';
   const content = await getVersionedContent(versionedUri, contentPredicate);
+  const fileMetadata = await persistContentToFile(content);
+  const logicalFileUri = await writeFileMetadataToDb(fileMetadata);
+
   const query = `
     ${prefixMap.get('bv').toSparqlString()}
     ${prefixMap.get('ext').toSparqlString()}
@@ -98,7 +106,7 @@ async function handleVersionedResource(
     ${prefixMap.get('muSession').toSparqlString()}
     ${prefixMap.get('dct').toSparqlString()}
     ${prefixMap.get('foaf').toSparqlString()}
-
+    ${prefixMap.get("prov").toSparqlString()}
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
         ${statePredicate} ?state.
@@ -106,7 +114,7 @@ async function handleVersionedResource(
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
         mu:uuid ${sparqlEscapeString(newResourceUuid)};
-        sign:text ${hackedSparqlEscapeString(content)};
+        prov:generated ${sparqlEscapeString(logicalFileUri)};
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
