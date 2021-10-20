@@ -1,3 +1,12 @@
+## 1.4.3 (2021-10-20)
+
+#### :bug: Bug Fix
+* [#74](https://github.com/lblod/notulen-prepublish-service/pull/74) Created more resilient cache ([@lagartoverde](https://github.com/lagartoverde))
+* [#73](https://github.com/lblod/notulen-prepublish-service/pull/73) Only insert the attachments if we find the decision container ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.4.2 (2021-10-08)
 
 #### :bug: Bug Fix
