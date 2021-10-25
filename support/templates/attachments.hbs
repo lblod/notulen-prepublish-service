@@ -2,7 +2,7 @@
 <ul class="bullet-list">
   {{#each attachments}}
     {{#if this.isRegulatory}}
-      <li><a rev="dct:isPartOf" property="eli:related_to" href="{{this.link}}" typeof="foaf:Document">{{this.filename}}</a></li>
+      <li><a rev="dct:isPartOf" property="eli:related_to" href="{{this.link}}" typeof="foaf:Document">{{this.filename}}</a> (reglementaire bijlage)</li>
     {{else}}
       <li><a property="eli:related_to" href="{{this.link}}" typeof="foaf:Document">{{this.filename}}</a></li>
     {{/if}}
