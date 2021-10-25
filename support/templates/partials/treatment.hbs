@@ -54,7 +54,7 @@
           {{/if}}
         </p>
         <p lang="nl-BE" property="besluit:onderwerp">{{this.subject}}</p>
-        {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=true}}
+        {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=false}}
         {{> mandateeList mandatees=this.voters property="besluit:heeftStemmer" title="Effectieve stemmers" includeRole=false}}
         <p>
           Totaal aantal voorstanders:
