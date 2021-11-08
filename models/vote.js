@@ -44,6 +44,7 @@ export default class Vote {
       subject: subject.value,
       result: result.value,
       isSecret: isSecret.value === "true",
+      isUnanimous: (Number(positiveVotes.value) === 0 || Number(negativeVotes.value) === 0) && Number(abstentionVotes.value) === 0,
       positiveVotes: positiveVotes.value,
       negativeVotes: negativeVotes.value,
       abstentionVotes: abstentionVotes.value,
@@ -52,11 +53,12 @@ export default class Vote {
     });
   }
 
-  constructor({uri, subject, result, isSecret, positiveVotes, negativeVotes, abstentionVotes, position, adminBodyClassification}) {
+  constructor({uri, subject, result, isSecret, isUnanimous, positiveVotes, negativeVotes, abstentionVotes, position, adminBodyClassification}) {
     this.uri = uri;
     this.subject = subject;
     this.result = result;
     this.isSecret = isSecret;
+    this.isUnanimous = isUnanimous;
     this.positiveVotes = positiveVotes;
     this.negativeVotes = negativeVotes;
     this.abstentionVotes = abstentionVotes;
