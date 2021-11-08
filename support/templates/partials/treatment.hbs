@@ -65,7 +65,8 @@
             {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false hideText=true}}
             {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false hideText=true}}
           {{/unless}}
-          <p>Met eenparigheid van stemmen,</p>
+          <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
+          <p>,met eenparigheid van stemmen</p>
         {{else}}
           <p>
             Totaal aantal voorstanders:
@@ -85,9 +86,9 @@
             {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
           {{/unless}}
           <p>Met als gevolg,</p>
+          <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
         {{/if}}
         
-        <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
       </div>
       {{/each}}
     </div>
