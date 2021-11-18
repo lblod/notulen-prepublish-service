@@ -1,3 +1,13 @@
+## 1.5.0 (2021-11-18)
+
+#### :rocket: Enhancement
+* [#78](https://github.com/lblod/notulen-prepublish-service/pull/78) Feature/unanimous voting ([@lagartoverde](https://github.com/lagartoverde))
+* [#77](https://github.com/lblod/notulen-prepublish-service/pull/77) remove role from voting participants ([@lagartoverde](https://github.com/lagartoverde))
+* [#76](https://github.com/lblod/notulen-prepublish-service/pull/76) Add some text if attachment is regulatory ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.4.3 (2021-10-20)
 
 #### :bug: Bug Fix
