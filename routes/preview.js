@@ -11,6 +11,9 @@ import { parseBody } from '../support/parse-body';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {IS_PREVIEW} from '../support/constants';
+import { generateNotulenPreview, NOTULEN_KIND_PUBLIC } from '../support/notulen-utils';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
 const router = express.Router();
 
 /***
@@ -218,4 +221,16 @@ router.post('/extract-previews', async function (req, res, next) {
     }
   }
 });
+
+router.post('/prepublish/notulen/final-preview/:zittingIdentifier', async function(req, res) {
+  const meetingUuid = req.params.zittingIdentifier;
+  const publicBehandelingUris = req.body['public-behandeling-uris'];
+
+  const meeting = await Meeting.find(meetingUuid);
+  const treatments = await Treatment.findAll({meetingUuid});
+
+  const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
+  res.end(publicationHtml);
+} );
+
 export default router;
