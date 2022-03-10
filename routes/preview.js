@@ -186,21 +186,21 @@ router.post('/extract-previews', async function (req, res, next) {
           attributes: {
             html: html,
             "validation-errors": errors
-          }
-        },
-        relationships: {
-          treatment: {
-            data: {
-              id: treatmentUuid,
-              type: "behandeling-van-agendapunt"
+          },
+          relationships: {
+            treatment: {
+              data: {
+                id: treatmentUuid,
+                type: "behandeling-van-agendapunt"
+              }
+            },
+            meeting: {
+              data: {
+                id: extractData.meeting.uuid,
+                type: "zitting"
+              }
             }
           },
-          meeting: {
-            data: {
-              id: extractData.meeting.uuid,
-              type: "zitting"
-            }
-          }
         },
       }
     ).end();
@@ -222,9 +222,10 @@ router.post('/extract-previews', async function (req, res, next) {
   }
 });
 
-router.post('/prepublish/notulen/final-preview/:zittingIdentifier', async function(req, res) {
-  const meetingUuid = req.params.zittingIdentifier;
-  const publicBehandelingUris = req.body['public-behandeling-uris'];
+router.post('/meeting-notes-previews', async function(req, res) {
+  const {relationships} = parseBody(req.body);
+  const publicBehandelingUris = relationships?.publicTreatments?.map(publicTreatment => publicTreatment.id) || [];
+  const meetingUuid = relationships?.meeting?.id;
 
   const meeting = await Meeting.find(meetingUuid);
   const treatments = await Treatment.findAll({meetingUuid});
