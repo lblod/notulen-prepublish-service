@@ -230,7 +230,25 @@ router.post('/prepublish/notulen/final-preview/:zittingIdentifier', async functi
   const treatments = await Treatment.findAll({meetingUuid});
 
   const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
-  res.end(publicationHtml);
+  return res.status(201).send(
+    {
+      data: {
+        type: "notulen-final-preview",
+        id: uuid(),
+        attributes: {
+          html: publicationHtml,
+        }
+      },
+      relationships: {
+        meeting: {
+          data: {
+            id: meetingUuid,
+            type: "zitting"
+          }
+        }
+      },
+    }
+  ).end();
 } );
 
 export default router;
