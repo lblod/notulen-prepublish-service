@@ -181,7 +181,7 @@ router.post('/extract-previews', async function (req, res, next) {
     return res.status(201).send(
       {
         data: {
-          type: "extract-preview",
+          type: "extract-previews",
           id: uuid(),
           attributes: {
             html: html,
@@ -191,13 +191,13 @@ router.post('/extract-previews', async function (req, res, next) {
             treatment: {
               data: {
                 id: treatmentUuid,
-                type: "behandeling-van-agendapunt"
+                type: "treatments"
               }
             },
             meeting: {
               data: {
                 id: extractData.meeting.uuid,
-                type: "zitting"
+                type: "meetings"
               }
             }
           },
@@ -234,7 +234,7 @@ router.post('/meeting-notes-previews', async function(req, res) {
   return res.status(201).send(
     {
       data: {
-        type: "notulen-final-preview",
+        type: "notulen-final-previews",
         id: uuid(),
         attributes: {
           html: publicationHtml,
@@ -244,7 +244,7 @@ router.post('/meeting-notes-previews', async function(req, res) {
         meeting: {
           data: {
             id: meetingUuid,
-            type: "zitting"
+            type: "meetings"
           }
         }
       },
