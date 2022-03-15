@@ -234,26 +234,26 @@ router.post('/meeting-notes-previews', async function(req, res) {
     const treatments = await Treatment.findAll({meetingUuid});
     const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
     pushJobResult(jobUuid, 200,
-    {
-      data: {
-        type: "notulen-final-previews",
-        id: uuid(),
-        attributes: {
-          html: publicationHtml,
-        }
-      },
-      relationships: {
-        meeting: {
-          data: {
-            id: meetingUuid,
-            type: "meetings"
+      {
+        data: {
+          type: "notulen-final-previews",
+          id: uuid(),
+          attributes: {
+            html: publicationHtml,
           }
-        }
-      },
-    }
-                 );
+        },
+        relationships: {
+          meeting: {
+            data: {
+              id: meetingUuid,
+              type: "meetings"
+            }
+          }
+        },
+      }
+    );
   }
-  catch(e) {
+  catch(err) {
     console.error(err);
     pushJobResult(jobUuid, 500, {
       errors: [
