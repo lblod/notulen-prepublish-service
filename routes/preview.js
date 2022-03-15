@@ -44,10 +44,10 @@ function pushJobResult( uuid, status, result ) {
  * @param res Ngenix response object.
  * @return job Uuid
  */
-function yieldJobId(res) {
+function yieldJobId(res, status = 200) {
   const jobUuid = uuid();
   res
-    .status(200)
+    .status(status)
     .send({
       data: {
         attributes: {
@@ -223,15 +223,17 @@ router.post('/extract-previews', async function (req, res, next) {
 });
 
 router.post('/meeting-notes-previews', async function(req, res) {
+  const jobUuid = yieldJobId(res, 201);
   const {relationships} = parseBody(req.body);
-  const publicBehandelingUris = relationships?.publicTreatments?.map(publicTreatment => publicTreatment.id) || [];
   const meetingUuid = relationships?.meeting?.id;
+  try {
+    const {relationships} = parseBody(req.body);
+    const publicBehandelingUris = relationships?.publicTreatments?.map(publicTreatment => publicTreatment.id) || [];
 
-  const meeting = await Meeting.find(meetingUuid);
-  const treatments = await Treatment.findAll({meetingUuid});
-
-  const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
-  return res.status(201).send(
+    const meeting = await Meeting.find(meetingUuid);
+    const treatments = await Treatment.findAll({meetingUuid});
+    const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
+    pushJobResult(jobUuid, 200,
     {
       data: {
         type: "notulen-final-previews",
@@ -249,7 +251,18 @@ router.post('/meeting-notes-previews', async function(req, res) {
         }
       },
     }
-  ).end();
-} );
+                 );
+  }
+  catch(e) {
+    console.error(err);
+    pushJobResult(jobUuid, 500, {
+      errors: [
+        {
+          title: `An error occurred while creating meeting notes preview for ${meetingUuid}: ${err}`,
+        },
+      ],
+    });
+  }
+});
 
 export default router;
