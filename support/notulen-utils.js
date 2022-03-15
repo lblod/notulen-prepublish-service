@@ -90,6 +90,19 @@ export async function ensureVersionedNotulen(meeting, treatments, kind, publicTr
   }
 }
 
+export async function generateNotulenPreview(meeting, treatments, kind, publicTreatments = []) {
+  let html;
+  if (kind === NOTULEN_KIND_FULL) {
+    const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, allPublic: true});
+    html = constructHtmlForMeetingNotesFromData(data);
+  }
+  else {
+    const data = await buildDataForMeetingNotes({meeting, treatments, previewType: IS_FINAL, publicTreatments});
+    html = constructHtmlForMeetingNotesFromData(data);
+  }
+  return html;
+}
+
 
 export async function signVersionedNotulen( versionedNotulenUri, sessionId, targetStatus, attachments ) {
   await handleVersionedResource( "signature", versionedNotulenUri, sessionId, targetStatus, 'ext:signsNotulen', undefined, undefined, attachments);

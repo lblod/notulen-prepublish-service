@@ -11,7 +11,11 @@ export function parseBody(jsonBody) {
   const relationshipData = jsonBody.data.relationships;
   if (relationshipData) {
     for (const key of Object.keys(relationshipData)) {
-      relationships[key] = relationshipData[key].data;
+      if(Array.isArray(relationshipData[key])) {
+        relationships[key] = relationshipData[key].map(relationship => relationship.data);
+      } else {
+        relationships[key] = relationshipData[key].data;
+      }
     }
   }
   return {

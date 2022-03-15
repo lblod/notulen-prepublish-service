@@ -11,6 +11,9 @@ import { parseBody } from '../support/parse-body';
 import validateMeeting from '../support/validate-meeting';
 import validateTreatment from '../support/validate-treatment';
 import {IS_PREVIEW} from '../support/constants';
+import { generateNotulenPreview, NOTULEN_KIND_PUBLIC } from '../support/notulen-utils';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
 const router = express.Router();
 
 /***
@@ -178,26 +181,26 @@ router.post('/extract-previews', async function (req, res, next) {
     return res.status(201).send(
       {
         data: {
-          type: "extract-preview",
+          type: "extract-previews",
           id: uuid(),
           attributes: {
             html: html,
             "validation-errors": errors
-          }
-        },
-        relationships: {
-          treatment: {
-            data: {
-              id: treatmentUuid,
-              type: "behandeling-van-agendapunt"
+          },
+          relationships: {
+            treatment: {
+              data: {
+                id: treatmentUuid,
+                type: "treatments"
+              }
+            },
+            meeting: {
+              data: {
+                id: extractData.meeting.uuid,
+                type: "meetings"
+              }
             }
           },
-          meeting: {
-            data: {
-              id: extractData.meeting.uuid,
-              type: "zitting"
-            }
-          }
         },
       }
     ).end();
@@ -218,4 +221,35 @@ router.post('/extract-previews', async function (req, res, next) {
     }
   }
 });
+
+router.post('/meeting-notes-previews', async function(req, res) {
+  const {relationships} = parseBody(req.body);
+  const publicBehandelingUris = relationships?.publicTreatments?.map(publicTreatment => publicTreatment.id) || [];
+  const meetingUuid = relationships?.meeting?.id;
+
+  const meeting = await Meeting.find(meetingUuid);
+  const treatments = await Treatment.findAll({meetingUuid});
+
+  const publicationHtml = await generateNotulenPreview(meeting, treatments, NOTULEN_KIND_PUBLIC, publicBehandelingUris);
+  return res.status(201).send(
+    {
+      data: {
+        type: "notulen-final-previews",
+        id: uuid(),
+        attributes: {
+          html: publicationHtml,
+        }
+      },
+      relationships: {
+        meeting: {
+          data: {
+            id: meetingUuid,
+            type: "meetings"
+          }
+        }
+      },
+    }
+  ).end();
+} );
+
 export default router;
