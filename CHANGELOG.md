@@ -1,3 +1,17 @@
+## 1.6.0 (2022-03-17)
+
+#### :rocket: Enhancement
+* [#82](https://github.com/lblod/notulen-prepublish-service/pull/82) make notulen generation async ([@nvdk](https://github.com/nvdk))
+* [#81](https://github.com/lblod/notulen-prepublish-service/pull/81) created endpoint for generating final notulen preview with public behandelings ([@lagartoverde](https://github.com/lagartoverde))
+* [#79](https://github.com/lblod/notulen-prepublish-service/pull/79) Remove spaces on the role in the template ([@lagartoverde](https://github.com/lagartoverde))
+
+#### :bug: Bug Fix
+* [#80](https://github.com/lblod/notulen-prepublish-service/pull/80) fix decision list not properly closing divs ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 2
+- Niels V ([@nvdk](https://github.com/nvdk))
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.5.0 (2021-11-18)
 
 #### :rocket: Enhancement
