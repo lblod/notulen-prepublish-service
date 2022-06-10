@@ -129,53 +129,39 @@ export async function fetchChairmanAndSecretary(uri){
     ${prefixMap.get("foaf").toSparqlString()}
     ${prefixMap.get("persoon").toSparqlString()}
     SELECT DISTINCT * WHERE {
-      OPTIONAL {
-        ${sparqlEscapeUri(uri)} besluit:heeftVoorzitter ?chairmanUri.
-          ?chairmanUri mandaat:isBestuurlijkeAliasVan ?chairmanPersonUri.
-          ?chairmanUri org:holds ?chairmanPositionUri.
-          ?chairmanPositionUri org:role ?chairmanRoleUri.
-          ?chairmanRoleUri skos:prefLabel ?chairmanRole.
-          ?chairmanPersonUri foaf:familyName ?chairmanFamilyName.
-          ?chairmanPersonUri persoon:gebruikteVoornaam ?chairmanName.
-      }
-      OPTIONAL {
-        ${sparqlEscapeUri(uri)} besluit:heeftSecretaris ?secretaryUri.
-          ?secretaryUri mandaat:isBestuurlijkeAliasVan ?secretaryPersonUri.
-          ?secretaryUri org:holds ?secretaryPositionUri.
-          ?secretaryPositionUri org:role ?secretaryRoleUri.
-          ?secretaryRoleUri skos:prefLabel ?secretaryRole.
-          ?secretaryPersonUri foaf:familyName ?secretaryFamilyName.
-          ?secretaryPersonUri persoon:gebruikteVoornaam ?secretaryName.
+      {
+      SELECT ?mandatarisUri ?relation WHERE {
+        {
+          ${sparqlEscapeUri(uri)} besluit:heeftVoorzitter ?mandatarisUri.
+          BIND(besluit:heeftVoorzitter as ?relation)
+        }
+        UNION
+        {
+          ${sparqlEscapeUri(uri)} besluit:heeftSecretaris ?mandatarisUri.
+          BIND(besluit:heeftSecretaris as ?relation)
+        }
       }
     }
+    ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
+    ?mandatarisUri org:holds ?positionUri.
+    ?positionUri org:role ?roleUri.
+    ?roleUri skos:prefLabel ?role.
+    ?personUri foaf:familyName ?familyName.
+    ?personUri persoon:gebruikteVoornaam ?name.
+   }
   `);
-  return processChairmanAndSecretary(chairmanAndSecretaryQuery.results.bindings[0]);
+  return processChairmanAndSecretary(chairmanAndSecretaryQuery.results.bindings);
 }
 
 function processChairmanAndSecretary(bindings) {
-  let chairman;
-  if(bindings.chairmanUri) {
-    chairman = {
-      uri: bindings.chairmanUri.value,
-      personUri: bindings.chairmanPersonUri.value,
-      name: bindings.chairmanName.value,
-      familyName: bindings.chairmanFamilyName.value,
-      positionUri: bindings.chairmanPositionUri.value,
-      roleUri: bindings.chairmanRoleUri.value,
-      role: bindings.chairmanRole.value
-    };
-  }
-  let secretary;
-  if(bindings.secretaryUri) {
-    secretary = {
-      uri: bindings.secretaryUri.value,
-      personUri: bindings.secretaryPersonUri.value,
-      name: bindings.secretaryName.value,
-      familyName: bindings.secretaryFamilyName.value,
-      positionUri: bindings.secretaryPositionUri.value,
-      roleUri: bindings.secretaryRoleUri.value,
-      role: bindings.secretaryRole.value
-    };
+  let chairman, secretary;
+  for (const binding of bindings) {
+    if (binding.relationship?.value == 'http://data.vlaanderen.be/ns/besluit#heeftVoorzitter') {
+      chairman = new Mandatee(binding);
+    }
+    else if (binding.relationship?.value == 'http://data.vlaanderen.be/ns/besluit#heeftSecretaris') {
+      secretary = new Mandatee(binding);
+    }
   }
   return {chairman, secretary};
 }

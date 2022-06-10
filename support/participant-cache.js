@@ -32,9 +32,14 @@ export default class ParticipantCache {
           ?personUri persoon:gebruikteVoornaam ?name.
         }
       `);
-      const mandatee = new Mandatee({...queryData.results.bindings[0], mandatarisUri: uri});
-      this.map.set(uri, mandatee);
-      return mandatee;
+      if (queryData.results.bindings.length === 1) {
+        const mandatee = new Mandatee({...queryData.results.bindings[0], mandatarisUri: { value: uri}});
+        this.map.set(uri, mandatee);
+        return mandatee;
+      }
+      else {
+        throw `mandatee with uri ${uri} was not found in the database`;
+      }
     }
   }
 }
