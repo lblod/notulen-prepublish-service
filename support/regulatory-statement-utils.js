@@ -3,11 +3,10 @@ import { handleVersionedResource } from "./pre-importer";
 import { query, update, sparqlEscapeUri } from 'mu';
 import { DOCUMENT_PUBLISHED_STATUS } from "./constants";
 import VersionedRegulatoryStatement from "../models/versioned-regulatory-statement";
-import EditorDocument, { editorDocumentFromUri } from "./editor-document";
 
 /**
  * 
- * @param {EditorDocument} regulatoryStatementDocument An editor document object representing the regulatory statement
+ * @param {import('./editor-document').default} regulatoryStatementDocument An editor document object representing the regulatory statement
  * @param {string} versionedTreatmentUri The URI of the versioned treatment the regulatory statement belongs to.
  * @returns {Promise<string>} The URI of the newly created or already existing versioned regulatory statement.
  */
@@ -19,7 +18,7 @@ export async function ensureVersionedRegulatoryStatement(regulatoryStatementDocu
   }
   else {
     const html = regulatoryStatementDocument.content;
-    const versionedRegulatoryStatement = await VersionedRegulatoryStatement.create({ regulatoryStatementDocumentUri: regulatoryStatementDocument.uri, versionedTreatmentUri, html })
+    const versionedRegulatoryStatement = await VersionedRegulatoryStatement.create({ regulatoryStatementDocumentUri: regulatoryStatementDocument.uri, versionedTreatmentUri, html });
     return versionedRegulatoryStatement.uri;
   }
 }

@@ -102,10 +102,10 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
       const extractUri = await ensureVersionedExtract(treatment, meeting);
       await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "getekend", treatment.attachments );
       const treatmentEditorDocumentUri = await getUri(treatment.editorDocumentUuid);
-      const linkedRegulatoryStatementContainers = await getLinkedDocuments(treatmentEditorDocumentUri)
+      const linkedRegulatoryStatementContainers = await getLinkedDocuments(treatmentEditorDocumentUri);
       const linkedRegulatoryStatementDocuments = await Promise.all(linkedRegulatoryStatementContainers.map(async (containerURI) => getCurrentVersion(containerURI)));
       const versionedRegulatoryStatements = await Promise.all(linkedRegulatoryStatementDocuments.map(async (doc) => ensureVersionedRegulatoryStatement(doc, extractUri)));
-      await Promise.all(versionedRegulatoryStatements.map(async (versionedStatementUri) => signVersionedRegulatoryStatement(versionedStatementUri, req.header("MU-SESSION-ID"), "getekend")))
+      await Promise.all(versionedRegulatoryStatements.map(async (versionedStatementUri) => signVersionedRegulatoryStatement(versionedStatementUri, req.header("MU-SESSION-ID"), "getekend")));
       return res.send( { success: true } ).end();
     }
   } catch (err) {
