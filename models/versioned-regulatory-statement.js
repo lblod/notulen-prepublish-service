@@ -16,20 +16,14 @@ export default class VersionedRegulatoryStatement {
         ?uri a ext:VersionedRegulatoryStatement;
                   mu:uuid ?uuid;
                   ext:reglementaireBijlage ${sparqlEscapeString(regulatoryStatementDocumentUri)}.
-        OPTIONAL { ?uri ext:content ?content. }
-        OPTIONAL { ?uri prov:generated/^nie:dataSource ?fileUri. }
+        ?uri prov:generated/^nie:dataSource ?fileUri.
       }
   `);
     const bindings = r.results.bindings;
     if (bindings.length > 0) {
       const binding = bindings[0];
       const fileUri = binding.fileUri?.value;
-      let html;
-      if (fileUri){
-        html = await getFileContentForUri(fileUri);
-      } else {
-        html = binding.content?.value;
-      }
+      const html = fileUri ? await getFileContentForUri(fileUri) : '';
       return new VersionedRegulatoryStatement({uri: binding.uri.value, html, regulatoryStatementDocument: regulatoryStatementDocumentUri});
     }
     else {
