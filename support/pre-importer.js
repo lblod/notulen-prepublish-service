@@ -19,6 +19,7 @@ function hackedSparqlEscapeString( string ) {
 
 async function getVersionedContent(uri, contentPredicate) {
   const result = await query(`
+        ${prefixMap.get("nie").toSparqlString()}
         ${prefixMap.get("prov").toSparqlString()}
         ${prefixMap.get("ext").toSparqlString()}
         SELECT ?content ?fysicalFileUri
