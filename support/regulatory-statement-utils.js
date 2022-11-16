@@ -61,8 +61,8 @@ export async function updateStatusOfLinkedEditorDocument(versionedRegulatoryStat
   const editorDocumentQuery = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     SELECT ?editorDocument WHERE  {
-    ${sparqlEscapeUri(versionedRegulatoryStatementUri)} a ext:VersionedReglementaireBijlage;
-        ext:reglementaireBijlage ?editorDocument.
+    ${sparqlEscapeUri(versionedRegulatoryStatementUri)} a ext:VersionedRegulatoryStatement;
+        ext:regulatoryStatement ?editorDocument.
     }
   `);
   if (!editorDocumentQuery.results.bindings.length)

@@ -11,9 +11,10 @@ import EditorDocument from './editor-document';
  */
 export async function getCurrentVersion(documentContainerUri) {
   const currentVersionQuery = await query(`
+      PREFIX pav: <http://purl.org/pav/>
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       SELECT ?uri ?content ?context WHERE  {
-      ${sparqlEscapeUri(documentContainerUri)} ext:hasCurrentVersion ?uri .
+      ${sparqlEscapeUri(documentContainerUri)} pav:hasCurrentVersion ?uri .
       ?uri ext:editorDocumentContent ?content;
                       ext:editorDocumentContext ?context.
       }
@@ -40,6 +41,7 @@ export async function getCurrentVersion(documentContainerUri) {
 export async function getLinkedDocuments(editorDocumentUri){
   const linkedStatementsQuery = await query(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX dct: <http://purl.org/dc/terms/>
     SELECT ?part WHERE  {
       ?part dct:isPartOf ${sparqlEscapeUri(editorDocumentUri)} .
     }

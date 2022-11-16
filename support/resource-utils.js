@@ -10,7 +10,7 @@ export async function getUri(uuid){
      }`);
   if (!queryResult.results.bindings.length)
     throw new Error('URI not found for supplied uuid' + uuid);
-  return queryResult.results.bindings[0].uri;
+  return queryResult.results.bindings[0].uri.value;
 }
 
 export async function getUuid(uri){
@@ -21,5 +21,5 @@ export async function getUuid(uri){
      }`);
   if (!queryResult.results.bindings.length)
     throw new Error('URI not found for supplied URI' + uri);
-  return queryResult.results.bindings[0].uuid;
+  return queryResult.results.bindings[0].uuid.value;
 }
