@@ -1,7 +1,8 @@
 // @ts-ignore
-import {update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
+import {query, update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {prefixMap} from "./prefixes";
 import {signDocument} from './sign-document';
+import { getFileContentForUri, persistContentToFile, writeFileMetadataToDb } from './file-utils';
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -16,6 +17,30 @@ function hackedSparqlEscapeString( string ) {
   return `${sparqlEscapeString(string.replace(/\n/g, function() { return ''; }).replace(/\r/g, function() { return '';}))}`;
 }
 
+async function getVersionedContent(uri, contentPredicate) {
+  const result = await query(`
+        ${prefixMap.get("prov").toSparqlString()}
+        ${prefixMap.get("ext").toSparqlString()}
+        SELECT ?content ?fysicalFileUri
+        WHERE {
+         OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
+         OPTIONAL { ${sparqlEscapeUri(uri)} prov:generated/^nie:dataSource ?fysicalFileUri. }
+        }`);
+  if (result.results.bindings.length == 1) {
+    const binding = result.results.bindings[0];
+    if (binding.content) {
+      return binding.content.value;
+    }
+    else {
+      const content = await getFileContentForUri(binding.fysicalFileUri.value);
+      return content;
+    }
+  }
+  else {
+    throw "could not retrieve content";
+  }
+}
+
 async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate, attachments ) {
   const now = new Date();
   const newResourceUuid = uuid();
@@ -24,7 +49,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
   const statePredicate = customStatePredicate || "ext:stateString";
   const contentPredicate = customContentPredicate || "ext:content";
   const attachmentsString = attachments ? attachments.map((attachment) => `${sparqlEscapeUri(newResourceUri)} ext:hasAttachments ${sparqlEscapeUri(attachment.uri)}.`).join(' ') : '';
-  // TODO: get correct signatorySecret from ACMIDM
+  const content = await getVersionedContent(versionedUri, contentPredicate);
   const query = `
     ${prefixMap.get("bv").toSparqlString()}
     ${prefixMap.get("ext").toSparqlString()}
@@ -43,7 +68,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
         mu:uuid ${sparqlEscapeString(newResourceUuid)};
-        sign:text ?content;
+        sign:text ${sparqlEscapeString(content)};
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
@@ -54,8 +79,6 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         ${statePredicate} ${sparqlEscapeString(targetStatus)}.
       ${attachmentsString}
     } WHERE {
-      ${sparqlEscapeUri(versionedUri)}
-        ${contentPredicate} ?content.
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
       ${sparqlEscapeUri(sessionId)}
