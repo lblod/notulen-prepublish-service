@@ -79,15 +79,3 @@ export async function updateStatusOfLinkedEditorDocument(versionedRegulatoryStat
     }
   `);
 }
-
-// export async function getLinkedRegulatoryStatements(treatmentUri){
-//   const linkedStatementsQuery = await query(`
-//     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-//     SELECT ?regulatoryStatementContainer WHERE  {
-//     ${sparqlEscapeUri(treatmentUri)} ext:hasDocumentContainer ?container .
-//     ?container ext:currentVersion ?hasCurrentVersion .
-//     ?regulatoryStatementContainer dct:isPartOf ?currentVersion .
-//     }
-//   `);
-//   return linkedStatementsQuery.results.bindings.map((binding) => binding.regulatoryStatementContainer.value);
-// }
