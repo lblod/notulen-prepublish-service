@@ -16,9 +16,8 @@ import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import {handleVersionedResource} from './pre-importer';
-import { IS_FINAL } from './constants';
+import { IS_FINAL, DOCUMENT_PUBLISHED_STATUS } from './constants';
 
-const DOCUMENT_PUBLISHED_STATUS = 'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 /**
  * This file contains helpers for exporting, signing and publishing an extract of the meeting notes
  * an extract is the treatment of one agendapoint and all it's related info
