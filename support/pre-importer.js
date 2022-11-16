@@ -68,7 +68,7 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
         mu:uuid ${sparqlEscapeString(newResourceUuid)};
-        sign:text ${sparqlEscapeString(content)};
+        sign:text ${hackedSparqlEscapeString(content)};
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
