@@ -1,6 +1,5 @@
 // @ts-ignore
 import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
-import { hackedSparqlEscapeString } from '../support/pre-importer';
 import { persistContentToFile, writeFileMetadataToDb, getFileContentForUri } from '../support/file-utils';
 import { prefixMap } from '../support/prefixes';
 // using the english name here, but the model is in dutch
