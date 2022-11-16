@@ -15,6 +15,9 @@ import {ensureVersionedBesluitenLijstForZitting, signVersionedBesluitenlijst} fr
 import {ensureVersionedNotulen, NOTULEN_KIND_FULL, signVersionedNotulen} from '../support/notulen-utils';
 import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-utils';
 import {fetchCurrentUser} from '../support/query-utils';
+import { getCurrentVersion, getLinkedDocuments } from '../support/editor-document-utils';
+import { ensureVersionedRegulatoryStatement, signVersionedRegulatoryStatement } from '../support/regulatory-statement-utils';
+import { getUri } from '../support/resource-utils';
 const router = express.Router();
 
 
@@ -98,6 +101,11 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
     else {
       const extractUri = await ensureVersionedExtract(treatment, meeting);
       await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "getekend", treatment.attachments );
+      const treatmentEditorDocumentUri = await getUri(treatment.editorDocumentUuid);
+      const linkedRegulatoryStatementContainers = await getLinkedDocuments(treatmentEditorDocumentUri)
+      const linkedRegulatoryStatementDocuments = await Promise.all(linkedRegulatoryStatementContainers.map(async (containerURI) => getCurrentVersion(containerURI)));
+      const versionedRegulatoryStatements = await Promise.all(linkedRegulatoryStatementDocuments.map(async (doc) => ensureVersionedRegulatoryStatement(doc, extractUri)));
+      await Promise.all(versionedRegulatoryStatements.map(async (versionedStatementUri) => signVersionedRegulatoryStatement(versionedStatementUri, req.header("MU-SESSION-ID"), "getekend")))
       return res.send( { success: true } ).end();
     }
   } catch (err) {
