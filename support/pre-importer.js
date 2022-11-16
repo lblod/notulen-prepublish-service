@@ -2,7 +2,7 @@
 import {query, update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
 import {prefixMap} from "./prefixes";
 import {signDocument} from './sign-document';
-import { getFileContentForUri, persistContentToFile, writeFileMetadataToDb } from './file-utils';
+import { getFileContentForUri } from './file-utils';
 
 function cleanupTriples(triples) {
   const cleantriples = {};

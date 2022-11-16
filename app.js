@@ -8,7 +8,7 @@ import taskRouter from './routes/task';
 import { statSync } from 'fs';
 
 try {
-  const shareStat = statSync('/share/');
+  statSync('/share/');
 }
 catch(e) {
   console.error(e);

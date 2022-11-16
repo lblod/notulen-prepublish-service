@@ -1,10 +1,11 @@
 import { stat, writeFile, readFile } from 'fs/promises';
 import { uuid, update } from 'mu';
+// @ts-ignore
 import { sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu';
 import { prefixMap } from '../support/prefixes';
 /**
  * reads a file from the shared drive and returns its content
- * @param string shareUri the uri of the file to read
+ * @param {string} shareUri the uri of the file to read
  * @return string
  */
 export async function getFileContentForUri(shareUri) {
@@ -16,7 +17,7 @@ export async function getFileContentForUri(shareUri) {
 /**
  * write contents to a file in the shared drive and return its path
  */
-export async function persistContentToFile(content, options) {
+export async function persistContentToFile(content) {
   const fileId = uuid();
   const filename = `${fileId}.html`;
   const path = `/share/${filename}`;
