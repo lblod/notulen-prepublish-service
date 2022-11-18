@@ -3,7 +3,7 @@
  */
 
 // @ts-ignore
-import { query, sparqlEscapeString } from 'mu';
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { IS_FINAL } from './constants';
@@ -12,6 +12,7 @@ class EditorDocument {
   constructor(content) {
     this.content = undefined;
     this.context = {};
+    this.uri = undefined;
     for( var key in content ) {
       this[key] = content[key];
     }
@@ -62,7 +63,7 @@ class EditorDocument {
  * @param {string} uuid UUID which is coupled to the EditorDocument as
  * mu:uuid property.
  *
- * @return {Promise} Promise which resolves to an object representing
+ * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
  * the EditorDocument
  */
 async function editorDocumentFromUuid( uuid, attachments, previewType ){
@@ -91,6 +92,39 @@ async function editorDocumentFromUuid( uuid, attachments, previewType ){
   return doc;
 }
 
+/**
+ * Retrieves the EditorDocument belonging to the supplied uri
+ *
+ * @method editorDocumentFromUuid
+ *
+ * @param {string} uri UUID which is coupled to the EditorDocument as
+ * mu:uuid property.
+ *
+ * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
+ * the EditorDocument
+ */
+export async function editorDocumentFromUri(uri){
+  const queryResult = await query(
+    `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+     SELECT * WHERE {
+      ${sparqlEscapeUri( uri )} a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
+            ext:editorDocumentContent ?content;
+            ext:editorDocumentContext ?context.
+     }`);
+  if( queryResult.results.bindings.length === 0 ) {
+    console.log(`No content found for EditorDocument ${uri} returning null`);
+    return null;
+  }
+  const result = queryResult.results.bindings[0];
+  const content = result.content.value;
+  const doc = new EditorDocument({
+    uri,
+    context: JSON.parse( result.context.value ),
+    content
+  });
+
+  return doc;
+}
 
 function appendAttachmentsToDocument(documentContent, attachments, previewType) {
   const attachmentsGrouped = {};

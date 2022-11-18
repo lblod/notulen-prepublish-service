@@ -5,6 +5,15 @@ import previewRouter from './routes/preview';
 import signingRouter from './routes/signing';
 import publicationRouter from './routes/publication';
 import taskRouter from './routes/task';
+import { statSync } from 'fs';
+
+try {
+  statSync('/share/');
+}
+catch(e) {
+  console.error(e);
+  throw 'failed to detect /share folder, make sure to mount a /share folder';
+}
 
 setupHandleBars();
 

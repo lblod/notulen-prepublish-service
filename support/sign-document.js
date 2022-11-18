@@ -2,6 +2,7 @@
 import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu';
 import { prefixMap } from "./prefixes";
 import { createHash } from 'crypto';
+import { getFileContentForUri } from './file-utils';
 
 // Create a hash for the signed - or public resource based on:
 
@@ -21,10 +22,12 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
     ${prefixMap.get("sign").toSparqlString()}
     ${prefixMap.get("publicationStatus").toSparqlString()}
     ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get('prov').toSparqlString()}
+    ${prefixMap.get('nie').toSparqlString()}
 
-    SELECT DISTINCT ?content ?userUri WHERE{
-      ${sparqlEscapeUri(versionedUri)}
-        ${contentPredicate} ?content.
+    SELECT DISTINCT ?content ?physicalFileUri ?userUri WHERE{
+      OPTIONAL { ${sparqlEscapeUri(versionedUri)} ${contentPredicate} ?content. }
+      OPTIONAL { ${sparqlEscapeUri(versionedUri)} prov:generated/^nie:dataSource ?physicalFileUri. }
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
     }
@@ -33,9 +36,18 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
   try {
     const result = await query(queryString);
 
+    const binding = result.results.bindings[0];
+    let content;
+    if (binding.content) {
+      content = binding.content.value;
+    }
+    else {
+      content = await getFileContentForUri(binding.physicalFileUri.value);
+    }
+
     const stringToHash =
       // the full text content
-      result.results.bindings[0].content.value +
+      content +
       // the uri of the person publishing/signing
       result.results.bindings[0].userUri.value +
       // the created date of the resource

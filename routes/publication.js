@@ -16,6 +16,9 @@ import {
   TASK_TYPE_PUBLISHING_DECISION_LIST,
   TASK_TYPE_PUBLISHING_MEETING_NOTES
 } from '../models/task';
+import { getCurrentVersion, getLinkedDocuments } from '../support/editor-document-utils';
+import { getUri } from '../support/resource-utils';
+import { ensureVersionedRegulatoryStatement, publishVersionedRegulatoryStatement } from '../support/regulatory-statement-utils';
 
 
 const router = express.Router();
@@ -99,6 +102,12 @@ router.post('/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid', 
     else {
       const extractUri = await ensureVersionedExtract(treatment, meeting);
       await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd", treatment.attachments );
+      //Determine which regulatory statements are part of the treatment, ensure they are versioned and publish them.
+      const treatmentEditorDocumentUri = await getUri(treatment.editorDocumentUuid);
+      const linkedRegulatoryStatementContainers = await getLinkedDocuments(treatmentEditorDocumentUri);
+      const linkedRegulatoryStatementDocuments = await Promise.all(linkedRegulatoryStatementContainers.map(async (containerURI) => getCurrentVersion(containerURI)));
+      const versionedRegulatoryStatements = await Promise.all(linkedRegulatoryStatementDocuments.map(async (doc) => ensureVersionedRegulatoryStatement(doc, extractUri)));
+      await Promise.all(versionedRegulatoryStatements.map(async (versionedStatementUri) => publishVersionedRegulatoryStatement(versionedStatementUri, req.header("MU-SESSION-ID"), "gepubliceerd")));
       return res.send( { success: true } ).end();
     }
   } catch (err) {
@@ -152,6 +161,11 @@ router.post('/signing/notulen/publish/:zittingIdentifier', async function(req, r
           if (! published) {
             const extractUri = await ensureVersionedExtract(treatment, meeting);
             await publishVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "gepubliceerd", treatment.attachments );
+            const treatmentEditorDocumentUri = await getUri(treatment.editorDocumentUuid);
+            const linkedRegulatoryStatementContainers = await getLinkedDocuments(treatmentEditorDocumentUri);
+            const linkedRegulatoryStatementDocuments = await Promise.all(linkedRegulatoryStatementContainers.map(async (containerURI) => getCurrentVersion(containerURI)));
+            const versionedRegulatoryStatements = await Promise.all(linkedRegulatoryStatementDocuments.map(async (doc) => ensureVersionedRegulatoryStatement(doc, extractUri)));
+            await Promise.all(versionedRegulatoryStatements.map(async (versionedStatementUri) => publishVersionedRegulatoryStatement(versionedStatementUri, req.header("MU-SESSION-ID"), "gepubliceerd")));
           }
         }
       }
