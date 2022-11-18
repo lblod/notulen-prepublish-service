@@ -1,3 +1,19 @@
+
+## 1.7.0 (2022-11-18)
+
+#### :rocket: Enhancement
+* [#88](https://github.com/lblod/notulen-prepublish-service/pull/88) Regulatory statement publishing support ([@elpoelma](https://github.com/elpoelma))
+
+#### :bug: Bug Fix
+* [#84](https://github.com/lblod/notulen-prepublish-service/pull/84) Bugfix/handle missing mandatee ([@nvdk](https://github.com/nvdk))
+
+#### :house: Internal
+* [#89](https://github.com/lblod/notulen-prepublish-service/pull/89) Add release script and use new lerna-changelog plugin ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 2
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+- Niels V ([@nvdk](https://github.com/nvdk))
+
 ## 1.6.0 (2022-03-17)
 
 #### :rocket: Enhancement
