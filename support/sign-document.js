@@ -25,9 +25,9 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
     ${prefixMap.get('prov').toSparqlString()}
     ${prefixMap.get('nie').toSparqlString()}
 
-    SELECT DISTINCT ?content ?fysicalFileUri ?userUri WHERE{
+    SELECT DISTINCT ?content ?physicalFileUri ?userUri WHERE{
       OPTIONAL { ${sparqlEscapeUri(versionedUri)} ${contentPredicate} ?content. }
-      OPTIONAL { ${sparqlEscapeUri(versionedUri)} prov:generated/^nie:dataSource ?fysicalFileUri. }
+      OPTIONAL { ${sparqlEscapeUri(versionedUri)} prov:generated/^nie:dataSource ?physicalFileUri. }
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
     }
@@ -42,7 +42,7 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
       content = binding.content.value;
     }
     else {
-      content = await getFileContentForUri(binding.fysicalFileUri.value);
+      content = await getFileContentForUri(binding.physicalFileUri.value);
     }
 
     const stringToHash =

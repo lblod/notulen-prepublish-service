@@ -34,8 +34,8 @@ export async function writeFileMetadataToDb(metadata) {
   const fileStats = await stat(metadata.path);
   const fileSize = fileStats.size;
   const created = new Date();
-  const fysicalFilename = metadata.filename;
-  const fysicalFileUri = metadata.path.replace('/share/','share://');
+  const physicalFilename = metadata.filename;
+  const physicalFileUri = metadata.path.replace('/share/','share://');
   const fileQuery = `
     ${prefixMap.get('ext').toSparqlString()}
     ${prefixMap.get('mu').toSparqlString()}
@@ -53,9 +53,9 @@ export async function writeFileMetadataToDb(metadata) {
                     nfo:fileSize ${fileSize};
                     dct:created ${sparqlEscapeDateTime(created)};
                     dct:modified ${sparqlEscapeDateTime(created)}.
-         ${sparqlEscapeUri(fysicalFileUri)} a nfo:FileDataObject;
+         ${sparqlEscapeUri(physicalFileUri)} a nfo:FileDataObject;
                     nie:dataSource ${sparqlEscapeUri(logicalFileUri)};
-                    nfo:fileName ${sparqlEscapeUri(fysicalFilename)};
+                    nfo:fileName ${sparqlEscapeUri(physicalFilename)};
                     mu:uuid ${sparqlEscapeUri(metadata.uuid)};
                     nfo:fileSize ${fileSize};
                     dbpedia:fileExtension "html";

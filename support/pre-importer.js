@@ -22,10 +22,10 @@ async function getVersionedContent(uri, contentPredicate) {
         ${prefixMap.get("nie").toSparqlString()}
         ${prefixMap.get("prov").toSparqlString()}
         ${prefixMap.get("ext").toSparqlString()}
-        SELECT ?content ?fysicalFileUri
+        SELECT ?content ?physicalFileUri
         WHERE {
          OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
-         OPTIONAL { ${sparqlEscapeUri(uri)} prov:generated/^nie:dataSource ?fysicalFileUri. }
+         OPTIONAL { ${sparqlEscapeUri(uri)} prov:generated/^nie:dataSource ?physicalFileUri. }
         }`);
   if (result.results.bindings.length == 1) {
     const binding = result.results.bindings[0];
@@ -33,7 +33,7 @@ async function getVersionedContent(uri, contentPredicate) {
       return binding.content.value;
     }
     else {
-      const content = await getFileContentForUri(binding.fysicalFileUri.value);
+      const content = await getFileContentForUri(binding.physicalFileUri.value);
       return content;
     }
   }
