@@ -10,6 +10,7 @@
     "luxon": "^1.26.0"
   },
   "devDependencies": {
+    "@release-it-plugins/lerna-changelog": "^5.0.0",
     "eslint": "^7.27.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.23.3",
@@ -18,15 +19,19 @@
     "eslint-plugin-promise": "^5.1.0",
     "n3": "^1.10.0",
     "rdf-validate-shacl": "^0.3.2",
-    "release-it-lerna-changelog": "^3.1.0"
+    "release-it": "^15.5.0"
   },
   "scripts": {
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "release": "release-it"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/lblod/notulen-prepublish-service"
   },
   "author": "redpencil.io",
-  "license": "MIT"
+  "license": "MIT",
+  "volta": {
+    "node": "14.21.1"
+  }
 }
