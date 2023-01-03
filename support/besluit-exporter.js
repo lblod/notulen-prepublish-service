@@ -23,7 +23,7 @@ async function buildBesluitenLijstForMeeting(meeting, meetingUuid) {
   const treatmentsWithDecisions = treatments.filter((t) => t.decisions.length > 0);
   const html = constructHtmlForDecisionList(meeting, treatmentsWithDecisions);
   const errors = meeting.validate();
-  if(!treatmentsWithDecisions) {
+  if(!treatmentsWithDecisions.length) {
     return {html, errors: [...errors, 'No besluits found']};
   }
   return {html, errors};
