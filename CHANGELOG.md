@@ -1,4 +1,13 @@
 
+
+## 1.8.0 (2023-01-03)
+
+#### :rocket: Enhancement
+* [#94](https://github.com/lblod/notulen-prepublish-service/pull/94) Bugfix/prevent besluitenlijst publication ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 1.7.0 (2022-11-18)
 
 #### :rocket: Enhancement
