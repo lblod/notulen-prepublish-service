@@ -6,7 +6,7 @@
   "dependencies": {
     "@lblod/marawa": "0.8.0-beta.3",
     "handlebars": "^4.7.7",
-    "jsdom": "^11.12.0",
+    "jsdom": "^16.5.0",
     "luxon": "^1.26.0"
   },
   "devDependencies": {
