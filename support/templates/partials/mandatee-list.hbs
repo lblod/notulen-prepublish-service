@@ -2,7 +2,7 @@
   {{#if mandatees.length}}
     {{#if hideText}}
       {{#each mandatees}}
-        <div typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{../property}}">
+        <span typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{../property}}">
           <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan" typeof="person:Person">
               <span property="persoon:gebruikteVoornaam" content={{this.name}}></span>
               <span property="foaf:familyName" content={{this.familyName}}></span>
@@ -14,7 +14,7 @@
               </span>
             </span>
           {{/if}}
-        </div>
+        </span>
       {{/each}}
     {{else}}
       <div class="au-c-template-list-container">
