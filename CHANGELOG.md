@@ -1,5 +1,14 @@
 
 
+
+## 1.8.1 (2023-01-09)
+
+#### :bug: Bug Fix
+* [#95](https://github.com/lblod/notulen-prepublish-service/pull/95) fix the problem with much space without text on pre-publication ([@usrtim](https://github.com/usrtim))
+
+#### Committers: 1
+- [@usrtim](https://github.com/usrtim)
+
 ## 1.8.0 (2023-01-03)
 
 #### :rocket: Enhancement
