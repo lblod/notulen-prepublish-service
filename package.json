@@ -7,7 +7,7 @@
     "@lblod/marawa": "0.8.0-beta.3",
     "handlebars": "^4.7.7",
     "jsdom": "^16.5.0",
-    "luxon": "^1.26.0"
+    "luxon": "^1.28.1"
   },
   "devDependencies": {
     "@release-it-plugins/lerna-changelog": "^5.0.0",
