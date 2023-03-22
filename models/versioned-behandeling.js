@@ -18,6 +18,7 @@ export default class VersionedExtract {
                   ext:content ?html;
                   ext:behandeling ?treatment.
         ?treatment mu:uuid ${sparqlEscapeString(treatmentUuid)}.
+        FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
       }
   `);
     const bindings = r.results.bindings;
@@ -44,7 +45,8 @@ export default class VersionedExtract {
            a ext:VersionedBehandeling;
            ext:content ${hackedSparqlEscapeString( html )};
            mu:uuid ${sparqlEscapeString( versionedExtractUuid )};
-           ext:behandeling ${sparqlEscapeUri(treatment.uri)}.
+           ext:behandeling ${sparqlEscapeUri(treatment.uri)};
+           ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
         ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedExtractUri)}.
       }`);
     return new VersionedExtract({html, uri: versionedExtractUri, treatment: treatment.uri});

@@ -14,11 +14,12 @@ export default class VersionedAgenda {
       WHERE {
         BIND(${sparqlEscapeString(agendaType)} as ?agendaType)
         ?uri
-           a bv:Agenda;
-           ext:renderedContent ?html;
-           bv:isAgendaVoor ?meeting;
+          a bv:Agenda;
+          ext:renderedContent ?html;
+          bv:isAgendaVoor ?meeting;
            bv:agendaType ?agendaType.
         ?meeting mu:uuid ${sparqlEscapeString(meetingUuid)}.
+        FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
       } LIMIT 1
     `);
     if (result.results.bindings.length === 0) {
@@ -52,6 +53,7 @@ export default class VersionedAgenda {
            ext:renderedContent ${hackedSparqlEscapeString(html)};
            bv:isAgendaVoor ${sparqlEscapeUri(meeting)};
            mu:uuid ${sparqlEscapeString(agendaUuid)};
+           ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>;
            bv:agendaType ${sparqlEscapeString(agendaType)}.
       }`);
     await update(`
