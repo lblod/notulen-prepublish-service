@@ -61,7 +61,8 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
     WHERE {
       ?besluitenLijstUri
         a ext:VersionedBesluitenLijst.
-      ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
+      ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri.
+      FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
     } LIMIT 1`);
 
   if( previousId.results.bindings.length ) {
@@ -88,7 +89,8 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
         ${sparqlEscapeUri(besluitenLijstUri)}
           a ext:VersionedBesluitenLijst;
           ext:content ${hackedSparqlEscapeString( html )};
-          mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
+          mu:uuid ${sparqlEscapeString( besluitenLijstUuid )};
+          ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
         ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
