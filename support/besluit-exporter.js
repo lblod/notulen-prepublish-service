@@ -62,9 +62,9 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
       ?besluitenLijstUri
         a ext:VersionedBesluitenLijst.
       ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri.
-      FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
+      FILTER NOT EXISTS { ?besluitenLijstUri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
     } LIMIT 1`);
-
+  
   if( previousId.results.bindings.length ) {
     const versionedBesluitenLijstId = previousId.results.bindings[0].besluitenLijstUri.value;
     console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
