@@ -1,6 +1,7 @@
 import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
+import SignedResource from '../models/signed-resource';
 import { ensureTask } from '../support/task-utils';
 import {
   TASK_STATUS_FAILURE,
@@ -15,6 +16,9 @@ import {ensureVersionedBesluitenLijstForZitting, signVersionedBesluitenlijst} fr
 import {ensureVersionedNotulen, NOTULEN_KIND_FULL, signVersionedNotulen} from '../support/notulen-utils';
 import {ensureVersionedExtract, signVersionedExtract} from '../support/extract-utils';
 import {fetchCurrentUser} from '../support/query-utils';
+
+import { parseBody } from '../support/parse-body';
+
 const router = express.Router();
 
 
@@ -96,9 +100,62 @@ router.post('/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid', asy
       return res.status(400).send({errors}).end();
     }
     else {
-      const extractUri = await ensureVersionedExtract(treatment, meeting);
+      const { uri: extractUri } = await ensureVersionedExtract(treatment, meeting);
       await signVersionedExtract( extractUri, req.header("MU-SESSION-ID"), "getekend", treatment.attachments );
       return res.send( { success: true } ).end();
+    }
+  } catch (err) {
+    console.log(err);
+    const error = new Error(`An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`);
+    return next(error);
+  }
+});
+
+/**
+ * Creates a signed resource for the provided resource (currently only a treatment is supported)
+ * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
+ */
+router.post('/signed-resources', async function(req, res, next) {
+  try {
+    const {relationships} = parseBody(req.body);
+    const treatmentUuid = relationships?.treatment?.id;
+    if (treatmentUuid) {
+      const treatment = await Treatment.find(treatmentUuid);
+      const meeting = await Meeting.findURI(treatment.meeting);
+      const meetingErrors = validateMeeting(meeting);
+      const treatmentErrors = await validateTreatment(treatment);
+      const errors = [...meetingErrors, ...treatmentErrors];
+      if (errors.length) {
+        return res.status(400).send({errors}).end();
+      }
+      else {
+        const versionedExtract = await ensureVersionedExtract(treatment, meeting);
+        const signedResourceUri = await signVersionedExtract( versionedExtract.uri, req.header("MU-SESSION-ID"), "getekend", treatment.attachments );
+        const signedResource = await SignedResource.findURI(signedResourceUri);
+        return  res.send({
+          data: {
+            "attributes": {
+              "content": signedResource.html,
+              "hash-value": signedResource.hashValue,
+              "created-on": signedResource.created,
+              "uri": signedResource.uri
+            },
+            "id": signedResource.uuid,
+            "type": "signed-resources",
+            "relationships": {
+              "versioned-behandeling": {
+                "data": { "type": "versioned-behandelingen", id: versionedExtract.uuid }
+              },
+              "gebruiker": {
+                "data": { "type": "gebruikers", id: signedResource.signatoryUuid }
+              }
+            },
+            "links": {
+              "self": "/signed-resources/" + signedResource.uuid
+            },
+          }
+        });
+      }
     }
   } catch (err) {
     console.log(err);
