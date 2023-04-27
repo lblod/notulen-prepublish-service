@@ -85,9 +85,9 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
       ${sparqlEscapeUri(sessionId)}
         ext:sessionRole ?signatoryRole.
     }`;
-  const updatePromise = await update( query );
+  await update( query );
   await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
-  return updatePromise;
+  return newResourceUri;
 }
 
 export {
