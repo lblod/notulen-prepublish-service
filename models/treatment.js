@@ -1,10 +1,10 @@
-import {prefixMap} from "../support/prefixes";
+import { prefixMap } from "../support/prefixes";
 // @ts-ignore
-import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
-import Attachment from './attachment';
+import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
+import Attachment from "./attachment";
 
 export default class Treatment {
-  static async findAll({meetingUuid}) {
+  static async findAll({ meetingUuid }) {
     const queryString = `
      ${prefixMap.get("besluit").toSparqlString()}
      ${prefixMap.get("dct").toSparqlString()}
@@ -40,13 +40,65 @@ export default class Treatment {
    `;
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
-      console.warn(`no treatment of agendapoints found for meeting with uuid ${meetingUuid}`);
+      console.warn(
+        `no treatment of agendapoints found for meeting with uuid ${meetingUuid}`
+      );
       return [];
-    }
-    else {
-      const treatments = result.results.bindings.map((binding) => Treatment.fromBinding(binding));
-      await Promise.all(treatments.map((treatment) => treatment.getAttachments()));
+    } else {
+      const treatments = result.results.bindings.map((binding) =>
+        Treatment.fromBinding(binding)
+      );
+      await Promise.all(
+        treatments.map((treatment) => treatment.getAttachments())
+      );
       return treatments;
+    }
+  }
+
+  static async findUri(uri) {
+    const queryString = `
+     ${prefixMap.get("besluit").toSparqlString()}
+     ${prefixMap.get("dct").toSparqlString()}
+     ${prefixMap.get("schema").toSparqlString()}
+     ${prefixMap.get("mu").toSparqlString()}
+     ${prefixMap.get("skos").toSparqlString()}
+     ${prefixMap.get("ext").toSparqlString()}
+     ${prefixMap.get("pav").toSparqlString()}
+      SELECT * WHERE {
+       BIND(${sparqlEscapeUri(uri)} as ?uri)
+       ?meeting a besluit:Zitting;
+                   besluit:behandelt ?agendapoint.
+          ?agendapoint schema:position ?position.
+      ?uri a besluit:BehandelingVanAgendapunt;
+           mu:uuid ?uuid;
+           dct:subject ?agendapoint;
+           besluit:openbaar ?isPublic;
+           ext:hasDocumentContainer ?container.
+      ?container pav:hasCurrentVersion ?editorDocument.
+      ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid.
+    OPTIONAL {
+        ?uri besluit:gebeurtNa ?executedAfter.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftVoorzitter ?chairman.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftSecretaris ?secretary.
+    }
+   }
+   `;
+    try {
+      const result = await query(queryString);
+      if (result.results.bindings.length === 1) {
+        const treatment = Treatment.fromBinding(result.results.bindings[0]);
+        await treatment.getAttachments();
+        return treatment;
+      } else {
+        throw `did not find treatment with uri ${uri}`;
+      }
+    } catch (e) {
+      console.error(e);
+      throw `failed to retrieve treatment with uri ${uri}`;
     }
   }
 
@@ -88,12 +140,10 @@ export default class Treatment {
         const treatment = Treatment.fromBinding(result.results.bindings[0]);
         await treatment.getAttachments();
         return treatment;
-      }
-      else {
+      } else {
         throw `did not find treatment with uuid ${treatmentUuid}`;
       }
-    }
-    catch(e) {
+    } catch (e) {
       console.error(e);
       throw `failed to retrieve treatment with uuid ${treatmentUuid}`;
     }
@@ -110,20 +160,20 @@ export default class Treatment {
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
-    secretary = null
+    secretary = null,
   }) {
     return new Treatment({
       uuid: uuid.value,
       uri: uri.value,
-      agendapoint : agendapoint.value,
-      position : position.value,
-      isPublic : isPublic.value === "true",
-      meeting : meeting.value,
+      agendapoint: agendapoint.value,
+      position: position.value,
+      isPublic: isPublic.value === "true",
+      meeting: meeting.value,
       documentContainerUri: container?.value,
-      editorDocumentUuid : editorDocumentUuid.value,
-      executedAfter : executedAfter?.value,
-      chairman : chairman?.value,
-      secretary : secretary?.value,
+      editorDocumentUuid: editorDocumentUuid.value,
+      executedAfter: executedAfter?.value,
+      chairman: chairman?.value,
+      secretary: secretary?.value,
     });
   }
 
@@ -138,7 +188,7 @@ export default class Treatment {
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
-    secretary = null
+    secretary = null,
   }) {
     this.uuid = uuid;
     this.uri = uri;
@@ -152,6 +202,7 @@ export default class Treatment {
     this.secretary = secretary;
     this.documentContainerUri = documentContainerUri;
   }
+
   async getAttachments() {
     const queryString = `
       ${prefixMap.get("ext").toSparqlString()}
@@ -173,10 +224,9 @@ export default class Treatment {
       const result = await query(queryString);
       const attachments = result.results.bindings.map(Attachment.fromBinding);
       this.attachments = attachments;
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       throw `failed to retrieve attachments from treatment with uuid ${this.uuid}`;
     }
   }
-
 }

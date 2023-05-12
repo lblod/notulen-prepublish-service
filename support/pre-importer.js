@@ -1,55 +1,93 @@
 // @ts-ignore
-import {query, update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime, uuid} from  'mu';
-import {prefixMap} from "./prefixes";
-import {signDocument} from './sign-document';
-import { getFileContentForUri } from './file-utils';
+import {
+  query,
+  update,
+  sparqlEscapeUri,
+  sparqlEscapeString,
+  sparqlEscapeDateTime,
+  uuid,
+} from "mu";
+import { prefixMap } from "./prefixes";
+import { signDocument } from "./sign-document";
+import { getFileContentForUri } from "./file-utils";
 
 function cleanupTriples(triples) {
   const cleantriples = {};
   for (const triple of triples) {
     const hash = JSON.stringify(triple);
-    cleantriples[hash]=triple;
+    cleantriples[hash] = triple;
   }
-  return Object.keys(cleantriples).map( (k) => cleantriples[k]);
+  return Object.keys(cleantriples).map((k) => cleantriples[k]);
 }
 
-function hackedSparqlEscapeString( string ) {
-  return `${sparqlEscapeString(string.replace(/\n/g, function() { return ''; }).replace(/\r/g, function() { return '';}))}`;
+function hackedSparqlEscapeString(string) {
+  return `${sparqlEscapeString(
+    string
+      .replace(/\n/g, function () {
+        return "";
+      })
+      .replace(/\r/g, function () {
+        return "";
+      })
+  )}`;
 }
 
 async function getVersionedContent(uri, contentPredicate) {
-  const result = await query(`
+  const contentQuery = `
         ${prefixMap.get("nie").toSparqlString()}
         ${prefixMap.get("prov").toSparqlString()}
         ${prefixMap.get("ext").toSparqlString()}
         SELECT ?content ?physicalFileUri
         WHERE {
          OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
-         OPTIONAL { ${sparqlEscapeUri(uri)} prov:generated/^nie:dataSource ?physicalFileUri. }
-        }`);
+         OPTIONAL { ${sparqlEscapeUri(
+           uri
+         )} prov:generated/^nie:dataSource ?physicalFileUri. }
+        }`;
+  console.log("contentQuery", contentQuery);
+  const result = await query(contentQuery);
   if (result.results.bindings.length == 1) {
     const binding = result.results.bindings[0];
     if (binding.content) {
       return binding.content.value;
-    }
-    else {
+    } else {
       const content = await getFileContentForUri(binding.physicalFileUri.value);
       return content;
     }
-  }
-  else {
+  } else {
     throw "could not retrieve content";
   }
 }
 
-async function handleVersionedResource( type, versionedUri, sessionId, targetStatus, customSignaturePredicate, customStatePredicate, customContentPredicate, attachments ) {
+async function handleVersionedResource(
+  type,
+  versionedUri,
+  sessionId,
+  targetStatus,
+  customSignaturePredicate,
+  customStatePredicate,
+  customContentPredicate,
+  attachments
+) {
   const now = new Date();
   const newResourceUuid = uuid();
-  const resourceType = type == 'signature' ? "sign:SignedResource" : "sign:PublishedResource";
-  const newResourceUri = `http://data.lblod.info/${type == 'signature' ? "signed-resources" : "published-resources"}/${newResourceUuid}`;
+  const resourceType =
+    type == "signature" ? "sign:SignedResource" : "sign:PublishedResource";
+  const newResourceUri = `http://data.lblod.info/${
+    type == "signature" ? "signed-resources" : "published-resources"
+  }/${newResourceUuid}`;
   const statePredicate = customStatePredicate || "ext:stateString";
   const contentPredicate = customContentPredicate || "ext:content";
-  const attachmentsString = attachments ? attachments.map((attachment) => `${sparqlEscapeUri(newResourceUri)} ext:hasAttachments ${sparqlEscapeUri(attachment.uri)}.`).join(' ') : '';
+  const attachmentsString = attachments
+    ? attachments
+        .map(
+          (attachment) =>
+            `${sparqlEscapeUri(
+              newResourceUri
+            )} ext:hasAttachments ${sparqlEscapeUri(attachment.uri)}.`
+        )
+        .join(" ")
+    : "";
   const content = await getVersionedContent(versionedUri, contentPredicate);
   const query = `
     ${prefixMap.get("bv").toSparqlString()}
@@ -74,7 +112,11 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
         sign:status publicationStatus:unpublished;
-        ${customSignaturePredicate ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};` : ''}
+        ${
+          customSignaturePredicate
+            ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};`
+            : ""
+        }
         dct:subject ${sparqlEscapeUri(versionedUri)}.
       ${sparqlEscapeUri(versionedUri)}
         ${statePredicate} ${sparqlEscapeString(targetStatus)}.
@@ -85,13 +127,16 @@ async function handleVersionedResource( type, versionedUri, sessionId, targetSta
       ${sparqlEscapeUri(sessionId)}
         ext:sessionRole ?signatoryRole.
     }`;
-  await update( query );
-  await signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, 'sha256');
+  await update(query);
+  await signDocument(
+    newResourceUri,
+    versionedUri,
+    contentPredicate,
+    sessionId,
+    now,
+    "sha256"
+  );
   return newResourceUri;
 }
 
-export {
-  hackedSparqlEscapeString,
-  handleVersionedResource,
-  cleanupTriples
-};
+export { hackedSparqlEscapeString, handleVersionedResource, cleanupTriples };

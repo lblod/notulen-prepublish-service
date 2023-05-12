@@ -1,10 +1,54 @@
 // @ts-ignore
-import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
-import { hackedSparqlEscapeString } from '../support/pre-importer';
+import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from "mu";
+import { hackedSparqlEscapeString } from "../support/pre-importer";
+import { prefixMap } from "../support/prefixes";
 
 // using the english name here, but the model is in dutch
 export default class VersionedExtract {
-  static async query({treatmentUuid}) {
+  static async find(uuid) {
+    const queryString = `
+       ${prefixMap.get("besluit").toSparqlString()}
+       ${prefixMap.get("dct").toSparqlString()}
+       ${prefixMap.get("schema").toSparqlString()}
+       ${prefixMap.get("mu").toSparqlString()}
+       ${prefixMap.get("skos").toSparqlString()}
+       ${prefixMap.get("ext").toSparqlString()}
+       ${prefixMap.get("pav").toSparqlString()}
+        SELECT * WHERE {
+           BIND(${sparqlEscapeString(uuid)} as ?uuid)
+
+            ?uri a ext:VersionedBehandeling ;
+                mu:uuid ?uuid ;
+                ext:behandeling ?treatment;
+                ext:content ?html.
+            OPTIONAL {
+                ?uri ext:stateString ?state .
+            }
+            FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
+
+        }
+   `;
+    try {
+      const result = await query(queryString);
+      const bindings = result.results.bindings;
+      if (bindings.length > 0) {
+        const binding = bindings[0];
+        return new VersionedExtract({
+          uri: binding.uri.value,
+          html: binding.html.value,
+          treatment: binding.treatment.value,
+          state: binding.state?.value,
+        });
+      } else {
+        throw `did not find versionedTreatment with uuid ${uuid}`;
+      }
+    } catch (e) {
+      console.error(e);
+      throw `failed to retrieve versionedTreatment with uuid ${uuid}`;
+    }
+  }
+
+  static async query({ treatmentUuid }) {
     const r = await query(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -24,14 +68,17 @@ export default class VersionedExtract {
     const bindings = r.results.bindings;
     if (bindings.length > 0) {
       const binding = bindings[0];
-      return new VersionedExtract({uri: binding.uri.value, html: binding.html.value, treatment: binding.treatment.value});
-    }
-    else {
+      return new VersionedExtract({
+        uri: binding.uri.value,
+        html: binding.html.value,
+        treatment: binding.treatment.value,
+      });
+    } else {
       return null;
     }
   }
 
-  static async create({treatment, meeting, html}) {
+  static async create({ treatment, meeting, html }) {
     const versionedExtractUuid = uuid();
     const versionedExtractUri = `http://data.lblod.info/prepublished-behandelingen/${versionedExtractUuid}`;
     await update(`
@@ -43,18 +90,25 @@ export default class VersionedExtract {
       INSERT DATA {
         ${sparqlEscapeUri(versionedExtractUri)}
            a ext:VersionedBehandeling;
-           ext:content ${hackedSparqlEscapeString( html )};
-           mu:uuid ${sparqlEscapeString( versionedExtractUuid )};
+           ext:content ${hackedSparqlEscapeString(html)};
+           mu:uuid ${sparqlEscapeString(versionedExtractUuid)};
            ext:behandeling ${sparqlEscapeUri(treatment.uri)};
            ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
-        ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedExtractUri)}.
+        ${sparqlEscapeUri(
+          meeting.uri
+        )} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedExtractUri)}.
       }`);
-    return new VersionedExtract({html, uri: versionedExtractUri, treatment: treatment.uri});
+    return new VersionedExtract({
+      html,
+      uri: versionedExtractUri,
+      treatment: treatment.uri,
+    });
   }
 
-  constructor({uri, html = null, treatment}) {
+  constructor({ uri, html = null, treatment, state = null }) {
     this.uri = uri;
     this.html = html;
     this.treatment = treatment;
+    this.state = state;
   }
 }

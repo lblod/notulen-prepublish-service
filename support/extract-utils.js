@@ -98,7 +98,7 @@ export function constructHtmlForExtract(extractData) {
 }
 
 export async function signVersionedExtract( uri, sessionId, targetStatus, attachments ) {
-  await handleVersionedResource( "signature", uri, sessionId, targetStatus, 'ext:signsBehandeling', undefined, undefined, attachments);
+  return await handleVersionedResource( "signature", uri, sessionId, targetStatus, 'ext:signsBehandeling', undefined, undefined, attachments);
 }
 
 export async function publishVersionedExtract( extractUri, sessionId, targetStatus, attachments ) {
