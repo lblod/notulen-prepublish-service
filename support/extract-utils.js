@@ -110,13 +110,13 @@ export async function ensureVersionedExtract(treatment, meeting) {
   const versionedExtract = await VersionedExtract.query({treatmentUuid: treatment.uuid});
   if (versionedExtract) {
     console.log(`reusing versioned extract for treatment with uuid  ${treatment.uuid}`);
-    return versionedExtract;
+    return versionedExtract.uri;
   }
   else {
     const data = await buildExtractDataForTreatment(treatment, meeting, IS_FINAL, true);
     const html = constructHtmlForExtract(data);
     const extract = await VersionedExtract.create({meeting, treatment, html});
-    return extract;
+    return extract.uri;
   }
 }
 

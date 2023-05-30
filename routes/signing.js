@@ -145,7 +145,7 @@ router.post(
       if (errors.length) {
         return res.status(400).send({ errors }).end();
       } else {
-        const { uri: extractUri } = await ensureVersionedExtract(
+        const extractUri = await ensureVersionedExtract(
           treatment,
           meeting
         );
@@ -212,13 +212,13 @@ router.post("/signed-resources", async function (req, res, next) {
       if (errors.length) {
         return res.status(400).send({ errors }).end();
       } else {
-        const versionedExtract = await ensureVersionedExtract(
+        const versionedExtractUri = await ensureVersionedExtract(
           treatment,
           meeting
         );
 
         const signedResourceUri = await signVersionedExtract(
-          versionedExtract.uri,
+          versionedExtractUri,
           req.header("MU-SESSION-ID"),
           "getekend",
           treatment.attachments
