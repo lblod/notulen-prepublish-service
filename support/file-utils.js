@@ -9,7 +9,7 @@ import { prefixMap } from '../support/prefixes';
  * @return string
  */
 export async function getFileContentForUri(shareUri) {
-  const path = shareUri.replace('share://','/share/');
+  const path = shareUri.replace('share://', '/share/');
   const content = await readFile(path, 'utf8');
   return content;
 }
@@ -21,10 +21,9 @@ export async function persistContentToFile(content) {
   const fileId = uuid();
   const filename = `${fileId}.html`;
   const path = `/share/${filename}`;
-  await writeFile(path, content, "utf8");
-  return {uuid: fileId, path, filename};
+  await writeFile(path, content, 'utf8');
+  return { uuid: fileId, path, filename };
 }
-
 
 export async function writeFileMetadataToDb(metadata) {
   console.log(metadata);
@@ -35,7 +34,7 @@ export async function writeFileMetadataToDb(metadata) {
   const fileSize = fileStats.size;
   const created = new Date();
   const physicalFilename = metadata.filename;
-  const physicalFileUri = metadata.path.replace('/share/','share://');
+  const physicalFileUri = metadata.path.replace('/share/', 'share://');
   const fileQuery = `
     ${prefixMap.get('ext').toSparqlString()}
     ${prefixMap.get('mu').toSparqlString()}

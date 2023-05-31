@@ -3,18 +3,18 @@ module.exports = {
     es2021: true,
     node: true,
   },
-  plugins: ["mocha"],
+  plugins: ['mocha'],
   extends: [
-    "eslint:recommended",
-    "plugin:mocha/recommended",
-    "plugin:prettier/recommended",
+    'eslint:recommended',
+    'plugin:mocha/recommended',
+    'plugin:prettier/recommended',
   ],
   parserOptions: {
     ecmaVersion: 12,
-    sourceType: "module",
+    sourceType: 'module',
   },
   rules: {
-    "linebreak-style": ["error", "unix"],
-    semi: ["error", "always"],
+    'linebreak-style': ['error', 'unix'],
+    semi: ['error', 'always'],
   },
 };

@@ -6,16 +6,21 @@ import {
   sparqlEscapeString,
   sparqlEscapeDateTime,
   // @ts-ignore
-  sparqlEscapeInt} from 'mu';
+  sparqlEscapeInt,
+} from 'mu';
 
-export const TASK_TYPE_SIGNING_DECISION_LIST = "decisionListSignature";
-export const TASK_TYPE_PUBLISHING_DECISION_LIST = "decisionListPublication";
-export const TASK_TYPE_SIGNING_MEETING_NOTES = "meetingNotesSignature";
-export const TASK_TYPE_PUBLISHING_MEETING_NOTES = "meetingNotesPublication";
-export const TASK_STATUS_FAILURE =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/failure";
-export const TASK_STATUS_CREATED =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/created";
-export const TASK_STATUS_SUCCESS =  "http://lblod.data.gift/besluit-publicatie-melding-statuses/success";
-export const TASK_STATUS_RUNNING = "http://lblod.data.gift/besluit-publicatie-melding-statuses/ongoing";
+export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';
+export const TASK_TYPE_PUBLISHING_DECISION_LIST = 'decisionListPublication';
+export const TASK_TYPE_SIGNING_MEETING_NOTES = 'meetingNotesSignature';
+export const TASK_TYPE_PUBLISHING_MEETING_NOTES = 'meetingNotesPublication';
+export const TASK_STATUS_FAILURE =
+  'http://lblod.data.gift/besluit-publicatie-melding-statuses/failure';
+export const TASK_STATUS_CREATED =
+  'http://lblod.data.gift/besluit-publicatie-melding-statuses/created';
+export const TASK_STATUS_SUCCESS =
+  'http://lblod.data.gift/besluit-publicatie-melding-statuses/success';
+export const TASK_STATUS_RUNNING =
+  'http://lblod.data.gift/besluit-publicatie-melding-statuses/ongoing';
 
 export default class Task {
   static async create(meeting, type) {
@@ -30,18 +35,40 @@ export default class Task {
      PREFIX    adms: <http://www.w3.org/ns/adms#>
      INSERT DATA {
         ${sparqlEscapeUri(uri)} a task:Task;
-                                                mu:uuid ${sparqlEscapeString(id)};
-                                                adms:status ${sparqlEscapeUri(TASK_STATUS_CREATED)};
-                                                task:numberOfRetries ${sparqlEscapeInt(0)};
-                                                dct:created ${sparqlEscapeDateTime(created)};
-                                                dct:modified ${sparqlEscapeDateTime(created)};
+                                                mu:uuid ${sparqlEscapeString(
+                                                  id
+                                                )};
+                                                adms:status ${sparqlEscapeUri(
+                                                  TASK_STATUS_CREATED
+                                                )};
+                                                task:numberOfRetries ${sparqlEscapeInt(
+                                                  0
+                                                )};
+                                                dct:created ${sparqlEscapeDateTime(
+                                                  created
+                                                )};
+                                                dct:modified ${sparqlEscapeDateTime(
+                                                  created
+                                                )};
                                                 dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-                                                dct:type ${sparqlEscapeString(type)};
-                                                nuao:involves ${sparqlEscapeUri(meeting.uri)}.
+                                                dct:type ${sparqlEscapeString(
+                                                  type
+                                                )};
+                                                nuao:involves ${sparqlEscapeUri(
+                                                  meeting.uri
+                                                )}.
     }
   `;
     await update(queryString);
-    return new Task({id, type, involves: meeting.uri, created, modified: created, status: TASK_STATUS_CREATED, uri});
+    return new Task({
+      id,
+      type,
+      involves: meeting.uri,
+      created,
+      modified: created,
+      status: TASK_STATUS_CREATED,
+      uri,
+    });
   }
 
   static async find(uuid) {
@@ -65,12 +92,10 @@ export default class Task {
    `);
     if (result.results.bindings.length) {
       return Task.fromBinding(result.results.bindings[0]);
-    }
-    else
-      return null;
+    } else return null;
   }
 
-  static async query({meetingUri, type, userUri = null}) {
+  static async query({ meetingUri, type, userUri = null }) {
     const result = await query(`
      PREFIX    mu: <http://mu.semte.ch/vocabularies/core/>
      PREFIX    nuao: <http://www.semanticdesktop.org/ontologies/2010/01/25/nuao#>
@@ -90,25 +115,27 @@ export default class Task {
      }
    `);
     if (result.results.bindings.length) {
-      return Task.fromBinding({...result.results.bindings[0], type: type, involves: meetingUri});
-    }
-    else
-      return null;
+      return Task.fromBinding({
+        ...result.results.bindings[0],
+        type: type,
+        involves: meetingUri,
+      });
+    } else return null;
   }
 
   static fromBinding(binding) {
-    return new Task( {
+    return new Task({
       id: binding.uuid.value,
       uri: binding.uri.value,
       created: binding.created.value,
       modified: binding.modified.value,
       status: binding.status.value,
       involves: binding.involves.value,
-      type: binding.type.value
+      type: binding.type.value,
     });
   }
 
-  constructor({id, uri, created, status, modified, type, involves}) {
+  constructor({ id, uri, created, status, modified, type, involves }) {
     this.id = id;
     this.type = type;
     this.involves = involves;

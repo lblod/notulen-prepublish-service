@@ -9,8 +9,7 @@ import { statSync } from 'fs';
 
 try {
   statSync('/share/');
-}
-catch(e) {
+} catch (e) {
   console.error(e);
   throw 'failed to detect /share folder, make sure to mount a /share folder';
 }

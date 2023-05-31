@@ -17,11 +17,9 @@ export async function parse(triples) {
       if (error) {
         console.warn(error);
         reject(error);
-      }
-      else if(quad) {
+      } else if (quad) {
         dataset.add(quad);
-      }
-      else {
+      } else {
         resolve(dataset);
       }
     });
@@ -30,27 +28,30 @@ export async function parse(triples) {
 
 // TODO consider using other rdfa libraries, marawa might not be the best option for this
 export async function htmlToRdf(html) {
-  const dom = new jsdom.JSDOM( `<body>${html}</body>` );
+  const dom = new jsdom.JSDOM(`<body>${html}</body>`);
   const topDomNode = dom.window.document.querySelector('body');
-  const contexts = analyseRdfa(topDomNode).map(block => block.context).flat();
-  const triples = contexts.map((t) => {
-    try {
-      return t.toNT();
-    }
-    catch(e) {
-      return "";
-    }
-  }).join("\n");
+  const contexts = analyseRdfa(topDomNode)
+    .map((block) => block.context)
+    .flat();
+  const triples = contexts
+    .map((t) => {
+      try {
+        return t.toNT();
+      } catch (e) {
+        return '';
+      }
+    })
+    .join('\n');
   return await parse(triples);
 }
 
 function shaclSeverityToString(severity) {
   const uri = severity.value;
-  return uri.replace("http://www.w3.org/ns/shacl#","");
+  return uri.replace('http://www.w3.org/ns/shacl#', '');
 }
 
 export function shaclReportToMessage(report) {
-  let reportString = "\n";
+  let reportString = '\n';
   for (const r of report.results) {
     const severity = shaclSeverityToString(r.severity);
     reportString += `${severity} - ${r.path.value} (${r.focusNode.value})\n`;
