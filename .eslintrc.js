@@ -1,30 +1,20 @@
 module.exports = {
-  "env": {
-    "es2021": true,
-    "node": true
+  env: {
+    es2021: true,
+    node: true,
   },
-  "plugins": [ "mocha" ],
-  "extends": [
+  plugins: ["mocha"],
+  extends: [
     "eslint:recommended",
-    "plugin:mocha/recommended"
+    "plugin:mocha/recommended",
+    "plugin:prettier/recommended",
   ],
-  "parserOptions": {
-    "ecmaVersion": 12,
-    "sourceType": "module"
+  parserOptions: {
+    ecmaVersion: 12,
+    sourceType: "module",
   },
-  "rules": {
-    "indent": [
-      "error",
-      2,
-      { "SwitchCase": 1}
-    ],
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "semi": [
-      "error",
-      "always"
-    ]
-  }
+  rules: {
+    "linebreak-style": ["error", "unix"],
+    semi: ["error", "always"],
+  },
 };
