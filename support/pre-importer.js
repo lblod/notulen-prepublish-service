@@ -44,7 +44,6 @@ async function getVersionedContent(uri, contentPredicate) {
            uri
          )} prov:generated/^nie:dataSource ?physicalFileUri. }
         }`;
-  console.log("contentQuery", contentQuery);
   const result = await query(contentQuery);
   if (result.results.bindings.length == 1) {
     const binding = result.results.bindings[0];
