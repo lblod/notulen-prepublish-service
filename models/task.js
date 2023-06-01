@@ -1,12 +1,11 @@
 import {
   query,
+  sparqlEscapeDateTime,
+  sparqlEscapeInt,
+  sparqlEscapeString,
+  sparqlEscapeUri,
   update,
   uuid,
-  sparqlEscapeUri,
-  sparqlEscapeString,
-  sparqlEscapeDateTime,
-  // @ts-ignore
-  sparqlEscapeInt,
 } from 'mu';
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';
@@ -35,28 +34,14 @@ export default class Task {
      PREFIX    adms: <http://www.w3.org/ns/adms#>
      INSERT DATA {
         ${sparqlEscapeUri(uri)} a task:Task;
-                                                mu:uuid ${sparqlEscapeString(
-                                                  id
-                                                )};
-                                                adms:status ${sparqlEscapeUri(
-                                                  TASK_STATUS_CREATED
-                                                )};
-                                                task:numberOfRetries ${sparqlEscapeInt(
-                                                  0
-                                                )};
-                                                dct:created ${sparqlEscapeDateTime(
-                                                  created
-                                                )};
-                                                dct:modified ${sparqlEscapeDateTime(
-                                                  created
-                                                )};
-                                                dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-                                                dct:type ${sparqlEscapeString(
-                                                  type
-                                                )};
-                                                nuao:involves ${sparqlEscapeUri(
-                                                  meeting.uri
-                                                )}.
+        mu:uuid ${sparqlEscapeString(id)};
+        adms:status ${sparqlEscapeUri(TASK_STATUS_CREATED)};
+        task:numberOfRetries ${sparqlEscapeInt(0)};
+        dct:created ${sparqlEscapeDateTime(created)};
+        dct:modified ${sparqlEscapeDateTime(created)};
+        dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+        dct:type ${sparqlEscapeString(type)};
+        nuao:involves ${sparqlEscapeUri(meeting.uri)}.
     }
   `;
     await update(queryString);
