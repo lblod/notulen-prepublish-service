@@ -1,3 +1,7 @@
+### Ignored project files
+
+/support/classification-utils.js
+
 ### Node template
 # Logs
 logs
