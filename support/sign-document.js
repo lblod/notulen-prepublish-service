@@ -1,6 +1,6 @@
 // @ts-ignore
 import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu';
-import { prefixMap } from "./prefixes";
+import { prefixMap } from './prefixes';
 import { createHash } from 'crypto';
 import { getFileContentForUri } from './file-utils';
 
@@ -11,23 +11,32 @@ import { getFileContentForUri } from './file-utils';
 // the created date of the resource
 
 // currently uses sha-256
-async function generateStringToHash(versionedUri, contentPredicate, sessionId, now) {
+async function generateStringToHash(
+  versionedUri,
+  contentPredicate,
+  sessionId,
+  now
+) {
   now = now.toISOString();
   const queryString = `
-    ${prefixMap.get("muSession").toSparqlString()}
-    ${prefixMap.get("bv").toSparqlString()}
-    ${prefixMap.get("ext").toSparqlString()}
-    ${prefixMap.get("mu").toSparqlString()}
-    ${prefixMap.get("pav").toSparqlString()}
-    ${prefixMap.get("sign").toSparqlString()}
-    ${prefixMap.get("publicationStatus").toSparqlString()}
-    ${prefixMap.get("dct").toSparqlString()}
+    ${prefixMap.get('muSession').toSparqlString()}
+    ${prefixMap.get('bv').toSparqlString()}
+    ${prefixMap.get('ext').toSparqlString()}
+    ${prefixMap.get('mu').toSparqlString()}
+    ${prefixMap.get('pav').toSparqlString()}
+    ${prefixMap.get('sign').toSparqlString()}
+    ${prefixMap.get('publicationStatus').toSparqlString()}
+    ${prefixMap.get('dct').toSparqlString()}
     ${prefixMap.get('prov').toSparqlString()}
     ${prefixMap.get('nie').toSparqlString()}
 
     SELECT DISTINCT ?content ?physicalFileUri ?userUri WHERE{
-      OPTIONAL { ${sparqlEscapeUri(versionedUri)} ${contentPredicate} ?content. }
-      OPTIONAL { ${sparqlEscapeUri(versionedUri)} prov:generated/^nie:dataSource ?physicalFileUri. }
+      OPTIONAL { ${sparqlEscapeUri(
+        versionedUri
+      )} ${contentPredicate} ?content. }
+      OPTIONAL { ${sparqlEscapeUri(
+        versionedUri
+      )} prov:generated/^nie:dataSource ?physicalFileUri. }
       ${sparqlEscapeUri(sessionId)}
         muSession:account/^foaf:account ?userUri.
     }
@@ -40,8 +49,7 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
     let content;
     if (binding.content) {
       content = binding.content.value;
-    }
-    else {
+    } else {
       content = await getFileContentForUri(binding.physicalFileUri.value);
     }
 
@@ -54,9 +62,10 @@ async function generateStringToHash(versionedUri, contentPredicate, sessionId, n
       now;
 
     return stringToHash;
-  }
-  catch (error) {
-    throw new Error("unable to sign resource because couldn't find relavant data in the database");
+  } catch (error) {
+    throw new Error(
+      "unable to sign resource because couldn't find relavant data in the database"
+    );
   }
 }
 
@@ -68,19 +77,31 @@ function generateHash(algorithm, stringToHash) {
   return hashString;
 }
 
-async function signDocument(newResourceUri, versionedUri, contentPredicate, sessionId, now, algorithm) {
-  const stringToHash = await generateStringToHash(versionedUri, contentPredicate, sessionId, now);
+async function signDocument(
+  newResourceUri,
+  versionedUri,
+  contentPredicate,
+  sessionId,
+  now,
+  algorithm
+) {
+  const stringToHash = await generateStringToHash(
+    versionedUri,
+    contentPredicate,
+    sessionId,
+    now
+  );
   const hash = generateHash(algorithm, stringToHash);
   const query = `
-    ${prefixMap.get("bv").toSparqlString()}
-    ${prefixMap.get("ext").toSparqlString()}
-    ${prefixMap.get("mu").toSparqlString()}
-    ${prefixMap.get("pav").toSparqlString()}
-    ${prefixMap.get("sign").toSparqlString()}
-    ${prefixMap.get("publicationStatus").toSparqlString()}
-    ${prefixMap.get("muSession").toSparqlString()}
-    ${prefixMap.get("dct").toSparqlString()}
-    ${prefixMap.get("foaf").toSparqlString()}
+    ${prefixMap.get('bv').toSparqlString()}
+    ${prefixMap.get('ext').toSparqlString()}
+    ${prefixMap.get('mu').toSparqlString()}
+    ${prefixMap.get('pav').toSparqlString()}
+    ${prefixMap.get('sign').toSparqlString()}
+    ${prefixMap.get('publicationStatus').toSparqlString()}
+    ${prefixMap.get('muSession').toSparqlString()}
+    ${prefixMap.get('dct').toSparqlString()}
+    ${prefixMap.get('foaf').toSparqlString()}
 
     INSERT DATA{
       ${sparqlEscapeUri(newResourceUri)}
@@ -91,9 +112,10 @@ async function signDocument(newResourceUri, versionedUri, contentPredicate, sess
 
   try {
     await update(query);
-  }
-  catch (error) {
-    throw new Error("unable to sign resource because couldn't insert data into the database");
+  } catch (error) {
+    throw new Error(
+      "unable to sign resource because couldn't insert data into the database"
+    );
   }
 }
 

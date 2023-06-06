@@ -1,19 +1,19 @@
-import {prefixMap} from "../support/prefixes";
+import { prefixMap } from '../support/prefixes';
 // @ts-ignore
-import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import Attachment from './attachment';
 
 export default class Treatment {
-  static async findAll({meetingUuid}) {
+  static async findAll({ meetingUuid }) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
-     ${prefixMap.get("ext").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
                    mu:uuid ${sparqlEscapeString(meetingUuid)};
@@ -40,25 +40,30 @@ export default class Treatment {
    `;
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
-      console.warn(`no treatment of agendapoints found for meeting with uuid ${meetingUuid}`);
+      console.warn(
+        `no treatment of agendapoints found for meeting with uuid ${meetingUuid}`
+      );
       return [];
-    }
-    else {
-      const treatments = result.results.bindings.map((binding) => Treatment.fromBinding(binding));
-      await Promise.all(treatments.map((treatment) => treatment.getAttachments()));
+    } else {
+      const treatments = result.results.bindings.map((binding) =>
+        Treatment.fromBinding(binding)
+      );
+      await Promise.all(
+        treatments.map((treatment) => treatment.getAttachments())
+      );
       return treatments;
     }
   }
 
   static async find(treatmentUuid) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
-     ${prefixMap.get("ext").toSparqlString()}
-     ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
       SELECT * WHERE {
        BIND(${sparqlEscapeString(treatmentUuid)} as ?uuid)
        ?meeting a besluit:Zitting;
@@ -88,12 +93,10 @@ export default class Treatment {
         const treatment = Treatment.fromBinding(result.results.bindings[0]);
         await treatment.getAttachments();
         return treatment;
-      }
-      else {
+      } else {
         throw `did not find treatment with uuid ${treatmentUuid}`;
       }
-    }
-    catch(e) {
+    } catch (e) {
       console.error(e);
       throw `failed to retrieve treatment with uuid ${treatmentUuid}`;
     }
@@ -110,20 +113,20 @@ export default class Treatment {
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
-    secretary = null
+    secretary = null,
   }) {
     return new Treatment({
       uuid: uuid.value,
       uri: uri.value,
-      agendapoint : agendapoint.value,
-      position : position.value,
-      isPublic : isPublic.value === "true",
-      meeting : meeting.value,
+      agendapoint: agendapoint.value,
+      position: position.value,
+      isPublic: isPublic.value === 'true',
+      meeting: meeting.value,
       documentContainerUri: container?.value,
-      editorDocumentUuid : editorDocumentUuid.value,
-      executedAfter : executedAfter?.value,
-      chairman : chairman?.value,
-      secretary : secretary?.value,
+      editorDocumentUuid: editorDocumentUuid.value,
+      executedAfter: executedAfter?.value,
+      chairman: chairman?.value,
+      secretary: secretary?.value,
     });
   }
 
@@ -138,7 +141,7 @@ export default class Treatment {
     editorDocumentUuid,
     executedAfter = null,
     chairman = null,
-    secretary = null
+    secretary = null,
   }) {
     this.uuid = uuid;
     this.uri = uri;
@@ -154,10 +157,10 @@ export default class Treatment {
   }
   async getAttachments() {
     const queryString = `
-      ${prefixMap.get("ext").toSparqlString()}
-      ${prefixMap.get("dct").toSparqlString()}
-      ${prefixMap.get("mu").toSparqlString()}
-      ${prefixMap.get("nfo").toSparqlString()}
+      ${prefixMap.get('ext').toSparqlString()}
+      ${prefixMap.get('dct').toSparqlString()}
+      ${prefixMap.get('mu').toSparqlString()}
+      ${prefixMap.get('nfo').toSparqlString()}
       SELECT * WHERE {
         ${sparqlEscapeUri(this.documentContainerUri)} ext:hasAttachments ?uri.
         ?uri dct:isPartOf ?decision;
@@ -173,10 +176,9 @@ export default class Treatment {
       const result = await query(queryString);
       const attachments = result.results.bindings.map(Attachment.fromBinding);
       this.attachments = attachments;
-    } catch(e) {
+    } catch (e) {
       console.error(e);
       throw `failed to retrieve attachments from treatment with uuid ${this.uuid}`;
     }
   }
-
 }

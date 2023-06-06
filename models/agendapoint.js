@@ -1,15 +1,15 @@
-import {prefixMap} from "../support/prefixes";
+import { prefixMap } from '../support/prefixes';
 // @ts-ignore
-import {query, sparqlEscapeString, sparqlEscapeUri} from "mu";
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
 export default class AgendaPoint {
-  static async findAll({meetingUuid}) {
+  static async findAll({ meetingUuid }) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
                    mu:uuid ${sparqlEscapeString(meetingUuid)};
@@ -31,21 +31,26 @@ export default class AgendaPoint {
    `;
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
-      console.warn(`no agendapoints found for meeting with uuid ${meetingUuid}`);
+      console.warn(
+        `no agendapoints found for meeting with uuid ${meetingUuid}`
+      );
       return [];
-    }
-    else {
-      const agendapoints = result.results.bindings.map((binding) => AgendaPoint.fromBinding(binding));
-      return agendapoints.sort((a, b) => Number(a.position) > Number(b.position) ? 1 : -1);
+    } else {
+      const agendapoints = result.results.bindings.map((binding) =>
+        AgendaPoint.fromBinding(binding)
+      );
+      return agendapoints.sort((a, b) =>
+        Number(a.position) > Number(b.position) ? 1 : -1
+      );
     }
   }
 
   static async findURI(uri) {
     const queryString = `
-    ${prefixMap.get("besluit").toSparqlString()}
-    ${prefixMap.get("dct").toSparqlString()}
-    ${prefixMap.get("schema").toSparqlString()}
-    ${prefixMap.get("skos").toSparqlString()}
+    ${prefixMap.get('besluit').toSparqlString()}
+    ${prefixMap.get('dct').toSparqlString()}
+    ${prefixMap.get('schema').toSparqlString()}
+    ${prefixMap.get('skos').toSparqlString()}
     SELECT * WHERE {
         BIND(${sparqlEscapeUri(uri)} as ?uri)
         ?uri besluit:geplandOpenbaar ?plannedPublic.
@@ -65,8 +70,7 @@ export default class AgendaPoint {
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
       return AgendaPoint.fromBinding(result.results.bindings[0]);
-    }
-    else {
+    } else {
       console.warn(`no agendapoint found for uri ${uri}`);
       return [];
     }
@@ -80,17 +84,17 @@ export default class AgendaPoint {
     addedAfter = null,
     description = null,
     type = null,
-    typeName = null
+    typeName = null,
   }) {
     return new AgendaPoint({
       uri: uri.value,
       title: title.value,
       position: position.value,
-      plannedPublic: plannedPublic.value === "true",
+      plannedPublic: plannedPublic.value === 'true',
       addedAfter: addedAfter?.value,
       description: description?.value,
       type: type?.value,
-      typeName: typeName?.value
+      typeName: typeName?.value,
     });
   }
 
@@ -102,7 +106,7 @@ export default class AgendaPoint {
     addedAfter = null,
     description = null,
     type = null,
-    typeName = null
+    typeName = null,
   }) {
     this.uri = uri;
     this.title = title;

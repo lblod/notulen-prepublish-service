@@ -1,6 +1,9 @@
 // @ts-ignore
 import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
-import {handleVersionedResource, hackedSparqlEscapeString} from './pre-importer';
+import {
+  handleVersionedResource,
+  hackedSparqlEscapeString,
+} from './pre-importer';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { prefixes } from './prefixes';
 import Meeting from '../models/meeting';
@@ -14,27 +17,30 @@ export async function buildBesluitenLijstForMeetingId(meetingUuid) {
 }
 
 async function buildBesluitenLijstForMeeting(meeting, meetingUuid) {
-
-  const treatments = await Treatment.findAll({meetingUuid});
+  const treatments = await Treatment.findAll({ meetingUuid });
   for (const treatment of treatments) {
     await addVotesToTreatment(treatment);
     await addDecisionsToTreatment(treatment);
   }
-  const treatmentsWithDecisions = treatments.filter((t) => t.decisions.length > 0);
+  const treatmentsWithDecisions = treatments.filter(
+    (t) => t.decisions.length > 0
+  );
   const html = constructHtmlForDecisionList(meeting, treatmentsWithDecisions);
   const errors = meeting.validate();
-  if(!treatmentsWithDecisions.length) {
-    return {html, errors: [...errors, 'Geen besluiten gevonden']};
+  if (!treatmentsWithDecisions.length) {
+    return { html, errors: [...errors, 'Geen besluiten gevonden'] };
   }
-  return {html, errors};
+  return { html, errors };
 }
 
 async function addDecisionsToTreatment(treatment) {
-  treatment.decisions = await Decision.extractDecisionsFromDocument(treatment.editorDocumentUuid);
+  treatment.decisions = await Decision.extractDecisionsFromDocument(
+    treatment.editorDocumentUuid
+  );
 }
 
 async function addVotesToTreatment(treatment) {
-  const votes = await Vote.findAll({ treatmentUri: treatment.uri});
+  const votes = await Vote.findAll({ treatmentUri: treatment.uri });
   if (votes.length > 0) {
     // this makes it easier to check if there are votes in the template
     treatment.votes = votes;
@@ -43,15 +49,16 @@ async function addVotesToTreatment(treatment) {
 
 export function constructHtmlForDecisionList(meeting, treatments) {
   const template = PUBLISHER_TEMPLATES.get('decisionList');
-  const html = template({meeting, treatments, prefixes: prefixes.join(" ")});
+  const html = template({ meeting, treatments, prefixes: prefixes.join(' ') });
   return html;
 }
 
-async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
+async function ensureVersionedBesluitenLijstForZitting(meetingUuid) {
   // TODO remove (or move) relationship between previously signable
   // besluitenLijst, and the current besluitenLijst.
   const meeting = await Meeting.find(meetingUuid);
-  const previousId = await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+  const previousId =
+    await query(`PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
     PREFIX pav: <http://purl.org/pav/>
     PREFIX prov: <http://www.w3.org/ns/prov#>
@@ -61,23 +68,31 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
     WHERE {
       ?besluitenLijstUri
         a ext:VersionedBesluitenLijst.
-      ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ?besluitenLijstUri
+      ${sparqlEscapeUri(
+        meeting.uri
+      )} besluit:heeftBesluitenlijst ?besluitenLijstUri
     } LIMIT 1`);
 
-  if( previousId.results.bindings.length ) {
-    const versionedBesluitenLijstId = previousId.results.bindings[0].besluitenLijstUri.value;
-    console.log(`Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`);
+  if (previousId.results.bindings.length) {
+    const versionedBesluitenLijstId =
+      previousId.results.bindings[0].besluitenLijstUri.value;
+    console.log(
+      `Reusing versioned besluitenlijst ${versionedBesluitenLijstId}`
+    );
     return versionedBesluitenLijstId;
   } else {
     console.log(`Creating a new versioned besluitenlijst for ${meeting.uri}`);
-    const {html, errors} = await buildBesluitenLijstForMeeting( meeting, meetingUuid );
-    if(errors.length) {
+    const { html, errors } = await buildBesluitenLijstForMeeting(
+      meeting,
+      meetingUuid
+    );
+    if (errors.length) {
       throw new Error(errors.join(', '));
     }
     const besluitenLijstUuid = uuid();
     const besluitenLijstUri = `http://data.lblod.info/besluiten-lijsten/${besluitenLijstUuid}`;
 
-    await update( `
+    await update(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>
@@ -87,22 +102,47 @@ async function ensureVersionedBesluitenLijstForZitting( meetingUuid ) {
       INSERT DATA{
         ${sparqlEscapeUri(besluitenLijstUri)}
           a ext:VersionedBesluitenLijst;
-          ext:content ${hackedSparqlEscapeString( html )};
-          mu:uuid ${sparqlEscapeString( besluitenLijstUuid )}.
-        ${sparqlEscapeUri(meeting.uri)} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
+          ext:content ${hackedSparqlEscapeString(html)};
+          mu:uuid ${sparqlEscapeString(besluitenLijstUuid)}.
+        ${sparqlEscapeUri(
+          meeting.uri
+        )} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.
       }`);
 
     return besluitenLijstUri;
   }
 }
 
-async function signVersionedBesluitenlijst( versionedBesluitenLijstUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "signature", versionedBesluitenLijstUri, sessionId, targetStatus, 'ext:signsBesluitenlijst');
+async function signVersionedBesluitenlijst(
+  versionedBesluitenLijstUri,
+  sessionId,
+  targetStatus
+) {
+  await handleVersionedResource(
+    'signature',
+    versionedBesluitenLijstUri,
+    sessionId,
+    targetStatus,
+    'ext:signsBesluitenlijst'
+  );
 }
 
-async function publishVersionedBesluitenlijst( versionedBesluitenLijstUri, sessionId, targetStatus ) {
-  await handleVersionedResource( "publication", versionedBesluitenLijstUri, sessionId, targetStatus, 'ext:publishesBesluitenlijst');
+async function publishVersionedBesluitenlijst(
+  versionedBesluitenLijstUri,
+  sessionId,
+  targetStatus
+) {
+  await handleVersionedResource(
+    'publication',
+    versionedBesluitenLijstUri,
+    sessionId,
+    targetStatus,
+    'ext:publishesBesluitenlijst'
+  );
 }
 
-
-export {signVersionedBesluitenlijst, publishVersionedBesluitenlijst, ensureVersionedBesluitenLijstForZitting };
+export {
+  signVersionedBesluitenlijst,
+  publishVersionedBesluitenlijst,
+  ensureVersionedBesluitenLijstForZitting,
+};

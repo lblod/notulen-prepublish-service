@@ -4,15 +4,17 @@ import InvalidRequest from './invalid-request';
 // TODO: consider using actual library
 //
 export function parseBody(jsonBody) {
-  if (typeof jsonBody !== "object" || typeof jsonBody.data !== "object") {
-    throw new InvalidRequest("could not parse json body");
+  if (typeof jsonBody !== 'object' || typeof jsonBody.data !== 'object') {
+    throw new InvalidRequest('could not parse json body');
   }
   const relationships = {};
   const relationshipData = jsonBody.data.relationships;
   if (relationshipData) {
     for (const key of Object.keys(relationshipData)) {
-      if(Array.isArray(relationshipData[key])) {
-        relationships[key] = relationshipData[key].map(relationship => relationship.data);
+      if (Array.isArray(relationshipData[key])) {
+        relationships[key] = relationshipData[key].map(
+          (relationship) => relationship.data
+        );
       } else {
         relationships[key] = relationshipData[key].data;
       }
@@ -20,6 +22,6 @@ export function parseBody(jsonBody) {
   }
   return {
     attributes: jsonBody.data?.attributes,
-    relationships
+    relationships,
   };
 }

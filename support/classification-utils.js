@@ -1,3 +1,5 @@
+// this file is ignored by prettier to avoid unnecessary linebreaks in constant declarations
+
 const BURGEMEESTER = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/4955bd72cd0e4eb895fdbfab08da0284';
 const COLLEGE_VAN_BURGEMEESTER_EN_SCHEPENEN = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/5ab0e9b8a3b2ca7c5e000006';
 const VOORZITTER_VAN_DE_RAAD_VOOR_MAATSCHAPPELIJK_WELZIJN = 'http://data.vlaanderen.be/id/concept/BestuursorgaanClassificatieCode/e14fe683-e061-44a2-b7c8-e10cab4e6ed9';
@@ -23,7 +25,7 @@ export const articlesBasedOnClassifcationMap = {
   [GOUVERNEUR]: 'de',
   [PROVINCIERAAD]: 'de',
   [VOORZITTER_VAN_HET_BIJZONDER_COMITE_VOOR_DE_SOCIALE_DIENST]: 'de',
-  [VAST_BUREAU]: 'het'
+  [VAST_BUREAU]: 'het',
 };
 
 export const whoVotesBasedOnClassifcationMap = {
@@ -38,6 +40,5 @@ export const whoVotesBasedOnClassifcationMap = {
   [GOUVERNEUR]: 'De gouverneur stemt',
   [PROVINCIERAAD]: 'De leden van de raad stemmen',
   [VOORZITTER_VAN_HET_BIJZONDER_COMITE_VOOR_DE_SOCIALE_DIENST]: 'De voorzitter stemt',
-  [VAST_BUREAU]: 'De leden van het bureau stemmen'
+  [VAST_BUREAU]: 'De leden van het bureau stemmen',
 };
-

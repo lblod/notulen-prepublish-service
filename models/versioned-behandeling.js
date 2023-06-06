@@ -1,10 +1,10 @@
 // @ts-ignore
-import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
+import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
 import { hackedSparqlEscapeString } from '../support/pre-importer';
 
 // using the english name here, but the model is in dutch
 export default class VersionedExtract {
-  static async query({treatmentUuid}) {
+  static async query({ treatmentUuid }) {
     const r = await query(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -23,14 +23,17 @@ export default class VersionedExtract {
     const bindings = r.results.bindings;
     if (bindings.length > 0) {
       const binding = bindings[0];
-      return new VersionedExtract({uri: binding.uri.value, html: binding.html.value, treatment: binding.treatment.value});
-    }
-    else {
+      return new VersionedExtract({
+        uri: binding.uri.value,
+        html: binding.html.value,
+        treatment: binding.treatment.value,
+      });
+    } else {
       return null;
     }
   }
 
-  static async create({treatment, meeting, html}) {
+  static async create({ treatment, meeting, html }) {
     const versionedExtractUuid = uuid();
     const versionedExtractUri = `http://data.lblod.info/prepublished-behandelingen/${versionedExtractUuid}`;
     await update(`
@@ -42,15 +45,21 @@ export default class VersionedExtract {
       INSERT DATA {
         ${sparqlEscapeUri(versionedExtractUri)}
            a ext:VersionedBehandeling;
-           ext:content ${hackedSparqlEscapeString( html )};
-           mu:uuid ${sparqlEscapeString( versionedExtractUuid )};
+           ext:content ${hackedSparqlEscapeString(html)};
+           mu:uuid ${sparqlEscapeString(versionedExtractUuid)};
            ext:behandeling ${sparqlEscapeUri(treatment.uri)}.
-        ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedExtractUri)}.
+        ${sparqlEscapeUri(
+          meeting.uri
+        )} ext:hasVersionedBehandeling ${sparqlEscapeUri(versionedExtractUri)}.
       }`);
-    return new VersionedExtract({html, uri: versionedExtractUri, treatment: treatment.uri});
+    return new VersionedExtract({
+      html,
+      uri: versionedExtractUri,
+      treatment: treatment.uri,
+    });
   }
 
-  constructor({uri, html = null, treatment}) {
+  constructor({ uri, html = null, treatment }) {
     this.uri = uri;
     this.html = html;
     this.treatment = treatment;
