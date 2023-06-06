@@ -8,10 +8,10 @@ import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
 import Attachment from '../models/attachment';
 import { constructHtmlForMeetingNotesFromData } from '../support/notulen-utils';
-import { prefixes } from "../support/prefixes";
+import { prefixes } from '../support/prefixes';
 import { setupHandleBars } from '../support/setup-handlebars';
 import { htmlToRdf, loadDataset, shaclReportToMessage } from './helpers';
-import {appendAttachmentsToDocument} from '../support/editor-document';
+import { appendAttachmentsToDocument } from '../support/editor-document';
 
 const person1 = {
   uri: 'http://my-example.org/mandatee/1',
@@ -53,74 +53,73 @@ const person4 = {
   positionUri: 'http://my-example.org/position/1',
 };
 const meeting = new Meeting({
-  uuid: "uuid",
-  uri: "http://my-example.org/meeting/uuid",
-  plannedStart: "2021-05-01T15:00:00Z",
-  startedAt: "2021-05-01T15:00:00Z",
-  endedAt: "2021-05-01T18:00:00Z",
-  adminBodyUri: "http://my-example.org/bestuursorgaan/uuid",
-  adminBodyName: "bestuursorgaan"
+  uuid: 'uuid',
+  uri: 'http://my-example.org/meeting/uuid',
+  plannedStart: '2021-05-01T15:00:00Z',
+  startedAt: '2021-05-01T15:00:00Z',
+  endedAt: '2021-05-01T18:00:00Z',
+  adminBodyUri: 'http://my-example.org/bestuursorgaan/uuid',
+  adminBodyName: 'bestuursorgaan',
 });
 
 const stemming = {
-  uri: "http://my-example.org/stemming/1",
+  uri: 'http://my-example.org/stemming/1',
   isSecret: false,
   positiveVotes: 1,
   negativeVotes: 1,
   abstentionVotes: 0,
-  subject : 'voting subject',
+  subject: 'voting subject',
   result: 'voting result',
   whoVotesPhrase: 'De burgemeester stemt',
   attendees: [person1, person2],
   voters: [person1, person2],
   positiveVoters: [person1],
   negativeVoters: [person2],
-  abstentionVoters: []
+  abstentionVoters: [],
 };
 
 const agendapoint1 = new AgendaPoint({
-  uri: "http://my-example.org/agendapoints/1234",
-  title: "agendapoint 1",
-  plannedPublic:true,
-  type: "http://my-example.org/agendapoint-type/1",
-  typeName: "gepland",
+  uri: 'http://my-example.org/agendapoints/1234',
+  title: 'agendapoint 1',
+  plannedPublic: true,
+  type: 'http://my-example.org/agendapoint-type/1',
+  typeName: 'gepland',
   position: 1,
 });
 
 const agendapoint2 = new AgendaPoint({
-  uri: "http://my-example.org/agendapoints/1235",
-  title: "agendapoint 2",
+  uri: 'http://my-example.org/agendapoints/1235',
+  title: 'agendapoint 2',
   plannedPublic: true,
-  type: "http://my-example.org/agendapoint-type/1",
-  typeName: "gepland",
-  description: "a description for agendapoint 2",
+  type: 'http://my-example.org/agendapoint-type/1',
+  typeName: 'gepland',
+  description: 'a description for agendapoint 2',
   position: 2,
 });
-
 
 const agendapoints = [agendapoint1, agendapoint2];
 
 const attachment1 = new Attachment({
-  uri: "http://my-example.org/attachment/1",
-  decision: "http://my-example.org/besluit/1",
-  file: "http://my-example.org/file/1",
-  type: "http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c",
-  filename: "file",
-  fileUuid: "1"
+  uri: 'http://my-example.org/attachment/1',
+  decision: 'http://my-example.org/besluit/1',
+  file: 'http://my-example.org/file/1',
+  type: 'http://lblod.data.gift/concepts/14e264b4-92db-483f-9dd1-3e806ad6d26c',
+  filename: 'file',
+  fileUuid: '1',
 });
 
 const attachment2 = new Attachment({
-  uri: "http://my-example.org/attachment/2",
-  decision: "http://my-example.org/besluit/1",
-  file: "http://my-example.org/file/2",
-  type: "",
-  filename: "file",
-  fileUuid: "2"
+  uri: 'http://my-example.org/attachment/2',
+  decision: 'http://my-example.org/besluit/1',
+  file: 'http://my-example.org/file/2',
+  type: '',
+  filename: 'file',
+  fileUuid: '2',
 });
 
 const treatmentData1 = {
   treatment: new Treatment({
-    uri: "http://my-example.org/behandeling/1",
+    uri: 'http://my-example.org/behandeling/1',
     isPublic: true,
     uuid: 1,
     agendapoint: agendapoint1.uri,
@@ -132,7 +131,7 @@ const treatmentData1 = {
   meeting: meeting,
   prefixes,
   participationList: {
-    present: [person1, person2]
+    present: [person1, person2],
   },
   attachments: [attachment1],
   votes: [stemming],
@@ -180,12 +179,12 @@ const treatmentData1 = {
         <br>
       </div>
 
-    </div>`
+    </div>`,
 };
 
 const treatmentData2 = {
   treatment: new Treatment({
-    uri: "http://my-example.org/behandeling/2",
+    uri: 'http://my-example.org/behandeling/2',
     isPublic: true,
     uuid: 2,
     agendapoint: agendapoint2.uri,
@@ -240,148 +239,167 @@ const treatmentData2 = {
         <br>
       </div>
 
-    </div>`
+    </div>`,
 };
-
 
 const intermission = new Intermission({
   uri: 'http://my-example.org/intermissions/1',
-  startedAt: "2021-05-01T15:00:00Z",
-  endedAt: "2021-05-01T18:00:00Z",
-  comment: 'this is the comment'
+  startedAt: '2021-05-01T15:00:00Z',
+  endedAt: '2021-05-01T18:00:00Z',
+  comment: 'this is the comment',
 });
 
 const participationList = {
   present: [person1],
   notPresent: [person2],
   chairman: person3,
-  secretary: person4
+  secretary: person4,
 };
 
-
-
-
 function constructNotulen() {
-  const html = constructHtmlForMeetingNotesFromData({meeting, agendapoints, treatmentsData: [treatmentData1, treatmentData2], intermissions: [intermission], participationList});
+  const html = constructHtmlForMeetingNotesFromData({
+    meeting,
+    agendapoints,
+    treatmentsData: [treatmentData1, treatmentData2],
+    intermissions: [intermission],
+    participationList,
+  });
   return html;
 }
 
-const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type';
 
-describe('notulen publication template', function() {
-  before(async function() {
+describe('notulen publication template', function () {
+  before(async function () {
     setupHandleBars();
     const html = constructNotulen();
     this.dataset = await htmlToRdf(html);
   });
 
-  it('has the expected administrative body linked to the meeting', function() {
+  it('has the expected administrative body linked to the meeting', function () {
     const adminBodyQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#isGehoudenDoor"),
+      factory.namedNode('http://data.vlaanderen.be/ns/besluit#isGehoudenDoor'),
       factory.namedNode(meeting.adminBodyUri)
     );
     assert(this.dataset.has(adminBodyQuad));
   });
-  it('has the expected zitting type', function() {
+  it('has the expected zitting type', function () {
     const typeQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#Zitting")
+      factory.namedNode('http://data.vlaanderen.be/ns/besluit#Zitting')
     );
     assert(this.dataset.has(typeQuad));
   });
-  it('has the correct planned start date', function() {
+  it('has the correct planned start date', function () {
     const plannedStartQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#geplandeStart"),
-      factory.literal(meeting.plannedStart, "http://www.w3.org/2001/XMLSchema#dateTime")
+      factory.namedNode('http://data.vlaanderen.be/ns/besluit#geplandeStart'),
+      factory.literal(
+        meeting.plannedStart,
+        'http://www.w3.org/2001/XMLSchema#dateTime'
+      )
     );
     assert(this.dataset.has(plannedStartQuad));
   });
 
-  it('has the correct start date', function() {
+  it('has the correct start date', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode("http://www.w3.org/ns/prov#startedAtTime"),
-      factory.literal(meeting.startedAt, "http://www.w3.org/2001/XMLSchema#dateTime")
+      factory.namedNode('http://www.w3.org/ns/prov#startedAtTime'),
+      factory.literal(
+        meeting.startedAt,
+        'http://www.w3.org/2001/XMLSchema#dateTime'
+      )
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('has the correct end date', function() {
+  it('has the correct end date', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode("http://www.w3.org/ns/prov#endedAtTime"),
-      factory.literal(meeting.endedAt, "http://www.w3.org/2001/XMLSchema#dateTime")
+      factory.namedNode('http://www.w3.org/ns/prov#endedAtTime'),
+      factory.literal(
+        meeting.endedAt,
+        'http://www.w3.org/2001/XMLSchema#dateTime'
+      )
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('includes agendapoint 1', function() {
+  it('includes agendapoint 1', function () {
     const startQuad = factory.quad(
       factory.namedNode(agendapoint1.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#Agendapunt")
+      factory.namedNode('http://data.vlaanderen.be/ns/besluit#Agendapunt')
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('includes agendapoint 2', function() {
+  it('includes agendapoint 2', function () {
     const startQuad = factory.quad(
       factory.namedNode(agendapoint2.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#Agendapunt")
+      factory.namedNode('http://data.vlaanderen.be/ns/besluit#Agendapunt')
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('includes behandeling 1', function() {
+  it('includes behandeling 1', function () {
     const startQuad = factory.quad(
       factory.namedNode(treatmentData1.treatment.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt")
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt'
+      )
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('includes behandeling 2', function() {
+  it('includes behandeling 2', function () {
     const startQuad = factory.quad(
       factory.namedNode(treatmentData2.treatment.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt")
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#BehandelingVanAgendapunt'
+      )
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('includes intermission', function() {
+  it('includes intermission', function () {
     const startQuad = factory.quad(
       factory.namedNode(intermission.uri),
       factory.namedNode(RDF_TYPE),
-      factory.namedNode("http://mu.semte.ch/vocabularies/ext/Intermission")
+      factory.namedNode('http://mu.semte.ch/vocabularies/ext/Intermission')
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('person 1 is present on the meeting', function() {
+  it('person 1 is present on the meeting', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftAanwezigeBijStart'),
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#heeftAanwezigeBijStart'
+      ),
       factory.namedNode(person1.uri)
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('person 2 is not present on the meeting', function() {
+  it('person 2 is not present on the meeting', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
-      factory.namedNode('http://mu.semte.ch/vocabularies/ext/heeftAfwezigeBijStart'),
+      factory.namedNode(
+        'http://mu.semte.ch/vocabularies/ext/heeftAfwezigeBijStart'
+      ),
       factory.namedNode(person2.uri)
     );
     assert(this.dataset.has(startQuad));
   });
 
-  it('person 3 is chairman of the meeting', function() {
+  it('person 3 is chairman of the meeting', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftVoorzitter'),
@@ -390,7 +408,7 @@ describe('notulen publication template', function() {
     assert(this.dataset.has(startQuad));
   });
 
-  it('person 4 is chairman of the meeting', function() {
+  it('person 4 is chairman of the meeting', function () {
     const startQuad = factory.quad(
       factory.namedNode(meeting.uri),
       factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftSecretaris'),
@@ -399,7 +417,7 @@ describe('notulen publication template', function() {
     assert(this.dataset.has(startQuad));
   });
 
-  it('voting appears on the behandeling', function() {
+  it('voting appears on the behandeling', function () {
     const startQuad = factory.quad(
       factory.namedNode(treatmentData1.treatment.uri),
       factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftStemming'),
@@ -408,11 +426,14 @@ describe('notulen publication template', function() {
     assert(this.dataset.has(startQuad));
   });
 
-  it('voting is correct', function() {
+  it('voting is correct', function () {
     const geheimQuad = factory.quad(
       factory.namedNode(stemming.uri),
       factory.namedNode('http://data.vlaanderen.be/ns/besluit#geheim'),
-      factory.literal(String(stemming.isSecret), "http://www.w3.org/2001/XMLSchema#boolean")
+      factory.literal(
+        String(stemming.isSecret),
+        'http://www.w3.org/2001/XMLSchema#boolean'
+      )
     );
     assert(this.dataset.has(geheimQuad));
 
@@ -454,60 +475,91 @@ describe('notulen publication template', function() {
 
     const positiveVotesQuad = factory.quad(
       factory.namedNode(stemming.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#aantalVoorstanders'),
-      factory.literal(String(stemming.positiveVotes), 'http://www.w3.org/2001/XMLSchema#integer')
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#aantalVoorstanders'
+      ),
+      factory.literal(
+        String(stemming.positiveVotes),
+        'http://www.w3.org/2001/XMLSchema#integer'
+      )
     );
     assert(this.dataset.has(positiveVotesQuad));
 
     const negativeVotesQuad = factory.quad(
       factory.namedNode(stemming.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#aantalTegenstanders'),
-      factory.literal(String(stemming.negativeVotes), 'http://www.w3.org/2001/XMLSchema#integer')
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#aantalTegenstanders'
+      ),
+      factory.literal(
+        String(stemming.negativeVotes),
+        'http://www.w3.org/2001/XMLSchema#integer'
+      )
     );
     assert(this.dataset.has(negativeVotesQuad));
 
     const abstentionVotesQuad = factory.quad(
       factory.namedNode(stemming.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#aantalOnthouders'),
-      factory.literal(String(stemming.abstentionVotes), 'http://www.w3.org/2001/XMLSchema#integer')
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#aantalOnthouders'
+      ),
+      factory.literal(
+        String(stemming.abstentionVotes),
+        'http://www.w3.org/2001/XMLSchema#integer'
+      )
     );
     assert(this.dataset.has(abstentionVotesQuad));
     const positiveVotersQuad = factory.quad(
       factory.namedNode(stemming.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftVoorstander'),
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#heeftVoorstander'
+      ),
       factory.namedNode(stemming.positiveVoters[0].uri)
     );
     assert(this.dataset.has(positiveVotersQuad));
 
     const negativeVotersQuad = factory.quad(
       factory.namedNode(stemming.uri),
-      factory.namedNode('http://data.vlaanderen.be/ns/besluit#heeftTegenstander'),
+      factory.namedNode(
+        'http://data.vlaanderen.be/ns/besluit#heeftTegenstander'
+      ),
       factory.namedNode(stemming.negativeVoters[0].uri)
     );
     assert(this.dataset.has(negativeVotersQuad));
   });
 
-  it('attachments are linked correctly to the behandeling', async function() {
+  it('attachments are linked correctly to the behandeling', async function () {
     setupHandleBars();
-    const html = appendAttachmentsToDocument(treatmentData1.content, [attachment1, attachment2]);
+    const html = appendAttachmentsToDocument(treatmentData1.content, [
+      attachment1,
+      attachment2,
+    ]);
     const dataset = await htmlToRdf(html);
 
     const attachment1Quad = factory.quad(
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
-      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`)
+      factory.namedNode(
+        `http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`
+      )
     );
 
     const attachment1ReverseQuad = factory.quad(
-      factory.namedNode(`http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`),
+      factory.namedNode(
+        `http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`
+      ),
       factory.namedNode('dct:isPartOf'),
-      factory.literal('http://my-example.org/besluit/1', 'http://www.w3.org/2001/XMLSchema#string')
+      factory.literal(
+        'http://my-example.org/besluit/1',
+        'http://www.w3.org/2001/XMLSchema#string'
+      )
     );
 
     const attachment2Quad = factory.quad(
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
-      factory.namedNode(`http://my-example.org/files/${attachment2.fileUuid}/download?name=${attachment2.filename}`)
+      factory.namedNode(
+        `http://my-example.org/files/${attachment2.fileUuid}/download?name=${attachment2.filename}`
+      )
     );
 
     assert(dataset.has(attachment1Quad));
@@ -515,8 +567,8 @@ describe('notulen publication template', function() {
     assert(dataset.has(attachment2Quad));
   });
 
-  it('validates the basic shacl profile', async function() {
-    const shacl = await loadDataset(__dirname + "/shapes/meeting.ttl");
+  it('validates the basic shacl profile', async function () {
+    const shacl = await loadDataset(__dirname + '/shapes/meeting.ttl');
     const validator = new SHACLValidator(shacl, { factory });
     const report = await validator.validate(this.dataset);
     assert(report.conforms, shaclReportToMessage(report));

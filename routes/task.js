@@ -13,13 +13,11 @@ router.get('/publication-tasks/:id', async function (req, res) {
         status: task.status,
         type: task.type,
         taskType: task.type,
-      }
+      },
     });
-  }
-  else {
+  } else {
     res.status(404).send(`task with id ${taskUuid} was not found`);
   }
 });
-
 
 export default router;

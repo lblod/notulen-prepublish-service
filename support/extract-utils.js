@@ -4,27 +4,39 @@ import Meeting from '../models/meeting';
 import Vote from '../models/vote';
 import Decision from '../models/decision';
 // @ts-ignore
-import { query, update, sparqlEscapeUri} from 'mu';
-import {prefixes} from "./prefixes";
-import {fetchParticipationListForTreatment,
-  fetchTreatmentParticipantsWithCache,
+import { query, sparqlEscapeUri, update } from 'mu';
+import { prefixes } from './prefixes';
+import {
+  buildParticipantCache,
   fetchParticipationList,
-  buildParticipantCache} from './query-utils';
+  fetchParticipationListForTreatment,
+  fetchTreatmentParticipantsWithCache,
+} from './query-utils';
 import { editorDocumentFromUuid } from './editor-document';
-import { PUBLISHER_TEMPLATES} from './setup-handlebars';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
-import {handleVersionedResource} from './pre-importer';
-import { IS_FINAL, DOCUMENT_PUBLISHED_STATUS } from './constants';
+import { handleVersionedResource } from './pre-importer';
+import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL } from './constants';
 
 /**
  * This file contains helpers for exporting, signing and publishing an extract of the meeting notes
  * an extract is the treatment of one agendapoint and all it's related info
  */
 
-async function buildExtractForTreatment(treatment, meeting, meetingErrors, participantCache) {
-  const data = await buildExtractDataForTreatment(treatment, meeting, true, participantCache);
+async function buildExtractForTreatment(
+  treatment,
+  meeting,
+  meetingErrors,
+  participantCache
+) {
+  const data = await buildExtractDataForTreatment(
+    treatment,
+    meeting,
+    true,
+    participantCache
+  );
   const html = constructHtmlForExtract(data);
   const treatmentErrors = await validateTreatment(treatment);
   return {
@@ -33,9 +45,9 @@ async function buildExtractForTreatment(treatment, meeting, meetingErrors, parti
         content: html,
         errors: [...meetingErrors, ...treatmentErrors],
         behandeling: treatment.uri,
-        uuid: treatment.uuid
-      }
-    }
+        uuid: treatment.uuid,
+      },
+    },
   };
 }
 
@@ -49,46 +61,84 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
     participantCache = buildParticipantCache(participationList);
   }
   const meetingErrors = validateMeeting(meeting);
-  const extractBuilders = treatments.map( (treatment) => buildExtractForTreatment(treatment, meeting, meetingErrors, participantCache) );
+  const extractBuilders = treatments.map((treatment) =>
+    buildExtractForTreatment(
+      treatment,
+      meeting,
+      meetingErrors,
+      participantCache
+    )
+  );
   const extracts = await Promise.all(extractBuilders);
   return extracts;
 }
 
-export async function buildExtractData(treatmentUuid, previewType, isPublic = true) {
+export async function buildExtractData(
+  treatmentUuid,
+  previewType,
+  isPublic = true
+) {
   const treatment = await Treatment.find(treatmentUuid);
   const meeting = await Meeting.findURI(treatment.meeting);
-  return await buildExtractDataForTreatment(treatment, meeting, previewType, isPublic);
-
+  return await buildExtractDataForTreatment(
+    treatment,
+    meeting,
+    previewType,
+    isPublic
+  );
 }
 
-export async function buildExtractDataForTreatment(treatment, meeting, previewType, isPublic = true, participantCache = null) {
+export async function buildExtractDataForTreatment(
+  treatment,
+  meeting,
+  previewType,
+  isPublic = true,
+  participantCache = null
+) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
   let participationList;
   if (participantCache) {
-    participationList = await fetchTreatmentParticipantsWithCache(treatment, participantCache);
-  }
-  else {
+    participationList = await fetchTreatmentParticipantsWithCache(
+      treatment,
+      participantCache
+    );
+  } else {
     participationList = await fetchParticipationListForTreatment(treatment.uri);
     if (participationList) {
       participantCache = buildParticipantCache(participationList);
     }
   }
-  const votes = await Vote.findAll({treatmentUri: treatment.uri});
+  const votes = await Vote.findAll({ treatmentUri: treatment.uri });
   if (participationList && participationList.present.length > 0) {
     // only try fetching voters if people were present
     await Promise.all(votes.map((vote) => vote.fetchVoters(participantCache)));
   }
   let content;
   if (isPublic) {
-    const document = await editorDocumentFromUuid(treatment.editorDocumentUuid, treatment.attachments, previewType);
-    content = document?.content ?? "";
+    const document = await editorDocumentFromUuid(
+      treatment.editorDocumentUuid,
+      treatment.attachments,
+      previewType
+    );
+    content = document?.content ?? '';
+  } else {
+    const decisions = await Decision.extractDecisionsFromDocument(
+      treatment.editorDocumentUuid
+    );
+    const template = PUBLISHER_TEMPLATES.get(
+      'decisionsTitleAndDescriptionOnly'
+    );
+    content = template({ decisions });
   }
-  else {
-    const decisions = await Decision.extractDecisionsFromDocument(treatment.editorDocumentUuid);
-    const template =  PUBLISHER_TEMPLATES.get('decisionsTitleAndDescriptionOnly');
-    content = template({decisions});
-  }
-  return {treatment, agendapoint, meeting, prefixes: prefixes.join(" "), participationList, votes, content};
+  return {
+    treatment,
+    agendapoint,
+    meeting,
+    prefixes: prefixes.join(' '),
+    participationList,
+    votes,
+    content,
+  };
 }
 
 export function constructHtmlForExtract(extractData) {
@@ -97,25 +147,61 @@ export function constructHtmlForExtract(extractData) {
   return html;
 }
 
-export async function signVersionedExtract( uri, sessionId, targetStatus, attachments ) {
-  return await handleVersionedResource( "signature", uri, sessionId, targetStatus, 'ext:signsBehandeling', undefined, undefined, attachments);
+export async function signVersionedExtract(
+  uri,
+  sessionId,
+  targetStatus,
+  attachments
+) {
+  return await handleVersionedResource(
+    'signature',
+    uri,
+    sessionId,
+    targetStatus,
+    'ext:signsBehandeling',
+    undefined,
+    undefined,
+    attachments
+  );
 }
 
-export async function publishVersionedExtract( extractUri, sessionId, targetStatus, attachments ) {
-  await handleVersionedResource( "publication", extractUri, sessionId, targetStatus, 'ext:publishesBehandeling', undefined, undefined, attachments);
+export async function publishVersionedExtract(
+  extractUri,
+  sessionId,
+  targetStatus,
+  attachments
+) {
+  await handleVersionedResource(
+    'publication',
+    extractUri,
+    sessionId,
+    targetStatus,
+    'ext:publishesBehandeling',
+    undefined,
+    undefined,
+    attachments
+  );
   await updateStatusOfLinkedContainer(extractUri);
 }
 
 export async function ensureVersionedExtract(treatment, meeting) {
-  const versionedExtract = await VersionedExtract.query({treatmentUuid: treatment.uuid});
+  const versionedExtract = await VersionedExtract.query({
+    treatmentUuid: treatment.uuid,
+  });
   if (versionedExtract) {
-    console.log(`reusing versioned extract for treatment with uuid  ${treatment.uuid}`);
+    console.log(
+      `reusing versioned extract for treatment with uuid  ${treatment.uuid}`
+    );
     return versionedExtract.uri;
-  }
-  else {
-    const data = await buildExtractDataForTreatment(treatment, meeting, IS_FINAL, true);
+  } else {
+    const data = await buildExtractDataForTreatment(
+      treatment,
+      meeting,
+      IS_FINAL,
+      true
+    );
     const html = constructHtmlForExtract(data);
-    const extract = await VersionedExtract.create({meeting, treatment, html});
+    const extract = await VersionedExtract.create({ meeting, treatment, html });
     return extract.uri;
   }
 }
@@ -129,15 +215,20 @@ async function updateStatusOfLinkedContainer(extractUri) {
       ?behandeling ext:hasDocumentContainer ?documentContainer.
     }
   `);
-  if(!documentContainerQuery.results.bindings.length)
-    throw new Error('Document container not found for versioned behandeling ' + extractUri);
-  const documentContainerUri = documentContainerQuery.results.bindings[0].documentContainer.value;
+  if (!documentContainerQuery.results.bindings.length)
+    throw new Error(
+      'Document container not found for versioned behandeling ' + extractUri
+    );
+  const documentContainerUri =
+    documentContainerQuery.results.bindings[0].documentContainer.value;
   await update(`
     PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
     DELETE {
       ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ?status
     } INSERT {
-      ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ${sparqlEscapeUri(DOCUMENT_PUBLISHED_STATUS)}
+      ${sparqlEscapeUri(
+        documentContainerUri
+      )} ext:editorDocumentStatus ${sparqlEscapeUri(DOCUMENT_PUBLISHED_STATUS)}
     } WHERE {
       ${sparqlEscapeUri(documentContainerUri)} ext:editorDocumentStatus ?status
     }
@@ -148,7 +239,7 @@ async function updateStatusOfLinkedContainer(extractUri) {
  * Checks if a behandeling has already been published or not.
  * Returns true if published, false if not.
  */
-export async function isPublished( behandelingUri ) {
+export async function isPublished(behandelingUri) {
   const r = await query(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>

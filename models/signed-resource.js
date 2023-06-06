@@ -1,15 +1,15 @@
 // @ts-ignore
-import { prefixMap } from "../support/prefixes";
-import { query, sparqlEscapeUri } from "mu";
+import { prefixMap } from '../support/prefixes';
+import { query, sparqlEscapeUri } from 'mu';
 
 export default class SignedResource {
   static async findURI(uri) {
     const queryString = `
-    ${prefixMap.get("mu").toSparqlString()}
-    ${prefixMap.get("sign").toSparqlString()}
-    ${prefixMap.get("dct").toSparqlString()}
-    ${prefixMap.get("publicationStatus").toSparqlString()}
-    ${prefixMap.get("ext").toSparqlString()}
+    ${prefixMap.get('mu').toSparqlString()}
+    ${prefixMap.get('sign').toSparqlString()}
+    ${prefixMap.get('dct').toSparqlString()}
+    ${prefixMap.get('publicationStatus').toSparqlString()}
+    ${prefixMap.get('ext').toSparqlString()}
     SELECT DISTINCT *
     WHERE {
       BIND(${sparqlEscapeUri(uri)} as ?uri)
@@ -163,45 +163,45 @@ export default class SignedResource {
   toMuResourceModel() {
     // required relationships
     const relationships = {
-      "blockchain-status": {
+      'blockchain-status': {
         data: {
-          type: "blockchain-statuses",
+          type: 'blockchain-statuses',
           id: this.blockchainStatusUuid,
         },
       },
       gebruiker: {
-        data: { type: "gebruikers", id: this.signatoryUuid },
+        data: { type: 'gebruikers', id: this.signatoryUuid },
       },
     };
     // optional relationships
     if (this.agendaUuid) {
       relationships.agenda = {
         data: {
-          type: "agendas",
+          type: 'agendas',
           id: this.agendaUuid,
         },
       };
     }
     if (this.versionedBesluitenLijstUuid) {
-      relationships["versioned-besluiten-lijst"] = {
+      relationships['versioned-besluiten-lijst'] = {
         data: {
-          type: "versioned-besluiten-lijsten",
+          type: 'versioned-besluiten-lijsten',
           id: this.versionedBesluitenLijstUuid,
         },
       };
     }
     if (this.versionedNotulenUuid) {
-      relationships["versioned-notulen"] = {
+      relationships['versioned-notulen'] = {
         data: {
-          type: "versioned-notulen",
+          type: 'versioned-notulen',
           id: this.versionedNotulenUuid,
         },
       };
     }
     if (this.versionedBehandelingUuid) {
-      relationships["versioned-behandeling"] = {
+      relationships['versioned-behandeling'] = {
         data: {
-          type: "versioned-behandelingen",
+          type: 'versioned-behandelingen',
           id: this.versionedBehandelingUuid,
         },
       };
@@ -209,17 +209,17 @@ export default class SignedResource {
     return {
       data: {
         id: this.uuid,
-        type: "signed-resources",
+        type: 'signed-resources',
         attributes: {
           uri: this.uri,
           content: this.html,
-          "hash-value": this.hashValue,
-          "created-on": this.created,
+          'hash-value': this.hashValue,
+          'created-on': this.created,
           deleted: this.deleted,
         },
         relationships,
         links: {
-          self: "/signed-resources/" + this.uuid,
+          self: '/signed-resources/' + this.uuid,
         },
       },
     };

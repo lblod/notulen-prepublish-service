@@ -1,6 +1,6 @@
-import {query, sparqlEscapeUri} from "mu";
-import {prefixMap} from "./prefixes";
-import Mandatee from "../models/mandatee";
+import { query, sparqlEscapeUri } from 'mu';
+import { prefixMap } from './prefixes';
+import Mandatee from '../models/mandatee';
 
 export default class ParticipantCache {
   constructor() {
@@ -13,16 +13,16 @@ export default class ParticipantCache {
 
   async get(uri) {
     const value = this.map.get(uri);
-    if(value) {
+    if (value) {
       return value;
     } else {
       const queryData = await query(`
-        ${prefixMap.get("besluit").toSparqlString()}
-        ${prefixMap.get("mandaat").toSparqlString()}
-        ${prefixMap.get("org").toSparqlString()}
-        ${prefixMap.get("skos").toSparqlString()}
-        ${prefixMap.get("foaf").toSparqlString()}
-        ${prefixMap.get("persoon").toSparqlString()}
+        ${prefixMap.get('besluit').toSparqlString()}
+        ${prefixMap.get('mandaat').toSparqlString()}
+        ${prefixMap.get('org').toSparqlString()}
+        ${prefixMap.get('skos').toSparqlString()}
+        ${prefixMap.get('foaf').toSparqlString()}
+        ${prefixMap.get('persoon').toSparqlString()}
         SELECT DISTINCT * WHERE {
           ${sparqlEscapeUri(uri)} mandaat:isBestuurlijkeAliasVan ?personUri;
             org:holds ?positionUri.
@@ -33,11 +33,13 @@ export default class ParticipantCache {
         }
       `);
       if (queryData.results.bindings.length === 1) {
-        const mandatee = new Mandatee({...queryData.results.bindings[0], mandatarisUri: { value: uri}});
+        const mandatee = new Mandatee({
+          ...queryData.results.bindings[0],
+          mandatarisUri: { value: uri },
+        });
         this.map.set(uri, mandatee);
         return mandatee;
-      }
-      else {
+      } else {
         throw `mandatee with uri ${uri} was not found in the database`;
       }
     }

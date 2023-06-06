@@ -1,47 +1,47 @@
-import express from "express";
-import Meeting from "../models/meeting";
-import Treatment from "../models/treatment";
-import SignedResource from "../models/signed-resource";
-import { ensureTask } from "../support/task-utils";
+import express from 'express';
+import Meeting from '../models/meeting';
+import Treatment from '../models/treatment';
+import SignedResource from '../models/signed-resource';
+import { ensureTask } from '../support/task-utils';
 import {
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
   TASK_TYPE_SIGNING_MEETING_NOTES,
-} from "../models/task";
-import validateMeeting from "../support/validate-meeting";
-import validateTreatment from "../support/validate-treatment";
+} from '../models/task';
+import validateMeeting from '../support/validate-meeting';
+import validateTreatment from '../support/validate-treatment';
 import {
   ensureVersionedAgendaForMeeting,
   signVersionedAgenda,
-} from "../support/agenda-utils";
+} from '../support/agenda-utils';
 import {
   ensureVersionedBesluitenLijstForZitting,
   signVersionedBesluitenlijst,
-} from "../support/besluit-exporter";
+} from '../support/besluit-exporter';
 import {
   ensureVersionedNotulen,
   NOTULEN_KIND_FULL,
   signVersionedNotulen,
-} from "../support/notulen-utils";
+} from '../support/notulen-utils';
 import {
   ensureVersionedExtract,
   signVersionedExtract,
-} from "../support/extract-utils";
-import { fetchCurrentUser } from "../support/query-utils";
+} from '../support/extract-utils';
+import { fetchCurrentUser } from '../support/query-utils';
 import {
   getCurrentVersion,
   getLinkedDocuments,
-} from "../support/editor-document-utils";
+} from '../support/editor-document-utils';
 import {
   ensureVersionedRegulatoryStatement,
   signVersionedRegulatoryStatement,
-} from "../support/regulatory-statement-utils";
-import { getUri } from "../support/resource-utils";
+} from '../support/regulatory-statement-utils';
+import { getUri } from '../support/resource-utils';
 
-import { parseBody } from "../support/parse-body";
-import VersionedExtract from "../models/versioned-behandeling";
+import { parseBody } from '../support/parse-body';
+import VersionedExtract from '../models/versioned-behandeling';
 
 const router = express.Router();
 
@@ -56,7 +56,7 @@ const router = express.Router();
  * Ensures the prepublished agenda that is signed is persisted in the store and attached to the document container
  */
 router.post(
-  "/signing/agenda/sign/:agendaKindUuid/:meetingUuid",
+  '/signing/agenda/sign/:agendaKindUuid/:meetingUuid',
   async function (req, res, next) {
     try {
       const prepublishedAgendaUri = await ensureVersionedAgendaForMeeting(
@@ -65,8 +65,8 @@ router.post(
       );
       await signVersionedAgenda(
         prepublishedAgendaUri,
-        req.header("MU-SESSION-ID"),
-        "getekend"
+        req.header('MU-SESSION-ID'),
+        'getekend'
       );
       return res.send({ success: true }).end();
     } catch (err) {
@@ -84,13 +84,13 @@ router.post(
  * Ensures the prepublished besluitenlijst that is signed is persisted in the store and attached to the document container
  */
 router.post(
-  "/signing/besluitenlijst/sign/:zittingIdentifier",
+  '/signing/besluitenlijst/sign/:zittingIdentifier',
   async function (req, res, next) {
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
       const meeting = await Meeting.find(meetingUuid);
-      const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
+      const userUri = await fetchCurrentUser(req.header('MU-SESSION-ID'));
       signingTask = await ensureTask(
         meeting,
         TASK_TYPE_SIGNING_DECISION_LIST,
@@ -100,7 +100,7 @@ router.post(
       res.json({
         data: {
           id: signingTask.id,
-          status: "accepted",
+          status: 'accepted',
           type: signingTask.type,
         },
       });
@@ -119,8 +119,8 @@ router.post(
         );
       await signVersionedBesluitenlijst(
         prepublishedBesluitenlijstUri,
-        req.header("MU-SESSION-ID"),
-        "getekend"
+        req.header('MU-SESSION-ID'),
+        'getekend'
       );
       await signingTask.updateStatus(TASK_STATUS_SUCCESS);
     } catch (err) {
@@ -134,7 +134,7 @@ router.post(
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
  */
 router.post(
-  "/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid",
+  '/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid',
   async function (req, res, next) {
     try {
       const meeting = await Meeting.find(req.params.zittingIdentifier);
@@ -145,14 +145,11 @@ router.post(
       if (errors.length) {
         return res.status(400).send({ errors }).end();
       } else {
-        const extractUri = await ensureVersionedExtract(
-          treatment,
-          meeting
-        );
+        const extractUri = await ensureVersionedExtract(treatment, meeting);
         await signVersionedExtract(
           extractUri,
-          req.header("MU-SESSION-ID"),
-          "getekend",
+          req.header('MU-SESSION-ID'),
+          'getekend',
           treatment.attachments
         );
         const treatmentEditorDocumentUri = await getUri(
@@ -175,8 +172,8 @@ router.post(
           versionedRegulatoryStatements.map(async (versionedStatementUri) =>
             signVersionedRegulatoryStatement(
               versionedStatementUri,
-              req.header("MU-SESSION-ID"),
-              "getekend"
+              req.header('MU-SESSION-ID'),
+              'getekend'
             )
           )
         );
@@ -196,10 +193,10 @@ router.post(
  * Creates a signed resource for the provided resource (currently only a treatment is supported)
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
  */
-router.post("/signed-resources", async function (req, res, next) {
+router.post('/signed-resources', async function (req, res, next) {
   try {
     const { relationships } = parseBody(req.body);
-    const versionedTreatmentUuid = relationships?.["versioned-behandeling"]?.id;
+    const versionedTreatmentUuid = relationships?.['versioned-behandeling']?.id;
     if (versionedTreatmentUuid) {
       const versionedTreatment = await VersionedExtract.find(
         versionedTreatmentUuid
@@ -219,8 +216,8 @@ router.post("/signed-resources", async function (req, res, next) {
 
         const signedResourceUri = await signVersionedExtract(
           versionedExtractUri,
-          req.header("MU-SESSION-ID"),
-          "getekend",
+          req.header('MU-SESSION-ID'),
+          'getekend',
           treatment.attachments
         );
         const signedResource = await SignedResource.findURI(signedResourceUri);
@@ -241,13 +238,13 @@ router.post("/signed-resources", async function (req, res, next) {
  * Ensures the prepublished notulen that are signed are persisted in the store and attached to the document container
  */
 router.post(
-  "/signing/notulen/sign/:zittingIdentifier",
+  '/signing/notulen/sign/:zittingIdentifier',
   async function (req, res, next) {
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
       const meeting = await Meeting.find(meetingUuid);
-      const userUri = await fetchCurrentUser(req.header("MU-SESSION-ID"));
+      const userUri = await fetchCurrentUser(req.header('MU-SESSION-ID'));
       signingTask = await ensureTask(
         meeting,
         TASK_TYPE_SIGNING_MEETING_NOTES,
@@ -257,7 +254,7 @@ router.post(
       res.json({
         data: {
           id: signingTask.id,
-          status: "accepted",
+          status: 'accepted',
           type: signingTask.type,
         },
       });
@@ -283,7 +280,7 @@ router.post(
         attachments.push(...treatment.attachments);
       }
       if (errors.length) {
-        throw new Error(errors.join(", "));
+        throw new Error(errors.join(', '));
       }
       const versionedNotulenUri = await ensureVersionedNotulen(
         meeting,
@@ -292,8 +289,8 @@ router.post(
       );
       await signVersionedNotulen(
         versionedNotulenUri,
-        req.header("MU-SESSION-ID"),
-        "getekend",
+        req.header('MU-SESSION-ID'),
+        'getekend',
         attachments
       );
 

@@ -1,19 +1,19 @@
 // @ts-ignore
-import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from "mu";
-import { hackedSparqlEscapeString } from "../support/pre-importer";
-import { prefixMap } from "../support/prefixes";
+import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
+import { hackedSparqlEscapeString } from '../support/pre-importer';
+import { prefixMap } from '../support/prefixes';
 
 // using the english name here, but the model is in dutch
 export default class VersionedExtract {
   static async find(uuid) {
     const queryString = `
-       ${prefixMap.get("besluit").toSparqlString()}
-       ${prefixMap.get("dct").toSparqlString()}
-       ${prefixMap.get("schema").toSparqlString()}
-       ${prefixMap.get("mu").toSparqlString()}
-       ${prefixMap.get("skos").toSparqlString()}
-       ${prefixMap.get("ext").toSparqlString()}
-       ${prefixMap.get("pav").toSparqlString()}
+       ${prefixMap.get('besluit').toSparqlString()}
+       ${prefixMap.get('dct').toSparqlString()}
+       ${prefixMap.get('schema').toSparqlString()}
+       ${prefixMap.get('mu').toSparqlString()}
+       ${prefixMap.get('skos').toSparqlString()}
+       ${prefixMap.get('ext').toSparqlString()}
+       ${prefixMap.get('pav').toSparqlString()}
         SELECT * WHERE {
            BIND(${sparqlEscapeString(uuid)} as ?uuid)
 

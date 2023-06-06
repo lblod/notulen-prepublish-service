@@ -1,15 +1,15 @@
 // @ts-ignore
 import {
   query,
-  update,
-  sparqlEscapeUri,
-  sparqlEscapeString,
   sparqlEscapeDateTime,
+  sparqlEscapeString,
+  sparqlEscapeUri,
+  update,
   uuid,
-} from "mu";
-import { prefixMap } from "./prefixes";
-import { signDocument } from "./sign-document";
-import { getFileContentForUri } from "./file-utils";
+} from 'mu';
+import { prefixMap } from './prefixes';
+import { signDocument } from './sign-document';
+import { getFileContentForUri } from './file-utils';
 
 function cleanupTriples(triples) {
   const cleantriples = {};
@@ -24,19 +24,19 @@ function hackedSparqlEscapeString(string) {
   return `${sparqlEscapeString(
     string
       .replace(/\n/g, function () {
-        return "";
+        return '';
       })
       .replace(/\r/g, function () {
-        return "";
+        return '';
       })
   )}`;
 }
 
 async function getVersionedContent(uri, contentPredicate) {
   const contentQuery = `
-        ${prefixMap.get("nie").toSparqlString()}
-        ${prefixMap.get("prov").toSparqlString()}
-        ${prefixMap.get("ext").toSparqlString()}
+        ${prefixMap.get('nie').toSparqlString()}
+        ${prefixMap.get('prov').toSparqlString()}
+        ${prefixMap.get('ext').toSparqlString()}
         SELECT ?content ?physicalFileUri
         WHERE {
          OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
@@ -54,7 +54,7 @@ async function getVersionedContent(uri, contentPredicate) {
       return content;
     }
   } else {
-    throw "could not retrieve content";
+    throw 'could not retrieve content';
   }
 }
 
@@ -71,12 +71,12 @@ async function handleVersionedResource(
   const now = new Date();
   const newResourceUuid = uuid();
   const resourceType =
-    type == "signature" ? "sign:SignedResource" : "sign:PublishedResource";
+    type == 'signature' ? 'sign:SignedResource' : 'sign:PublishedResource';
   const newResourceUri = `http://data.lblod.info/${
-    type == "signature" ? "signed-resources" : "published-resources"
+    type == 'signature' ? 'signed-resources' : 'published-resources'
   }/${newResourceUuid}`;
-  const statePredicate = customStatePredicate || "ext:stateString";
-  const contentPredicate = customContentPredicate || "ext:content";
+  const statePredicate = customStatePredicate || 'ext:stateString';
+  const contentPredicate = customContentPredicate || 'ext:content';
   const attachmentsString = attachments
     ? attachments
         .map(
@@ -85,19 +85,19 @@ async function handleVersionedResource(
               newResourceUri
             )} ext:hasAttachments ${sparqlEscapeUri(attachment.uri)}.`
         )
-        .join(" ")
-    : "";
+        .join(' ')
+    : '';
   const content = await getVersionedContent(versionedUri, contentPredicate);
   const query = `
-    ${prefixMap.get("bv").toSparqlString()}
-    ${prefixMap.get("ext").toSparqlString()}
-    ${prefixMap.get("mu").toSparqlString()}
-    ${prefixMap.get("pav").toSparqlString()}
-    ${prefixMap.get("sign").toSparqlString()}
-    ${prefixMap.get("publicationStatus").toSparqlString()}
-    ${prefixMap.get("muSession").toSparqlString()}
-    ${prefixMap.get("dct").toSparqlString()}
-    ${prefixMap.get("foaf").toSparqlString()}
+    ${prefixMap.get('bv').toSparqlString()}
+    ${prefixMap.get('ext').toSparqlString()}
+    ${prefixMap.get('mu').toSparqlString()}
+    ${prefixMap.get('pav').toSparqlString()}
+    ${prefixMap.get('sign').toSparqlString()}
+    ${prefixMap.get('publicationStatus').toSparqlString()}
+    ${prefixMap.get('muSession').toSparqlString()}
+    ${prefixMap.get('dct').toSparqlString()}
+    ${prefixMap.get('foaf').toSparqlString()}
 
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
@@ -114,7 +114,7 @@ async function handleVersionedResource(
         ${
           customSignaturePredicate
             ? `${customSignaturePredicate} ${sparqlEscapeUri(versionedUri)};`
-            : ""
+            : ''
         }
         dct:subject ${sparqlEscapeUri(versionedUri)}.
       ${sparqlEscapeUri(versionedUri)}
@@ -133,7 +133,7 @@ async function handleVersionedResource(
     contentPredicate,
     sessionId,
     now,
-    "sha256"
+    'sha256'
   );
   return newResourceUri;
 }

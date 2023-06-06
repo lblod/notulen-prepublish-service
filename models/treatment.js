@@ -1,19 +1,19 @@
-import { prefixMap } from "../support/prefixes";
+import { prefixMap } from '../support/prefixes';
 // @ts-ignore
-import { query, sparqlEscapeString, sparqlEscapeUri } from "mu";
-import Attachment from "./attachment";
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+import Attachment from './attachment';
 
 export default class Treatment {
   static async findAll({ meetingUuid }) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
-     ${prefixMap.get("ext").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
                    mu:uuid ${sparqlEscapeString(meetingUuid)};
@@ -57,13 +57,13 @@ export default class Treatment {
 
   static async findUri(uri) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
-     ${prefixMap.get("ext").toSparqlString()}
-     ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
       SELECT * WHERE {
        BIND(${sparqlEscapeUri(uri)} as ?uri)
        ?meeting a besluit:Zitting;
@@ -104,13 +104,13 @@ export default class Treatment {
 
   static async find(treatmentUuid) {
     const queryString = `
-     ${prefixMap.get("besluit").toSparqlString()}
-     ${prefixMap.get("dct").toSparqlString()}
-     ${prefixMap.get("schema").toSparqlString()}
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("skos").toSparqlString()}
-     ${prefixMap.get("ext").toSparqlString()}
-     ${prefixMap.get("pav").toSparqlString()}
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
       SELECT * WHERE {
        BIND(${sparqlEscapeString(treatmentUuid)} as ?uuid)
        ?meeting a besluit:Zitting;
@@ -167,7 +167,7 @@ export default class Treatment {
       uri: uri.value,
       agendapoint: agendapoint.value,
       position: position.value,
-      isPublic: isPublic.value === "true",
+      isPublic: isPublic.value === 'true',
       meeting: meeting.value,
       documentContainerUri: container?.value,
       editorDocumentUuid: editorDocumentUuid.value,
@@ -205,10 +205,10 @@ export default class Treatment {
 
   async getAttachments() {
     const queryString = `
-      ${prefixMap.get("ext").toSparqlString()}
-      ${prefixMap.get("dct").toSparqlString()}
-      ${prefixMap.get("mu").toSparqlString()}
-      ${prefixMap.get("nfo").toSparqlString()}
+      ${prefixMap.get('ext').toSparqlString()}
+      ${prefixMap.get('dct').toSparqlString()}
+      ${prefixMap.get('mu').toSparqlString()}
+      ${prefixMap.get('nfo').toSparqlString()}
       SELECT * WHERE {
         ${sparqlEscapeUri(this.documentContainerUri)} ext:hasAttachments ?uri.
         ?uri dct:isPartOf ?decision;

@@ -1,10 +1,14 @@
 // @ts-ignore
-import {uuid, query, sparqlEscapeString, update, sparqlEscapeUri} from "mu";
-import { persistContentToFile, writeFileMetadataToDb, getFileContentForUri } from '../support/file-utils';
+import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
+import {
+  persistContentToFile,
+  writeFileMetadataToDb,
+  getFileContentForUri,
+} from '../support/file-utils';
 import { prefixMap } from '../support/prefixes';
 // using the english name here, but the model is in dutch
 export default class VersionedRegulatoryStatement {
-  static async query({regulatoryStatementDocumentUri}) {
+  static async query({ regulatoryStatementDocumentUri }) {
     const r = await query(`
       ${prefixMap.get('ext').toSparqlString()}
       ${prefixMap.get('mu').toSparqlString()}
@@ -15,7 +19,9 @@ export default class VersionedRegulatoryStatement {
       {
         ?uri a ext:VersionedRegulatoryStatement;
                   mu:uuid ?uuid;
-                  ext:reglementaireBijlage ${sparqlEscapeString(regulatoryStatementDocumentUri)}.
+                  ext:reglementaireBijlage ${sparqlEscapeString(
+                    regulatoryStatementDocumentUri
+                  )}.
         ?uri prov:generated/^nie:dataSource ?fileUri.
       }
   `);
@@ -24,19 +30,26 @@ export default class VersionedRegulatoryStatement {
       const binding = bindings[0];
       const fileUri = binding.fileUri?.value;
       const html = fileUri ? await getFileContentForUri(fileUri) : '';
-      return new VersionedRegulatoryStatement({uri: binding.uri.value, html, regulatoryStatementDocument: regulatoryStatementDocumentUri});
-    }
-    else {
+      return new VersionedRegulatoryStatement({
+        uri: binding.uri.value,
+        html,
+        regulatoryStatementDocument: regulatoryStatementDocumentUri,
+      });
+    } else {
       return null;
     }
   }
 
-  static async create({regulatoryStatementDocumentUri, versionedTreatmentUri, html}) {
+  static async create({
+    regulatoryStatementDocumentUri,
+    versionedTreatmentUri,
+    html,
+  }) {
     const versionedRegulatoryStatementUuid = uuid();
     const versionedRegulatoryStatementUri = `http://data.lblod.info/prepublished-regulatory-statements/${versionedRegulatoryStatementUuid}`;
     const fileInfo = await persistContentToFile(html);
     const logicalFileUri = await writeFileMetadataToDb(fileInfo);
-    
+
     await update(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
@@ -47,14 +60,24 @@ export default class VersionedRegulatoryStatement {
         ${sparqlEscapeUri(versionedRegulatoryStatementUri)}
            a ext:VersionedRegulatoryStatement;
            prov:generated ${sparqlEscapeUri(logicalFileUri)};
-           mu:uuid ${sparqlEscapeString( versionedRegulatoryStatementUuid )};
-           ext:regulatoryStatement ${sparqlEscapeUri(regulatoryStatementDocumentUri)}.
-        ${sparqlEscapeUri(versionedTreatmentUri)} ext:hasVersionedReglementaireBijlage ${sparqlEscapeUri(versionedRegulatoryStatementUri)}.
+           mu:uuid ${sparqlEscapeString(versionedRegulatoryStatementUuid)};
+           ext:regulatoryStatement ${sparqlEscapeUri(
+             regulatoryStatementDocumentUri
+           )}.
+        ${sparqlEscapeUri(
+          versionedTreatmentUri
+        )} ext:hasVersionedReglementaireBijlage ${sparqlEscapeUri(
+      versionedRegulatoryStatementUri
+    )}.
       }`);
-    return new VersionedRegulatoryStatement({html, uri: versionedRegulatoryStatementUri, regulatoryStatementDocument: regulatoryStatementDocumentUri});
+    return new VersionedRegulatoryStatement({
+      html,
+      uri: versionedRegulatoryStatementUri,
+      regulatoryStatementDocument: regulatoryStatementDocumentUri,
+    });
   }
 
-  constructor({uri, html = null, regulatoryStatementDocument}) {
+  constructor({ uri, html = null, regulatoryStatementDocument }) {
     this.uri = uri;
     this.html = html;
     this.regulatoryStatementDocument = regulatoryStatementDocument;
