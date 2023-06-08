@@ -20,11 +20,13 @@ export default class VersionedNotulen {
                   ext:notulenKind ${sparqlEscapeString(kind)};
                   ext:content ?html.
       ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedNotulen  ?uri.
+      FILTER NOT EXISTS { ?uri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
     } LIMIT 1
   `);
     const bindings = r.results.bindings;
     if (bindings.length > 0) {
       const binding = bindings[0];
+      console.log(binding);
       return new VersionedNotulen({
         uri: binding.uri.value,
         html: binding.html.value,
@@ -50,7 +52,8 @@ export default class VersionedNotulen {
           a ext:VersionedNotulen;
           ext:content ${hackedSparqlEscapeString(html)};
           ext:notulenKind ${sparqlEscapeString(kind)};
-          mu:uuid ${sparqlEscapeString(versionedNotulenUuid)}.
+          mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};
+          ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
         ${publicTreatments
           .map(
             (uri) =>

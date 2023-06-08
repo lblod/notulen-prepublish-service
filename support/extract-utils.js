@@ -4,13 +4,13 @@ import Meeting from '../models/meeting';
 import Vote from '../models/vote';
 import Decision from '../models/decision';
 // @ts-ignore
-import { query, update, sparqlEscapeUri } from 'mu';
+import { query, sparqlEscapeUri, update } from 'mu';
 import { prefixes } from './prefixes';
 import {
+  buildParticipantCache,
+  fetchParticipationList,
   fetchParticipationListForTreatment,
   fetchTreatmentParticipantsWithCache,
-  fetchParticipationList,
-  buildParticipantCache,
 } from './query-utils';
 import { editorDocumentFromUuid } from './editor-document';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
@@ -18,7 +18,7 @@ import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import { handleVersionedResource } from './pre-importer';
-import { IS_FINAL, DOCUMENT_PUBLISHED_STATUS } from './constants';
+import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL } from './constants';
 
 /**
  * This file contains helpers for exporting, signing and publishing an extract of the meeting notes
@@ -153,7 +153,7 @@ export async function signVersionedExtract(
   targetStatus,
   attachments
 ) {
-  await handleVersionedResource(
+  return await handleVersionedResource(
     'signature',
     uri,
     sessionId,

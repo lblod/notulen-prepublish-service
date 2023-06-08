@@ -55,6 +55,53 @@ export default class Treatment {
     }
   }
 
+  static async findUri(uri) {
+    const queryString = `
+     ${prefixMap.get('besluit').toSparqlString()}
+     ${prefixMap.get('dct').toSparqlString()}
+     ${prefixMap.get('schema').toSparqlString()}
+     ${prefixMap.get('mu').toSparqlString()}
+     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap.get('ext').toSparqlString()}
+     ${prefixMap.get('pav').toSparqlString()}
+      SELECT * WHERE {
+       BIND(${sparqlEscapeUri(uri)} as ?uri)
+       ?meeting a besluit:Zitting;
+                   besluit:behandelt ?agendapoint.
+          ?agendapoint schema:position ?position.
+      ?uri a besluit:BehandelingVanAgendapunt;
+           mu:uuid ?uuid;
+           dct:subject ?agendapoint;
+           besluit:openbaar ?isPublic;
+           ext:hasDocumentContainer ?container.
+      ?container pav:hasCurrentVersion ?editorDocument.
+      ?editorDocument <http://mu.semte.ch/vocabularies/core/uuid> ?editorDocumentUuid.
+    OPTIONAL {
+        ?uri besluit:gebeurtNa ?executedAfter.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftVoorzitter ?chairman.
+    }
+    OPTIONAL {
+        ?uri besluit:heeftSecretaris ?secretary.
+    }
+   }
+   `;
+    try {
+      const result = await query(queryString);
+      if (result.results.bindings.length === 1) {
+        const treatment = Treatment.fromBinding(result.results.bindings[0]);
+        await treatment.getAttachments();
+        return treatment;
+      } else {
+        throw `did not find treatment with uri ${uri}`;
+      }
+    } catch (e) {
+      console.error(e);
+      throw `failed to retrieve treatment with uri ${uri}`;
+    }
+  }
+
   static async find(treatmentUuid) {
     const queryString = `
      ${prefixMap.get('besluit').toSparqlString()}
@@ -155,6 +202,7 @@ export default class Treatment {
     this.secretary = secretary;
     this.documentContainerUri = documentContainerUri;
   }
+
   async getAttachments() {
     const queryString = `
       ${prefixMap.get('ext').toSparqlString()}

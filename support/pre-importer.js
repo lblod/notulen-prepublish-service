@@ -1,10 +1,10 @@
 // @ts-ignore
 import {
   query,
-  update,
-  sparqlEscapeUri,
-  sparqlEscapeString,
   sparqlEscapeDateTime,
+  sparqlEscapeString,
+  sparqlEscapeUri,
+  update,
   uuid,
 } from 'mu';
 import { prefixMap } from './prefixes';
@@ -33,7 +33,7 @@ function hackedSparqlEscapeString(string) {
 }
 
 async function getVersionedContent(uri, contentPredicate) {
-  const result = await query(`
+  const contentQuery = `
         ${prefixMap.get('nie').toSparqlString()}
         ${prefixMap.get('prov').toSparqlString()}
         ${prefixMap.get('ext').toSparqlString()}
@@ -43,7 +43,8 @@ async function getVersionedContent(uri, contentPredicate) {
          OPTIONAL { ${sparqlEscapeUri(
            uri
          )} prov:generated/^nie:dataSource ?physicalFileUri. }
-        }`);
+        }`;
+  const result = await query(contentQuery);
   if (result.results.bindings.length == 1) {
     const binding = result.results.bindings[0];
     if (binding.content) {
@@ -125,7 +126,7 @@ async function handleVersionedResource(
       ${sparqlEscapeUri(sessionId)}
         ext:sessionRole ?signatoryRole.
     }`;
-  const updatePromise = await update(query);
+  await update(query);
   await signDocument(
     newResourceUri,
     versionedUri,
@@ -134,7 +135,7 @@ async function handleVersionedResource(
     now,
     'sha256'
   );
-  return updatePromise;
+  return newResourceUri;
 }
 
 export { hackedSparqlEscapeString, handleVersionedResource, cleanupTriples };

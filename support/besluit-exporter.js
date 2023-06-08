@@ -1,8 +1,8 @@
 // @ts-ignore
-import { update, query, sparqlEscapeString, sparqlEscapeUri, uuid } from 'mu';
+import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
 import {
-  handleVersionedResource,
   hackedSparqlEscapeString,
+  handleVersionedResource,
 } from './pre-importer';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { prefixes } from './prefixes';
@@ -70,7 +70,8 @@ async function ensureVersionedBesluitenLijstForZitting(meetingUuid) {
         a ext:VersionedBesluitenLijst.
       ${sparqlEscapeUri(
         meeting.uri
-      )} besluit:heeftBesluitenlijst ?besluitenLijstUri
+      )} besluit:heeftBesluitenlijst ?besluitenLijstUri.
+      FILTER NOT EXISTS { ?besluitenLijstUri ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean> }
     } LIMIT 1`);
 
   if (previousId.results.bindings.length) {
@@ -103,7 +104,8 @@ async function ensureVersionedBesluitenLijstForZitting(meetingUuid) {
         ${sparqlEscapeUri(besluitenLijstUri)}
           a ext:VersionedBesluitenLijst;
           ext:content ${hackedSparqlEscapeString(html)};
-          mu:uuid ${sparqlEscapeString(besluitenLijstUuid)}.
+          mu:uuid ${sparqlEscapeString(besluitenLijstUuid)};
+          ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
         ${sparqlEscapeUri(
           meeting.uri
         )} besluit:heeftBesluitenlijst ${sparqlEscapeUri(besluitenLijstUri)}.

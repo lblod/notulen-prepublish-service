@@ -1,6 +1,7 @@
 import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
+import SignedResource from '../models/signed-resource';
 import { ensureTask } from '../support/task-utils';
 import {
   TASK_STATUS_FAILURE,
@@ -38,6 +39,10 @@ import {
   signVersionedRegulatoryStatement,
 } from '../support/regulatory-statement-utils';
 import { getUri } from '../support/resource-utils';
+
+import { parseBody } from '../support/parse-body';
+import VersionedExtract from '../models/versioned-behandeling';
+
 const router = express.Router();
 
 /**
@@ -183,6 +188,50 @@ router.post(
     }
   }
 );
+
+/**
+ * Creates a signed resource for the provided resource (currently only a treatment is supported)
+ * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
+ */
+router.post('/signed-resources', async function (req, res, next) {
+  try {
+    const { relationships } = parseBody(req.body);
+    const versionedTreatmentUuid = relationships?.['versioned-behandeling']?.id;
+    if (versionedTreatmentUuid) {
+      const versionedTreatment = await VersionedExtract.find(
+        versionedTreatmentUuid
+      );
+      const treatment = await Treatment.findUri(versionedTreatment.treatment);
+      const meeting = await Meeting.findURI(treatment.meeting);
+      const meetingErrors = validateMeeting(meeting);
+      const treatmentErrors = await validateTreatment(treatment);
+      const errors = [...meetingErrors, ...treatmentErrors];
+      if (errors.length) {
+        return res.status(400).send({ errors }).end();
+      } else {
+        const versionedExtractUri = await ensureVersionedExtract(
+          treatment,
+          meeting
+        );
+
+        const signedResourceUri = await signVersionedExtract(
+          versionedExtractUri,
+          req.header('MU-SESSION-ID'),
+          'getekend',
+          treatment.attachments
+        );
+        const signedResource = await SignedResource.findURI(signedResourceUri);
+        return res.send(signedResource.toMuResourceModel());
+      }
+    }
+  } catch (err) {
+    console.log(err);
+    const error = new Error(
+      `An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`
+    );
+    return next(error);
+  }
+});
 
 /**
  * Makes the current user sign the notulen for the supplied document.
