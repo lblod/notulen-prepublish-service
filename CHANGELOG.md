@@ -1,6 +1,20 @@
 
 
 
+
+## 2.0.0 (2023-06-08)
+####  BREAKING
+* [#101](https://github.com/lblod/notulen-prepublish-service/pull/101) support for delete signatures ([@lagartoverde](https://github.com/lagartoverde))
+
+#### :rocket: Enhancement
+* [#101](https://github.com/lblod/notulen-prepublish-service/pull/101) support for delete signatures ([@lagartoverde](https://github.com/lagartoverde))
+* [#102](https://github.com/lblod/notulen-prepublish-service/pull/102) feat(linting): add conventional prettier setup ([@abeforgit](https://github.com/abeforgit))
+
+#### Committers: 2
+- Arne Bertrand ([@abeforgit](https://github.com/abeforgit))
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
+
 ## 1.8.1 (2023-01-09)
 
 #### :bug: Bug Fix
