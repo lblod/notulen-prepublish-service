@@ -22,7 +22,7 @@ class EditorDocument {
     for (var key in content) {
       this[key] = content[key];
     }
-    if(this.removeTemplateComments){
+    if (this.removeTemplateComments) {
       this._removeTemplateComments();
     }
   }
@@ -63,8 +63,14 @@ class EditorDocument {
     const dom = this.getDom();
     // clear dom as we'll change the content
     this.dom = undefined;
-    const comments = [...dom.window.document.querySelectorAll(`div[typeof='${prefixMap.get("ext").name}:TemplateComment'`),
-    ...dom.window.document.querySelectorAll(`div[typeof='${prefixMap.get("ext").uri}TemplateComment'`)]
+    const comments = [
+      ...dom.window.document.querySelectorAll(
+        `div[typeof='${prefixMap.get('ext').name}:TemplateComment'`
+      ),
+      ...dom.window.document.querySelectorAll(
+        `div[typeof='${prefixMap.get('ext').uri}TemplateComment'`
+      ),
+    ];
     comments.forEach((comment) => comment.remove());
     this.content = dom.window.document.body.innerHTML;
   }
@@ -99,7 +105,7 @@ async function editorDocumentFromUuid(uuid, attachments, previewType) {
             )}
      }`
   );
-  
+
   if (queryResult.results.bindings.length === 0) {
     console.log(`No content found for EditorDocument ${uuid} returning null`);
     return null;
