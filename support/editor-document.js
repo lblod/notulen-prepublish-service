@@ -61,8 +61,6 @@ class EditorDocument {
 
   _removeTemplateComments() {
     const dom = this.getDom();
-    // clear dom as we'll change the content
-    this.dom = undefined;
     const comments = [
       ...dom.window.document.querySelectorAll(
         `div[typeof='${prefixMap.get('ext').name}:TemplateComment'`
@@ -73,6 +71,7 @@ class EditorDocument {
     ];
     comments.forEach((comment) => comment.remove());
     this.content = dom.window.document.body.innerHTML;
+    this.resetDom();
   }
 
   resetDom() {
