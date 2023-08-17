@@ -2,6 +2,15 @@
 
 
 
+
+## 2.1.0 (2023-08-17)
+
+#### :rocket: Enhancement
+* [#105](https://github.com/lblod/notulen-prepublish-service/pull/105) GN-4441 Remove template comments from anything requested ([@x-m-el](https://github.com/x-m-el))
+
+#### Committers: 1
+- [@x-m-el](https://github.com/x-m-el)
+
 ## 2.0.0 (2023-06-08)
 ####  BREAKING
 * [#101](https://github.com/lblod/notulen-prepublish-service/pull/101) support for delete signatures ([@lagartoverde](https://github.com/lagartoverde))
