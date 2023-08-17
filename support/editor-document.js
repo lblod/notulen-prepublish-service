@@ -7,14 +7,23 @@ import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { IS_FINAL } from './constants';
+import { prefixMap } from './prefixes';
 
+/**
+ * removeTemplateComments: remove all nodes that are a template comment. This should be done for
+ * anything that is not being edited.
+ */
 class EditorDocument {
   constructor(content) {
     this.content = undefined;
     this.context = {};
     this.uri = undefined;
+    this.removeTemplateComments = true;
     for (var key in content) {
       this[key] = content[key];
+    }
+    if (this.removeTemplateComments) {
+      this._removeTemplateComments();
     }
   }
 
@@ -50,6 +59,21 @@ class EditorDocument {
     }
   }
 
+  _removeTemplateComments() {
+    const dom = this.getDom();
+    const comments = [
+      ...dom.window.document.querySelectorAll(
+        `div[typeof='${prefixMap.get('ext').name}:TemplateComment'`
+      ),
+      ...dom.window.document.querySelectorAll(
+        `div[typeof='${prefixMap.get('ext').uri}TemplateComment'`
+      ),
+    ];
+    comments.forEach((comment) => comment.remove());
+    this.content = dom.window.document.body.innerHTML;
+    this.resetDom();
+  }
+
   resetDom() {
     this.dom = undefined;
     this.topDomNode = undefined;
@@ -80,6 +104,7 @@ async function editorDocumentFromUuid(uuid, attachments, previewType) {
             )}
      }`
   );
+
   if (queryResult.results.bindings.length === 0) {
     console.log(`No content found for EditorDocument ${uuid} returning null`);
     return null;
