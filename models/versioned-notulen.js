@@ -62,9 +62,9 @@ export default class VersionedNotulen {
             )} ext:publicBehandeling ${sparqlEscapeUri(uri)}.`
         )
         .join(' ')}
-      ${sparqlEscapeUri(
-        meeting.uri
-      )} ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)}.
+      ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedNotulen ${sparqlEscapeUri(
+      versionedNotulenUri
+    )}.
     }`.replace(/\s+/g, ' ');
     await update(firstQuery);
     const secondQuery = `
