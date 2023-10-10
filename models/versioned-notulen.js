@@ -41,32 +41,33 @@ export default class VersionedNotulen {
   static async create({ kind, meeting, html, publicTreatments }) {
     const versionedNotulenUuid = uuid();
     const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
-    await update(`
-      PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-      PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-      PREFIX pav: <http://purl.org/pav/>
-      PREFIX prov: <http://www.w3.org/ns/prov#>
+    const firstQuery = `
+    PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
+    PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
+    PREFIX pav: <http://purl.org/pav/>
+    PREFIX prov: <http://www.w3.org/ns/prov#>
 
-      INSERT DATA{
-        ${sparqlEscapeUri(versionedNotulenUri)}
-          a ext:VersionedNotulen;
-          ext:content ${hackedSparqlEscapeString(html)};
-          ext:notulenKind ${sparqlEscapeString(kind)};
-          mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};
-          ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
-        ${publicTreatments
-          .map(
-            (uri) =>
-              ` ${sparqlEscapeUri(
-                versionedNotulenUri
-              )} ext:publicBehandeling ${sparqlEscapeUri(uri)}.`
-          )
-          .join(' ')}
-        ${sparqlEscapeUri(
-          meeting.uri
-        )} ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)}.
-      }`);
-    await update(`
+    INSERT DATA{
+      ${sparqlEscapeUri(versionedNotulenUri)}
+        a ext:VersionedNotulen;
+        ext:content ${hackedSparqlEscapeString(html)};
+        ext:notulenKind ${sparqlEscapeString(kind)};
+        mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};
+        ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
+      ${publicTreatments
+        .map(
+          (uri) =>
+            ` ${sparqlEscapeUri(
+              versionedNotulenUri
+            )} ext:publicBehandeling ${sparqlEscapeUri(uri)}.`
+        )
+        .join(' ')}
+      ${sparqlEscapeUri(
+        meeting.uri
+      )} ext:hasVersionedNotulen ${sparqlEscapeUri(versionedNotulenUri)}.
+    }`.replace(/\s+/g, ' ');
+    await update(firstQuery);
+    const secondQuery = `
       PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
       INSERT {
           ?agendapoint besluit:Agendapunt.type ${sparqlEscapeUri(
@@ -77,8 +78,9 @@ export default class VersionedNotulen {
           ${sparqlEscapeUri(meeting.uri)} a besluit:Zitting.
           ${sparqlEscapeUri(meeting.uri)} besluit:behandelt ?agendapoint.
           FILTER( NOT EXISTS { ?agendapoint besluit:Agendapunt.type ?type})
-     }
-    `);
+    }
+    `;
+    await update(secondQuery);
     return new VersionedNotulen({
       html,
       uri: versionedNotulenUri,
