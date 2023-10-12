@@ -1,12 +1,55 @@
 import { prefixMap } from '../support/prefixes';
-import { DateTime } from 'luxon';
-// @ts-ignore
+import { DateTime } from 'luxon'; // @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import validateMeeting from '../support/validate-meeting';
 import { articlesBasedOnClassifcationMap } from '../support/classification-utils';
+
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 export default class Meeting {
+  constructor({
+    uuid,
+    uri,
+    adminBodyName = null,
+    adminBodyUri = null,
+    startedAt = null,
+    endedAt = null,
+    plannedStart = null,
+    intro = null,
+    outro = null,
+    location = null,
+    adminBodyClassification = null,
+    optimizeSpaces = false,
+  }) {
+    this.uuid = uuid;
+    this.uri = uri;
+    this.adminBodyUri = adminBodyUri;
+    this.adminBodyName = adminBodyName;
+    this.adminBodyArticle = this.generateAdminBodyArticle(
+      adminBodyClassification
+    );
+    this.startedAt = startedAt;
+    this.endedAt = endedAt;
+    this.plannedStart = plannedStart;
+    this.startedAtText = this.startedAt
+      ? DateTime.fromISO(this.startedAt).toFormat(dateFormat)
+      : '';
+    this.endedAtText = this.endedAt
+      ? DateTime.fromISO(this.endedAt).toFormat(dateFormat)
+      : '';
+    this.plannedStartText = this.plannedStart
+      ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat)
+      : '';
+    this.intro = intro;
+    this.outro = outro;
+    this.location = location;
+    // this is a hack for very large meetings. We can add this triple, and then this service
+    // will aggressively collapse spaces down to a single space. This can shave off just enough
+    // characters to make a meeting go through the pipeline which otherwise wouldn't.
+    // use with extreme caution
+    this.optimizeSpaces = optimizeSpaces;
+  }
+
   static async findURI(uri) {
     const queryString = `
     ${prefixMap.get('ext').toSparqlString()}
@@ -38,6 +81,9 @@ export default class Meeting {
       }
       OPTIONAL {
         ?uri notulen:outro ?outro.
+      }
+      OPTIONAL {
+          ?uri ext:optimizeSpaces ?optimizeSpaces.
       }
     }`;
     const result = await query(queryString);
@@ -80,6 +126,9 @@ export default class Meeting {
       OPTIONAL {
           ?uri notulen:outro ?outro.
       }
+      OPTIONAL {
+          ?uri ext:optimizeSpaces ?optimizeSpaces.
+      }
     }`;
     const result = await query(queryString);
     if (result.results.bindings.length !== 1) {
@@ -101,44 +150,10 @@ export default class Meeting {
       intro: binding.intro?.value,
       outro: binding.outro?.value,
       location: binding.location?.value,
+      optimizeSpaces: binding.optimizeSpaces?.value === 'true',
     });
   }
-  constructor({
-    uuid,
-    uri,
-    adminBodyName = null,
-    adminBodyUri = null,
-    startedAt = null,
-    endedAt = null,
-    plannedStart = null,
-    intro = null,
-    outro = null,
-    location = null,
-    adminBodyClassification = null,
-  }) {
-    this.uuid = uuid;
-    this.uri = uri;
-    this.adminBodyUri = adminBodyUri;
-    this.adminBodyName = adminBodyName;
-    this.adminBodyArticle = this.generateAdminBodyArticle(
-      adminBodyClassification
-    );
-    this.startedAt = startedAt;
-    this.endedAt = endedAt;
-    this.plannedStart = plannedStart;
-    this.startedAtText = this.startedAt
-      ? DateTime.fromISO(this.startedAt).toFormat(dateFormat)
-      : '';
-    this.endedAtText = this.endedAt
-      ? DateTime.fromISO(this.endedAt).toFormat(dateFormat)
-      : '';
-    this.plannedStartText = this.plannedStart
-      ? DateTime.fromISO(this.plannedStart).toFormat(dateFormat)
-      : '';
-    this.intro = intro;
-    this.outro = outro;
-    this.location = location;
-  }
+
   generateAdminBodyArticle(adminBodyUri) {
     return articlesBasedOnClassifcationMap[adminBodyUri];
   }

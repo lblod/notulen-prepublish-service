@@ -38,6 +38,18 @@ export default class VersionedNotulen {
     }
   }
 
+  /**
+   * @typedef {Object} Params
+   * @property {string} kind
+   * @property {Meeting} meeting
+   * @property {string} html
+   * @property {[]} publicTreatments
+   */
+  /**
+   * create a new versioned notulen
+   * @param {Params} args
+   * @returns {Promise<VersionedNotulen>}
+   */
   static async create({ kind, meeting, html, publicTreatments }) {
     const versionedNotulenUuid = uuid();
     const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
@@ -50,7 +62,7 @@ export default class VersionedNotulen {
     INSERT DATA{
       ${sparqlEscapeUri(versionedNotulenUri)}
         a ext:VersionedNotulen;
-        ext:content ${hackedSparqlEscapeString(html)};
+        ext:content ${hackedSparqlEscapeString(html, meeting.optimizeSpaces)};
         ext:notulenKind ${sparqlEscapeString(kind)};
         mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};
         ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
@@ -65,7 +77,7 @@ export default class VersionedNotulen {
       ${sparqlEscapeUri(meeting.uri)} ext:hasVersionedNotulen ${sparqlEscapeUri(
       versionedNotulenUri
     )}.
-    }`.replace(/\s+/g, ' ');
+    }`;
     await update(firstQuery);
     const secondQuery = `
       PREFIX besluit: <http://data.vlaanderen.be/ns/besluit#>
