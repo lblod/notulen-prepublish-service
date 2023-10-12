@@ -3,6 +3,16 @@
 
 
 
+
+## 2.1.1 (2023-10-12)
+
+#### :bug: Bug Fix
+* [#106](https://github.com/lblod/notulen-prepublish-service/pull/106) GN-4553: trim publish notulen query before sending it ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
+
 ## 2.1.0 (2023-08-17)
 
 #### :rocket: Enhancement
