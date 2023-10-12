@@ -20,8 +20,8 @@ function cleanupTriples(triples) {
   return Object.keys(cleantriples).map((k) => cleantriples[k]);
 }
 
-function hackedSparqlEscapeString(string) {
-  return `${sparqlEscapeString(
+function hackedSparqlEscapeString(string, optimizeSpaces = false) {
+  let result = `${sparqlEscapeString(
     string
       .replace(/\n/g, function () {
         return '';
@@ -30,6 +30,11 @@ function hackedSparqlEscapeString(string) {
         return '';
       })
   )}`;
+  if (optimizeSpaces) {
+    console.log('OPTIMIZING SPACES');
+    result = result.replace(/\s+/g, ' ');
+  }
+  return result;
 }
 
 async function getVersionedContent(uri, contentPredicate) {
