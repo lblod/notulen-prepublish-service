@@ -12,7 +12,7 @@ import { signDocument } from './sign-document';
 import {
   getFileContentForUri,
   persistContentToFile,
-  writeFileMetadataToDb
+  writeFileMetadataToDb,
 } from './file-utils';
 
 function cleanupTriples(triples) {
@@ -37,7 +37,6 @@ function hackedSparqlEscapeString(string) {
 }
 
 async function getVersionedContent(uri, contentPredicate) {
-
   const contentQuery = `
         ${prefixMap.get('nie').toSparqlString()}
         ${prefixMap.get('prov').toSparqlString()}
@@ -106,7 +105,7 @@ async function handleVersionedResource(
     ${prefixMap.get('muSession').toSparqlString()}
     ${prefixMap.get('dct').toSparqlString()}
     ${prefixMap.get('foaf').toSparqlString()}
-    ${prefixMap.get("prov").toSparqlString()}
+    ${prefixMap.get('prov').toSparqlString()}
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
         ${statePredicate} ?state.

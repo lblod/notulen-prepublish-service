@@ -1,9 +1,13 @@
 // @ts-ignore
 import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
-import { hackedSparqlEscapeString } from '../support/pre-importer';
-import { persistContentToFile, writeFileMetadataToDb, getFileContentForUri } from '../support/file-utils';
+import {
+  persistContentToFile,
+  writeFileMetadataToDb,
+  getFileContentForUri,
+} from '../support/file-utils';
 import { prefixMap } from '../support/prefixes';
-const AGENDAPOINT_TYPE_PLANNED = 'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
+const AGENDAPOINT_TYPE_PLANNED =
+  'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
 
 export default class VersionedNotulen {
   static async query({ kind, meeting }) {
@@ -32,11 +36,15 @@ export default class VersionedNotulen {
       let html;
       if (fileUri) {
         html = await getFileContentForUri(fileUri);
-      }
-      else {
+      } else {
         html = binding.content?.value;
       }
-      return new VersionedNotulen({uri: binding.uri.value, html,  kind, meeting: meeting.uri});
+      return new VersionedNotulen({
+        uri: binding.uri.value,
+        html,
+        kind,
+        meeting: meeting.uri,
+      });
     } else {
       return null;
     }
@@ -47,7 +55,7 @@ export default class VersionedNotulen {
     const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
     const fileInfo = await persistContentToFile(html);
     const logicalFileUri = await writeFileMetadataToDb(fileInfo);
-    await update( `
+    await update(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
       PREFIX pav: <http://purl.org/pav/>

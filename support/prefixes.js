@@ -1,3 +1,4 @@
+/* prefixes used in the generated HTML */
 const prefixes = [
   'eli: http://data.europa.eu/eli/ontology#',
   'prov: http://www.w3.org/ns/prov#',
@@ -28,6 +29,8 @@ class Prefix {
   }
 }
 
+/* prefixes used in queries */
+// prettier-ignore
 const prefixMap = new Map([
   ["ext", new Prefix("ext", "http://mu.semte.ch/vocabularies/ext/")],
   ["mu", new Prefix("mu", "http://mu.semte.ch/vocabularies/core/")],
