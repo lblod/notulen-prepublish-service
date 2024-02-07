@@ -50,6 +50,18 @@ export default class VersionedNotulen {
     }
   }
 
+  /**
+   * @typedef {Object} Params
+   * @property {string} kind
+   * @property {Meeting} meeting
+   * @property {string} html
+   * @property {[]} publicTreatments
+   */
+  /**
+   * create a new versioned notulen
+   * @param {Params} args
+   * @returns {Promise<VersionedNotulen>}
+   */
   static async create({ kind, meeting, html, publicTreatments }) {
     const versionedNotulenUuid = uuid();
     const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
@@ -91,7 +103,7 @@ export default class VersionedNotulen {
           ${sparqlEscapeUri(meeting.uri)} a besluit:Zitting.
           ${sparqlEscapeUri(meeting.uri)} besluit:behandelt ?agendapoint.
           FILTER( NOT EXISTS { ?agendapoint besluit:Agendapunt.type ?type})
-     }
+    }
     `);
     return new VersionedNotulen({
       html,
