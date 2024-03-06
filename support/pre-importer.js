@@ -118,7 +118,7 @@ async function handleVersionedResource(
       ${sparqlEscapeUri(newResourceUri)}
         a ${resourceType};
         mu:uuid ${sparqlEscapeString(newResourceUuid)};
-        prov:generated ${sparqlEscapeString(logicalFileUri)};
+        prov:generated ${sparqlEscapeUri(logicalFileUri)};
         sign:signatory ?userUri;
         sign:signatoryRoles ?signatoryRole;
         dct:created ${sparqlEscapeDateTime(now)};
