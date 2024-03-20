@@ -4,6 +4,16 @@
 
 
 
+
+## 2.2.0 (2024-03-20)
+
+#### :rocket: Enhancement
+* [#75](https://github.com/lblod/notulen-prepublish-service/pull/75) write versionednotulen, published and signed resource contents to file ([@nvdk](https://github.com/nvdk))
+
+#### Committers: 1
+- Niels V ([@nvdk](https://github.com/nvdk))
+
+
 ## 2.1.1 (2023-10-12)
 
 #### :bug: Bug Fix
