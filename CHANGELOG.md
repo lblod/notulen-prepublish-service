@@ -5,6 +5,11 @@
 
 
 
+## 2.3.0 (2024-04-17)
+
+Optionally select file or text content for signed resources.
+
+
 ## 2.2.0 (2024-03-20)
 
 #### :rocket: Enhancement
