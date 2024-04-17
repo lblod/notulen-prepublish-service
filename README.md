@@ -55,7 +55,8 @@ This service creates two types of resources:
 
 ### `sign:SignedResource`
 The signed resource is a document that has been signed. It has the following properties:
-* `sign:text` *: the content of the document that was signed
+* `sign:text` *: (unless prov:generated exists) the content of the document that was signed
+* `prov:generated` *: (unless sign:text exists) the uri of the file that has been generated, holding the contents of the document that was signed
 * `sign:signatory` *: the agent that signed the document
 * `sign:signatoryRoles`: the roles the agent had at the moment of signing (the same agent might be able to log into a specific role)
 * `dct:created` *: creation date of the signature
@@ -66,24 +67,41 @@ The signed resource is a document that has been signed. It has the following pro
 * `sign:hashAlgorithm`: the hashing algorithm that was used
 
 
-Fields denoted with an asterix `*` are used for the hashValue
-You can use the following snippet in mu-cl-resources
+Fields denoted with an asterix `*` are used for the hashValue. If the content is stored in a file, the contents of that file are used for the hash, if the content is stored in the triplestore, then that value is used directly.
+You can use the following snippet in mu-cl-resources (which also defines the file resource):
 ```lisp
+(define-resource file ()
+  :class (s-prefix "nfo:FileDataObject")
+  :properties `((:name :string ,(s-prefix "nfo:fileName"))
+                (:format :string ,(s-prefix "dct:format"))
+                (:size :number ,(s-prefix "nfo:fileSize"))
+                (:extension :string ,(s-prefix "dbpedia:fileExtension"))
+                (:created :datetime ,(s-prefix "nfo:fileCreated")))
+  :has-one `((file :via ,(s-prefix "nie:dataSource")
+                   :inverse t
+                   :as "download"))
+  :resource-base (s-url "http://data.example.com/files/")
+  :features `(include-uri)
+  :on-path "files"
+)
 (define-resource signed-resource ()
   :class (s-prefix "sign:SignedResource")
   :properties `((:content :string ,(s-prefix "sign:text"))
                 (:hash-value :string ,(s-prefix "sign:hashValue"))
                 (:hash-algo :string ,(s-prefix "sign:hashAlgorithm"))
                 (:created-on :datetime ,(s-prefix "dct:created")))
+  :has-one `((file :via ,(s-prefix "prov:generated")
+                       :as "file"))
 )
 ```
 ### `sign:PublishedResource`
 The published resource is a document as it has been published. The content of the published may be different from the actual document, as senstive information may be removed.
 
-* `sign:text` *: the content of the document as it is published
-* `sign:signatory` *: the agent that published the document
+* `sign:text`: (unless prov:generated exists) the content of the document as it is published
+* `prov:generated`: (unless sign:text exists) the uri of the file that has been generated, holding the contents of the document as it is published
+* `sign:signatory`: the agent that published the document
 * `sign:signatoryRoles`: the roles the agent had at the moment of publishing (the same agent might be able to log into a specific role)
-* `dct:created` *: creation date of the publication
+* `dct:created`: creation date of the publication
 * `dct:subject`: the document that was published
 * `sign:hashValue`: the hash that was calculated when publishing the document
 * `sign:hashAlgorithm`: the hashing algorithm that was used

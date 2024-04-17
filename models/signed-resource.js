@@ -15,7 +15,6 @@ export default class SignedResource {
       BIND(${sparqlEscapeUri(uri)} as ?uri)
         ?uri a sign:SignedResource;
              mu:uuid ?uuid;
-             sign:text ?html;
              sign:hashValue ?hashValue;
              sign:hashAlgorithm ?hashAlgorithm;
              dct:created ?created;
@@ -27,6 +26,11 @@ export default class SignedResource {
         ?blockchainStatus mu:uuid ?blockchainStatusUuid.
         ?signatory mu:uuid ?signatoryUuid.
         
+        {
+          { ?uri sign:text ?html. }
+          UNION
+          { ?uri prov:generated ?file. }
+        }
         OPTIONAL { ?uri ext:deleted ?deleted. }
         OPTIONAL { 
            ?uri ext:signsAgenda ?agenda.
@@ -71,6 +75,7 @@ export default class SignedResource {
     uri,
     uuid,
     html,
+    file,
     hashValue,
     hashAlgorithm,
     created,
@@ -92,7 +97,8 @@ export default class SignedResource {
     return new SignedResource({
       uri: uri.value,
       uuid: uuid.value,
-      html: html.value,
+      html: html?.value,
+      file: file?.value,
       hashValue: hashValue.value,
       hashAlgorithm: hashAlgorithm.value,
       created: created.value,
@@ -117,6 +123,7 @@ export default class SignedResource {
     uri,
     uuid,
     html,
+    file,
     hashValue,
     hashAlgorithm,
     created,
@@ -138,6 +145,7 @@ export default class SignedResource {
     this.uuid = uuid;
     this.uri = uri;
     this.html = html;
+    this.file = file;
     this.signatory = signatory;
     this.created = created;
     this.signatoryRole = signatoryRole;
@@ -213,6 +221,7 @@ export default class SignedResource {
         attributes: {
           uri: this.uri,
           content: this.html,
+          file: this.file,
           'hash-value': this.hashValue,
           'created-on': this.created,
           deleted: this.deleted,

@@ -97,6 +97,8 @@ async function handleVersionedResource(
         .join(' ')
     : '';
   const content = await getVersionedContent(versionedUri, contentPredicate);
+  // This creates a new file each time, even if getVersionedContent has just retrieved it from a
+  // file. This is to make handling deletes and document changes easier.
   const fileMetadata = await persistContentToFile(content);
   const logicalFileUri = await writeFileMetadataToDb(fileMetadata);
 
