@@ -29,7 +29,7 @@
                 <span property="foaf:familyName" content={{this.familyName}}>{{this.familyName}} </span>
               </span>
               {{#if ../includeRole}}
-                (<span property="org:holds" typeof="mandaat:Mandaat" resource="{{this.positionUri}}"><span property="org:role" typeof="skos:Concept" resource="{{this.roleUri}}"><span property="skos:prefLabel" content={{this.role}}>{{this.role}}</span></span></span>)
+                (<span property="org:holds" typeof="mandaat:Mandaat" resource="{{this.positionUri}}"><span property="org:role" typeof="skos:Concept" resource="{{this.roleUri}}"><span property="skos:prefLabel" content="{{this.role}}">{{this.role}}</span></span></span>)
               {{/if}}
             </li>
           {{/each}}
