@@ -5,6 +5,15 @@
 
 
 
+
+## 2.3.1 (2024-05-17)
+
+#### :bug: Bug Fix
+* [#110](https://github.com/lblod/notulen-prepublish-service/pull/110) Fix typo in mandatee list template ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 2.3.0 (2024-04-17)
 
 Optionally select file or text content for signed resources.
