@@ -6,6 +6,15 @@
 
 
 
+
+## 2.3.2 (2024-07-23)
+
+#### :bug: Bug Fix
+* [#113](https://github.com/lblod/notulen-prepublish-service/pull/113) Fix issue with predicate filtering to extract decisions ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 1
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+
 ## 2.3.1 (2024-05-17)
 
 #### :bug: Bug Fix
