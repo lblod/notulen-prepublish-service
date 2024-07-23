@@ -12,7 +12,9 @@ export default class Decision {
       const decisionUris = triples
         .filter(
           (t) =>
-            t.predicate === 'a' &&
+            (t.predicate === 'a' ||
+              t.predicate ===
+                'http://www.w3.org/1999/02/22-rdf-syntax-ns#type') &&
             t.object === 'http://data.vlaanderen.be/ns/besluit#Besluit'
         )
         .map((b) => b.subject);
@@ -37,7 +39,11 @@ export default class Decision {
     );
     const description = descriptionTriple?.object;
     const types = triples
-      .filter((t) => t.predicate === 'a')
+      .filter(
+        (t) =>
+          t.predicate === 'a' ||
+          t.predicate === 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
+      )
       .map((type) => type.object);
     const uri = triples[0].subject;
     return new Decision({ title, description, types, uri });
