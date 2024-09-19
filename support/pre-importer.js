@@ -58,13 +58,12 @@ async function getVersionedContent(uri, contentPredicate) {
     const binding = result.results.bindings[0];
     if (binding.content) {
       return binding.content.value;
-    } else {
+    } else if (binding.physicalFileUri) {
       const content = await getFileContentForUri(binding.physicalFileUri.value);
       return content;
     }
-  } else {
-    throw 'could not retrieve content';
   }
+  throw new Error('could not retrieve content');
 }
 
 async function handleVersionedResource(
