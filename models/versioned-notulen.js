@@ -17,7 +17,7 @@ export default class VersionedNotulen {
     ${prefixMap.get('prov').toSparqlString()}
     ${prefixMap.get('nie').toSparqlString()}
 
-    SELECT ?uri ?html
+    SELECT ?uri ?html ?fileUri
     WHERE {
       ?uri a ext:VersionedNotulen;
                   ext:notulenKind ${sparqlEscapeString(kind)}.
@@ -55,7 +55,7 @@ export default class VersionedNotulen {
    * @property {string} kind
    * @property {Meeting} meeting
    * @property {string} html
-   * @property {[]} publicTreatments
+   * @property {PublicTreatment[]} publicTreatments
    */
   /**
    * create a new versioned notulen
