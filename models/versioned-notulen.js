@@ -52,6 +52,7 @@ export default class VersionedNotulen {
 
   /**
    * @typedef {Object} Params
+   * @property {string} [notulenUri]
    * @property {string} kind
    * @property {Meeting} meeting
    * @property {string} html
@@ -62,9 +63,15 @@ export default class VersionedNotulen {
    * @param {Params} args
    * @returns {Promise<VersionedNotulen>}
    */
-  static async create({ kind, meeting, html, publicTreatments }) {
-    const versionedNotulenUuid = uuid();
-    const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
+  static async create({ notulenUri, kind, meeting, html, publicTreatments }) {
+    let versionedNotulenUuid;
+    let versionedNotulenUri;
+    if (!notulenUri) {
+      versionedNotulenUuid = uuid();
+      versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
+    } else {
+      versionedNotulenUri = notulenUri;
+    }
     const fileInfo = await persistContentToFile(html);
     const logicalFileUri = await writeFileMetadataToDb(fileInfo);
     await update(`
@@ -78,7 +85,11 @@ export default class VersionedNotulen {
           a ext:VersionedNotulen;
           prov:generated ${sparqlEscapeUri(logicalFileUri)};
           ext:notulenKind ${sparqlEscapeString(kind)};
-          mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};
+          ${
+            versionedNotulenUuid
+              ? `mu:uuid ${sparqlEscapeString(versionedNotulenUuid)};`
+              : ''
+          }
           ext:deleted "false"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
         ${publicTreatments
           .map(
