@@ -111,42 +111,51 @@ export async function ensureVersionedNotulen(
   kind,
   publicTreatments = []
 ) {
-  const versionedNotulen = await VersionedNotulen.query({ meeting, kind });
+  let versionedNotulen = await VersionedNotulen.query({ meeting, kind });
+  let notulenUri;
   if (versionedNotulen) {
     console.log(
       `Reusing versioned notulen ${versionedNotulen.uri} of kind ${kind}`
     );
-    return versionedNotulen.uri;
+    notulenUri = versionedNotulen.uri;
+    if (versionedNotulen.html) {
+      return versionedNotulen.uri;
+    } else {
+      console.warn(
+        `Versioned notulen for ${meeting.uri} (kind ${kind}) has no content, recreating...`
+      );
+    }
   } else {
     console.log(
       `Creating a new versioned notulen of kind ${kind} for ${meeting.uri}`
     );
-    let html;
-    if (kind === NOTULEN_KIND_FULL) {
-      const data = await buildDataForMeetingNotes({
-        meeting,
-        treatments,
-        previewType: IS_FINAL,
-        allPublic: true,
-      });
-      html = constructHtmlForMeetingNotesFromData(data);
-    } else {
-      const data = await buildDataForMeetingNotes({
-        meeting,
-        treatments,
-        previewType: IS_FINAL,
-        publicTreatments,
-      });
-      html = constructHtmlForMeetingNotesFromData(data);
-    }
-    const versionedNotulen = await VersionedNotulen.create({
+  }
+  let html;
+  if (kind === NOTULEN_KIND_FULL) {
+    const data = await buildDataForMeetingNotes({
       meeting,
-      html,
-      kind,
+      treatments,
+      previewType: IS_FINAL,
+      allPublic: true,
+    });
+    html = constructHtmlForMeetingNotesFromData(data);
+  } else {
+    const data = await buildDataForMeetingNotes({
+      meeting,
+      treatments,
+      previewType: IS_FINAL,
       publicTreatments,
     });
-    return versionedNotulen.uri;
+    html = constructHtmlForMeetingNotesFromData(data);
   }
+  versionedNotulen = await VersionedNotulen.create({
+    notulenUri,
+    meeting,
+    html,
+    kind,
+    publicTreatments,
+  });
+  return versionedNotulen.uri;
 }
 
 export async function generateNotulenPreview(
