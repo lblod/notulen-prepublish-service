@@ -7,6 +7,10 @@
 
 
 
+## 2.3.3 (2024-09-20)
+[#114](https://github.com/lblod/notulen-prepublish-service/pull/114) Handle logical file uris with no related physical file information
+
+
 ## 2.3.2 (2024-07-23)
 
 #### :bug: Bug Fix
