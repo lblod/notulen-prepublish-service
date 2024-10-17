@@ -1,8 +1,6 @@
 import { prefixMap } from '../support/prefixes';
 // @ts-ignore
 import { sparqlEscapeUri, query } from 'mu';
-import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
-import { sortMandatees } from '../support/query-utils';
 
 export default class CustomVote {
   static async findAll({ treatmentUri }) {
@@ -33,12 +31,7 @@ export default class CustomVote {
     }
   }
 
-  static fromBinding({
-    uri,
-    position,
-    content,
-    context
-  }) {
+  static fromBinding({ uri, position, content, context }) {
     return new CustomVote({
       uri: uri.value,
       position: position.value,
@@ -47,13 +40,8 @@ export default class CustomVote {
     });
   }
 
-  constructor({
-    uri,
-    position,
-    content,
-    context
-  }) {
-    this.type = 'customVote'
+  constructor({ uri, position, content, context }) {
+    this.type = 'customVote';
     this.isCustomVote = true;
     this.uri = uri;
     this.position = position;

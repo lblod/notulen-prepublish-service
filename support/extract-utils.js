@@ -109,13 +109,19 @@ export async function buildExtractDataForTreatment(
       participantCache = buildParticipantCache(participationList);
     }
   }
-  const standardVotes = await StandardVote.findAll({ treatmentUri: treatment.uri });
+  const standardVotes = await StandardVote.findAll({ 
+    treatmentUri: treatment.uri 
+  });
   const customVotes = await CustomVote.findAll({ treatmentUri: treatment.uri });
   const votes = [...standardVotes, ...customVotes];
-  votes.sort((a, b) => a.position -b.position);
+  votes.sort((a, b) => a.position - b.position);
   if (participationList && participationList.present.length > 0) {
     // only try fetching voters if people were present
-    await Promise.all(votes.map((vote) => vote.type === 'customVote' ? vote : vote.fetchVoters(participantCache)));
+    await Promise.all(
+      votes.map((vote) => 
+        vote.type === 'customVote' ? vote : vote.fetchVoters(participantCache)
+      )
+    );
   }
   let content;
   if (isPublic) {
