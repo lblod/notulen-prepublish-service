@@ -45,50 +45,57 @@
     <h4>Stemmingen bij agendapunt</h4>
     <div class="c-template-content c-template-content--voting" property="ext:stemmingTable">
       {{#each this.votes}}
-      <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
-        <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
-          {{#if this.isSecret}}
-            {{this.whoVotesPhrase}} geheim
-          {{else}}
-            {{this.whoVotesPhrase}} openbaar
-          {{/if}}
-        </p>
-        <p lang="nl-BE" property="besluit:onderwerp">{{this.subject}}</p>
-        {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=false}}
-        {{> mandateeList mandatees=this.voters property="besluit:heeftStemmer" title="Effectieve stemmers" includeRole=false}}
-        {{#if this.isUnanimous}}
-          <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}"></span>
-          <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}"></span>
-          <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}"></span>
-          {{#unless this.geheim}}
-            {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false hideText=true}}
-            {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false hideText=true}}
-            {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false hideText=true}}
-          {{/unless}}
-          <p><span lang="nl-BE" property="besluit:gevolg">{{this.result}}</span>, met eenparigheid van stemmen</p>
-        {{else}}
-          <p>
-            Totaal aantal voorstanders:
-            <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">{{this.positiveVotes}}</span>
-          </p>
-          <p>
-            Totaal aantal tegenstanders:
-            <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">{{this.negativeVotes}}</span>
-          </p>
-          <p>
-            Totaal aantal onthoudingen, blanco of ongeldig:
-            <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">{{this.abstentionVotes}}</span>
-          </p>
-          {{#unless this.geheim}}
-            {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
-            {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
-            {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
-          {{/unless}}
-          <p>Met als gevolg,</p>
-          <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
+        {{#if this.isStandardVote}}
+          <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/StandardStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+            <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
+              {{#if this.isSecret}}
+                {{this.whoVotesPhrase}} geheim
+              {{else}}
+                {{this.whoVotesPhrase}} openbaar
+              {{/if}}
+            </p>
+            <p lang="nl-BE" property="besluit:onderwerp">{{this.subject}}</p>
+            {{> mandateeList mandatees=this.attendees property="besluit:heeftAanwezige" title="Aanwezigen tijdens de stemming" includeRole=false}}
+            {{> mandateeList mandatees=this.voters property="besluit:heeftStemmer" title="Effectieve stemmers" includeRole=false}}
+            {{#if this.isUnanimous}}
+              <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}"></span>
+              <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}"></span>
+              <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}"></span>
+              {{#unless this.geheim}}
+                {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false hideText=true}}
+                {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false hideText=true}}
+                {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false hideText=true}}
+              {{/unless}}
+              <p><span lang="nl-BE" property="besluit:gevolg">{{this.result}}</span>, met eenparigheid van stemmen</p>
+            {{else}}
+              <p>
+                Totaal aantal voorstanders:
+                <span datatype="xsd:integer" property="besluit:aantalVoorstanders" content="{{this.positiveVotes}}">{{this.positiveVotes}}</span>
+              </p>
+              <p>
+                Totaal aantal tegenstanders:
+                <span datatype="xsd:integer" property="besluit:aantalTegenstanders" content="{{this.negativeVotes}}">{{this.negativeVotes}}</span>
+              </p>
+              <p>
+                Totaal aantal onthoudingen, blanco of ongeldig:
+                <span datatype="xsd:integer" property="besluit:aantalOnthouders" content="{{this.abstentionVotes}}">{{this.abstentionVotes}}</span>
+              </p>
+              {{#unless this.geheim}}
+                {{> mandateeList mandatees=this.positiveVoters property="besluit:heeftVoorstander" title="Voorstanders" includeRole=false}}
+                {{> mandateeList mandatees=this.negativeVoters property="besluit:heeftTegenstander" title="Tegenstanders" includeRole=false}}
+                {{> mandateeList mandatees=this.abstentionVoters property="besluit:heeftOnthouders" title="Onthoudingen, blanco of ongeldig" includeRole=false}}
+              {{/unless}}
+              <p>Met als gevolg,</p>
+              <p lang="nl-BE" property="besluit:gevolg">{{this.result}}</p>
+            {{/if}}
+            
+          </div>
         {{/if}}
-        
-      </div>
+        {{#if this.isCustomVote}}
+          <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/AangepasteStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+            {{{this.content}}}
+          </div>
+        {{/if}}
       {{/each}}
     </div>
   {{/if}}

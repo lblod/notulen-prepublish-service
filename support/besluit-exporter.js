@@ -9,7 +9,8 @@ import { prefixes } from './prefixes';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';
 import Decision from '../models/decision';
-import Vote from '../models/vote';
+import StandardVote from '../models/standard-vote';
+import CustomVote from '../models/custom-vote';
 
 export async function buildBesluitenLijstForMeetingId(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);
@@ -40,7 +41,10 @@ async function addDecisionsToTreatment(treatment) {
 }
 
 async function addVotesToTreatment(treatment) {
-  const votes = await Vote.findAll({ treatmentUri: treatment.uri });
+  const standardVotes = await StandardVote.findAll({ treatmentUri: treatment.uri });
+  const customVotes = await CustomVote.findAll({ treatmentUri: treatment.uri });
+  const votes = [...standardVotes, ...customVotes];
+  votes.sort((a, b) => a.position - b.position);
   if (votes.length > 0) {
     // this makes it easier to check if there are votes in the template
     treatment.votes = votes;
