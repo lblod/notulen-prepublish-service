@@ -41,8 +41,8 @@ async function addDecisionsToTreatment(treatment) {
 }
 
 async function addVotesToTreatment(treatment) {
-  const standardVotes = await StandardVote.findAll({ 
-    treatmentUri: treatment.uri 
+  const standardVotes = await StandardVote.findAll({
+    treatmentUri: treatment.uri,
   });
   const customVotes = await CustomVote.findAll({ treatmentUri: treatment.uri });
   const votes = [...standardVotes, ...customVotes];
