@@ -45,7 +45,7 @@
     <h4>Stemmingen bij agendapunt</h4>
     <div class="c-template-content c-template-content--voting" property="ext:stemmingTable">
       {{#each this.votes}}
-        {{#if this.isStandardVote}}
+        {{#if (eq this.type "standardVote")}}
           <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/StandardStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
             <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
               {{#if this.isSecret}}
@@ -91,7 +91,7 @@
             
           </div>
         {{/if}}
-        {{#if this.isCustomVote}}
+        {{#if (eq this.type "customVote")}}
           <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/AangepasteStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
             {{{this.content}}}
           </div>

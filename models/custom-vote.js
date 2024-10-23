@@ -42,7 +42,6 @@ export default class CustomVote {
 
   constructor({ uri, position, content, context }) {
     this.type = 'customVote';
-    this.isCustomVote = true;
     this.uri = uri;
     this.position = position;
     this.content = content;

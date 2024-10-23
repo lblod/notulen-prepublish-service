@@ -80,7 +80,6 @@ export default class StandardVote {
     adminBodyClassification,
   }) {
     this.type = 'standardVote';
-    this.isStandardVote = true;
     this.uri = uri;
     this.subject = subject;
     this.result = result;
