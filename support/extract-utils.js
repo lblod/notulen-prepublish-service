@@ -150,6 +150,7 @@ export async function buildExtractDataForTreatment(
     participationList,
     votes,
     content,
+    articleNumber: Number(treatment.position) + 1,
   };
 }
 
