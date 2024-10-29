@@ -46,7 +46,7 @@
     <div class="c-template-content c-template-content--voting" property="ext:stemmingTable">
       {{#each this.votes}}
         {{#if (eq this.type "standardVote")}}
-          <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/StandardStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+          <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
             <p datatype="xsd:boolean" content="{{this.isSecret}}" property="besluit:geheim">
               {{#if this.isSecret}}
                 {{this.whoVotesPhrase}} geheim
@@ -92,7 +92,7 @@
           </div>
         {{/if}}
         {{#if (eq this.type "customVote")}}
-          <div typeof="http://data.vlaanderen.be/ns/besluit#Stemming http://data.lblod.info/vocabularies/gelinktnotuleren/AangepasteStemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+          <div typeof="http://data.lblod.info/vocabularies/gelinktnotuleren/AangepasteStemming" resource="{{this.uri}}" property="http://data.lblod.info/vocabularies/gelinktnotuleren/heeftAangepasteStemming">
             {{{this.content}}}
           </div>
         {{/if}}

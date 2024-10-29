@@ -13,7 +13,7 @@ export default class CustomVote {
          ${prefixMap.get('gn').toSparqlString()}
          SELECT DISTINCT * WHERE {
            ${sparqlEscapeUri(treatmentUri)} a besluit:BehandelingVanAgendapunt;
-                                            besluit:heeftStemming ?uri.
+            gn:heeftAangepasteStemming ?uri.
           ?uri a gn:AangepasteStemming;
             schema:position ?position;
             ext:votingDocument ?documentContainer.
