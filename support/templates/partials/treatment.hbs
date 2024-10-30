@@ -6,11 +6,14 @@
       <span class="au-c-template-private">Besloten behandeling van agendapunt</span>
     {{/if}}
   </p>
-  <h3 resource="{{this.treatment.agendapoint}}" property="dc:subject">
-    <span property="dc:title">{{this.agendapoint.title}}</span>
-    {{#if this.agendapoint.type}}
-      (<span property="besluit:Agendapunt.type" resource="{{this.agendapoint.type}}" typeof="skos:Concept">{{this.agendapoint.typeName}}</span>)
-    {{/if}}
+  <h3>
+    {{articleNumber}}.&ensp;<span
+      resource="{{this.treatment.agendapoint}}" property="dc:subject">
+      <span property="dc:title">{{this.agendapoint.title}}</span>
+      {{#if this.agendapoint.type}}
+        (<span property="besluit:Agendapunt.type" resource="{{this.agendapoint.type}}" typeof="skos:Concept">{{this.agendapoint.typeName}}</span>)
+      {{/if}}
+    </span>
   </h3>
   {{#if this.participationList}}
     <h4>Aanwezigen bij agendapunt</h4>
