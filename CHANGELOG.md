@@ -7,6 +7,15 @@
 
 
 
+## 2.4.0 (2024-10-30)
+
+#### :rocket: Enhancement
+* [#116](https://github.com/lblod/notulen-prepublish-service/pull/116) Add agendapoint number to the output of treatment extracts [@piemonkey](https://github.com/piemonkey)
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
+
 ## 2.3.3 (2024-09-20)
 [#114](https://github.com/lblod/notulen-prepublish-service/pull/114) Handle logical file uris with no related physical file information
 
