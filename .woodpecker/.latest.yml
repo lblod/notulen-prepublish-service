@@ -4,7 +4,9 @@ steps:
     settings:
       repo: "${CI_REPO_OWNER}/${CI_REPO_NAME}"
       tags: latest
-      platforms: linux/amd64, linux/arm64
+      platforms: linux/amd64
+      # Can enable arm64 when moving to mu-javascript-template version >1.8
+      # platforms: linux/amd64, linux/arm64
     secrets: [ docker_username, docker_password ]
 when:
   branch: master
