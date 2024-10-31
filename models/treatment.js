@@ -4,6 +4,7 @@ import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import Attachment from './attachment';
 
 export default class Treatment {
+  /** @returns {Promise<Treatment[]>} */
   static async findAll({ meetingUuid }) {
     const queryString = `
      ${prefixMap.get('besluit').toSparqlString()}
@@ -55,6 +56,7 @@ export default class Treatment {
     }
   }
 
+  /** @returns {Promise<Treatment>} */
   static async findUri(uri) {
     const queryString = `
      ${prefixMap.get('besluit').toSparqlString()}
@@ -102,6 +104,7 @@ export default class Treatment {
     }
   }
 
+  /** @returns {Promise<Treatment>} */
   static async find(treatmentUuid) {
     const queryString = `
      ${prefixMap.get('besluit').toSparqlString()}

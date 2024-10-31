@@ -19,13 +19,17 @@ import validateMeeting from './validate-meeting';
 import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import { handleVersionedResource } from './pre-importer';
-import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL } from './constants';
+import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL, IS_PREVIEW } from './constants';
+
+// This file contains helpers for exporting, signing and publishing an extract of the meeting notes
+// an extract is the treatment of one agendapoint and all it's related info
 
 /**
- * This file contains helpers for exporting, signing and publishing an extract of the meeting notes
- * an extract is the treatment of one agendapoint and all it's related info
+ * @param {Treatment} treatment
+ * @param {Meeting} meeting
+ * @param {string[]} meetingErrors
+ * @param {*} participantCache
  */
-
 async function buildExtractForTreatment(
   treatment,
   meeting,
@@ -35,6 +39,7 @@ async function buildExtractForTreatment(
   const data = await buildExtractDataForTreatment(
     treatment,
     meeting,
+    IS_PREVIEW,
     true,
     participantCache
   );
@@ -89,6 +94,13 @@ export async function buildExtractData(
   );
 }
 
+/**
+ * @param {Treatment} treatment
+ * @param {Meeting} meeting
+ * @param {string} previewType
+ * @param {boolean} [isPublic=true]
+ * @param {any} [participantCache=null]
+ */
 export async function buildExtractDataForTreatment(
   treatment,
   meeting,
@@ -148,6 +160,7 @@ export async function buildExtractDataForTreatment(
     participationList,
     votes,
     content,
+    articleNumber: Number(treatment.position) + 1,
   };
 }
 

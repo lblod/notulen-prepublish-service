@@ -7,6 +7,21 @@
 
 
 
+## v2.4.1 (2024-10-31)
+
+* [#109](https://github.com/lblod/notulen-prepublish-service/pull/109) Switch template version to semtech version 1.5.0-beta.3
+* [#117](https://github.com/lblod/notulen-prepublish-service/pull/117) Move to woodpecker CI
+
+
+## 2.4.0 (2024-10-30)
+
+#### :rocket: Enhancement
+* [#116](https://github.com/lblod/notulen-prepublish-service/pull/116) Add agendapoint number to the output of treatment extracts [@piemonkey](https://github.com/piemonkey)
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
+
 ## 2.3.3 (2024-09-20)
 [#114](https://github.com/lblod/notulen-prepublish-service/pull/114) Handle logical file uris with no related physical file information
 
