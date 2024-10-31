@@ -15,15 +15,15 @@ Once a specific document is generated for signing or publication the content is 
 {
         "data": {
           "type": "extract-preview",
-        },
-        "relationships": {
-          "treatment": {
-            "data": {
-              "id": "{{treatmentUuid}}",
-              "type": "behandeling-van-agendapunt"
+          "relationships": {
+            "treatment": {
+              "data": {
+                "id": "{{treatmentUuid}}",
+                "type": "behandeling-van-agendapunt"
+              }
             }
           }
-      }
+        }
 }
 ```
 ## creating a signed document

@@ -48,4 +48,8 @@ function registerHelpers() {
   Handlebars.registerHelper('inc', (value) => {
     return parseInt(value) + 1;
   });
+
+  Handlebars.registerHelper('eq', (variable, value) => {
+    return variable === value;
+  });
 }

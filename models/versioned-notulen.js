@@ -30,8 +30,6 @@ export default class VersionedNotulen {
     const bindings = r.results.bindings;
     if (bindings.length > 0) {
       const binding = bindings[0];
-
-      console.log(binding);
       const fileUri = bindings.fileUri?.value;
       let html;
       if (fileUri) {
