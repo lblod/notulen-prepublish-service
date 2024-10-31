@@ -2,7 +2,10 @@ steps:
   install:
     image: node:14-alpine
     commands:
-      - npm ci
+      - npm i
+      # Our lockfile is incompatible with the version of npm used with node:14. The old scripts just
+      # `npm i`, so we do that. We should update to a sane node version and change this.
+      # - npm ci
   lint:
     image: node:14-alpine
     commands:
