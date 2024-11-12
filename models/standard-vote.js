@@ -4,7 +4,7 @@ import { sparqlEscapeUri, query } from 'mu';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 import { sortMandatees } from '../support/query-utils';
 
-export default class Vote {
+export default class StandardVote {
   static async findAll({ treatmentUri }) {
     try {
       const result = await query(`
@@ -31,11 +31,11 @@ export default class Vote {
         } ORDER BY ASC(?position)
       `);
       return result.results.bindings.map((binding) =>
-        Vote.fromBinding(binding)
+        StandardVote.fromBinding(binding)
       );
     } catch (e) {
       console.log(e);
-      throw `failed to fetch votes for treatment ${treatmentUri}`;
+      throw `failed to fetch standard votes for treatment ${treatmentUri}`;
     }
   }
 
@@ -50,7 +50,7 @@ export default class Vote {
     position,
     adminBodyClassification,
   }) {
-    return new Vote({
+    return new StandardVote({
       uri: uri.value,
       subject: subject.value,
       result: result.value,
@@ -79,6 +79,7 @@ export default class Vote {
     position,
     adminBodyClassification,
   }) {
+    this.type = 'standardVote';
     this.uri = uri;
     this.subject = subject;
     this.result = result;
