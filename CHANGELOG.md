@@ -7,6 +7,16 @@
 
 
 
+
+## 2.5.0 (2024-11-12)
+
+#### :rocket: Enhancement
+* [#115](https://github.com/lblod/notulen-prepublish-service/pull/115) Add support for publishing new custom votings ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
+
 ## v2.4.1 (2024-10-31)
 
 * [#109](https://github.com/lblod/notulen-prepublish-service/pull/109) Switch template version to semtech version 1.5.0-beta.3
