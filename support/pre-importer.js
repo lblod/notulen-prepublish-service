@@ -54,16 +54,24 @@ async function getVersionedContent(uri, contentPredicate) {
          )} prov:generated/^nie:dataSource ?physicalFileUri. }
         }`;
   const result = await query(contentQuery);
-  if (result.results.bindings.length == 1) {
-    const binding = result.results.bindings[0];
-    if (binding.content) {
-      return binding.content.value;
-    } else if (binding.physicalFileUri) {
+  const bindings = result.results.bindings;
+  if (bindings.length === 1) {
+    const binding = bindings[0];
+    if (binding.physicalFileUri) {
       const content = await getFileContentForUri(binding.physicalFileUri.value);
       return content;
+    } else if (binding.content) {
+      return binding.content.value;
     }
+  } else if (bindings.length > 1) {
+    throw new Error(
+      `Found ${bindings.length} sources of content for versioned resource ${uri}. Only one is allowed. This means there is invalid data in the database.`
+    );
+  } else {
+    throw new Error(
+      `Found no sources of content for versioned resource ${uri}`
+    );
   }
-  throw new Error('could not retrieve content');
 }
 
 async function handleVersionedResource(
