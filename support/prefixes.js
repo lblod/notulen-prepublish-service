@@ -68,8 +68,11 @@ const prefixMap = new Map([
   ["notulen", new Prefix("notulen", "http://lblod.data.gift/vocabularies/notulen/")],
   ["nfo", new Prefix("nfo", "http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#")],
   ["nie", new Prefix("nie", "http://www.semanticdesktop.org/ontologies/2007/01/19/nie#")],
+  ["gn", new Prefix("gn", "http://data.lblod.info/vocabularies/gelinktnotuleren/")],
   ["dbpedia", new Prefix("dbpedia", "http://dbpedia.org/ontology/")],
-  ["gn", new Prefix("gn", "http://data.lblod.info/vocabularies/gelinktnotuleren/")]
+  ["oslc", new Prefix("oslc", "http://open-services.net/ns/core#")],
+  ["task", new Prefix("task", "http://redpencil.data.gift/vocabularies/tasks/")],
+  ["nuao", new Prefix("nuao", "http://www.semanticdesktop.org/ontologies/2010/01/25/nuao#")],
 ]);
 
 export { prefixes, prefixMap };

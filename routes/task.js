@@ -10,9 +10,20 @@ router.get('/publication-tasks/:id', async function (req, res) {
     res.status(200).send({
       data: {
         id: task.id,
+        uri: task.uri,
         status: task.status,
         type: task.type,
+        created: task.created,
+        modified: task.modified,
+        involves: task.involves,
         taskType: task.type,
+        error: task.error
+          ? {
+              id: task.error.id,
+              message: task.error.message,
+              uri: task.error.uri,
+            }
+          : undefined,
       },
     });
   } else {
