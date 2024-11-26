@@ -8,6 +8,16 @@
 
 
 
+
+## 2.5.1 (2024-11-26)
+
+#### :bug: Bug Fix
+* [#118](https://github.com/lblod/notulen-prepublish-service/pull/118) Fix versionedNotulen never fetching filecontent ([@abeforgit](https://github.com/abeforgit))
+
+#### Committers: 1
+- Arne Bertrand ([@abeforgit](https://github.com/abeforgit))
+
+
 ## 2.5.0 (2024-11-12)
 
 #### :rocket: Enhancement
