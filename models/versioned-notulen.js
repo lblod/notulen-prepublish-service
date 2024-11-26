@@ -71,6 +71,23 @@ export default class VersionedNotulen {
     } else {
       versionedNotulenUri = notulenUri;
     }
+    // defend against existing resource
+    // an ask query is extremely fast
+    // specifically not taking Tombstones into account here, this a create
+    // which always inserts, so it's always an error if the uri already exists
+    //
+    // could arguably also no-op instead of error for sake of idempotence,
+    // but this is more explicit
+    const exists = await query(`
+      ASK { ${sparqlEscapeUri(versionedNotulenUri)} ?p ?v. }
+      `);
+    // it always returns an object shaped like { boolean: true }
+    // be careful to not do if(exists)
+    if (exists.boolean) {
+      throw new Error(
+        'Trying to create a versioned resource which already exists'
+      );
+    }
     const fileInfo = await persistContentToFile(html);
     const logicalFileUri = await writeFileMetadataToDb(fileInfo);
     await update(`

@@ -121,8 +121,8 @@ export async function ensureVersionedNotulen(
     if (versionedNotulen.html) {
       return versionedNotulen.uri;
     } else {
-      console.warn(
-        `Versioned notulen for ${meeting.uri} (kind ${kind}) has no content, recreating...`
+      throw new Error(
+        'Found a versioned notulen without content. This is a data error.'
       );
     }
   } else {
