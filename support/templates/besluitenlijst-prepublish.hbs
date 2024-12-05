@@ -43,11 +43,6 @@
                 </p>
               </div>
             {{/if}}
-             {{#if (eq this.type "customVote")}}
-              <div typeof="http://data.lblod.info/vocabularies/gelinktnotuleren/AangepasteStemming" resource="{{this.uri}}" property="http://data.lblod.info/vocabularies/gelinktnotuleren/heeftAangepasteStemming">
-                {{{this.content}}}
-              </div>
-            {{/if}}
           {{/each}}
         {{/if}}
         </div>
