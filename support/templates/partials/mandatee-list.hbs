@@ -25,8 +25,8 @@
           {{#each mandatees}}
             <li class="au-c-template-list-inline__item" typeof="http://data.vlaanderen.be/ns/mandaat#Mandataris" resource="{{this.uri}}" property="{{../property}}">
               <span resource="{{this.personUri}}" property="mandaat:isBestuurlijkeAliasVan" typeof="person:Person">
-                <span property="persoon:gebruikteVoornaam" content={{this.name}}>{{this.name}}</span>
-                <span property="foaf:familyName" content={{this.familyName}}>{{this.familyName}} </span>
+                <span property="persoon:gebruikteVoornaam" content="{{this.name}}">{{this.name}}</span>
+                <span property="foaf:familyName" content="{{this.familyName}}">{{this.familyName}} </span>
               </span>
               {{#if ../includeRole}}
                 (<span property="org:holds" typeof="mandaat:Mandaat" resource="{{this.positionUri}}"><span property="org:role" typeof="skos:Concept" resource="{{this.roleUri}}"><span property="skos:prefLabel" content="{{this.role}}">{{this.role}}</span></span></span>)

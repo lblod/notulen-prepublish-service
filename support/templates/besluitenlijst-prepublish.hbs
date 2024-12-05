@@ -31,16 +31,18 @@
         {{#if this.votes}}
           <h3>Stemmingen</h3>
           {{#each this.votes}}
-            <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
-              <p>
-                <strong>Onderwerp:</strong>
-                <span property="besluit:onderwerp">{{this.subject}}</span>,
-              </p>
-              <p>
-                <strong>Gevolg:</strong>
-                <span property="besluit:gevolg">{{this.result}}</span>
-              </p>
-            </div>
+            {{#if (eq this.type "standardVote")}}
+              <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+                <p>
+                  <strong>Onderwerp:</strong>
+                  <span property="besluit:onderwerp">{{this.subject}}</span>,
+                </p>
+                <p>
+                  <strong>Gevolg:</strong>
+                  <span property="besluit:gevolg">{{this.result}}</span>
+                </p>
+              </div>
+            {{/if}}
           {{/each}}
         {{/if}}
         </div>
