@@ -9,6 +9,15 @@
 
 
 
+
+## 2.5.2 (2024-12-05)
+
+#### :bug: Bug Fix
+* [#119](https://github.com/lblod/notulen-prepublish-service/pull/119) Custom votes where not supported on the decision list ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 2.5.1 (2024-11-26)
 
 #### :bug: Bug Fix
