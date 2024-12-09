@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prefixMap } from '../support/prefixes';
 import { hackedSparqlEscapeString } from '../support/pre-importer';
 

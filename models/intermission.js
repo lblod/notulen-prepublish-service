@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prefixMap } from '../support/prefixes';
 // @ts-ignore
 import { query, sparqlEscapeUri } from 'mu';

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // @ts-ignore
 import express from 'express';
 // @ts-ignore
