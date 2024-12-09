@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * Represents an rdfa-document as entered by the user in the frontend.
  */
