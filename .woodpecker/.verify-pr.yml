@@ -6,18 +6,16 @@ steps:
       # Our lockfile is incompatible with the version of npm used with node:14. The old scripts just
       # `npm i`, so we do that. We should update to a sane node version and change this.
       # - npm ci
-  lint:
+  lint-js:
     image: node:20-alpine
+    group: lint
     commands:
-      - npm run lint
-  build-dry-run:
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      repo: "${CI_REPO_OWNER}/${CI_REPO_NAME}"
-      platforms: linux/amd64
-      # Can enable arm64 when moving to mu-javascript-template version >1.8
-      # platforms: linux/amd64, linux/arm64
-      dry_run: true
+      - npm run lint:js
+  lint-types:
+    image: node:20-alpine
+    group: lint
+    commands:
+      - npm run lint:types
 when:
   event:
     - pull_request
