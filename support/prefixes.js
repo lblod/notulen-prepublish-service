@@ -15,6 +15,10 @@ const prefixes = [
 ];
 
 class Prefix {
+  /**
+   * @param {string} name
+   * @param {string} uri
+   */
   constructor(name, uri) {
     this.name = name;
     this.uri = uri;
