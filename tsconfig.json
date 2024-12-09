@@ -4,6 +4,7 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "checkJs": true,
+    "strict": true,
     "lib": [ "dom", "es2022" ],
     "moduleResolution": "bundler",
     "skipLibCheck": true,

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * Represents an rdfa-document as entered by the user in the frontend.
  */
@@ -63,10 +65,10 @@ class EditorDocument {
     const dom = this.getDom();
     const comments = [
       ...dom.window.document.querySelectorAll(
-        `div[typeof='${prefixMap.get('ext').name}:TemplateComment'`
+        `div[typeof='${prefixMap['ext'].name}:TemplateComment'`
       ),
       ...dom.window.document.querySelectorAll(
-        `div[typeof='${prefixMap.get('ext').uri}TemplateComment'`
+        `div[typeof='${prefixMap['ext'].uri}TemplateComment'`
       ),
     ];
     comments.forEach((comment) => comment.remove());

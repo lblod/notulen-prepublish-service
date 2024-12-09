@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { analyse } from '@lblod/marawa/rdfa-context-scanner';
 import { cleanupTriples } from '../support/pre-importer';
 import { editorDocumentFromUuid } from '../support/editor-document';

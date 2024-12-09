@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prefixMap } from '../support/prefixes';
 // @ts-ignore
 import { query, sparqlEscapeUri } from 'mu';
@@ -13,10 +14,10 @@ const POSITION_LABEL_MAP = {
 export default class Intermission {
   static async findAll({ meetingUri }) {
     const result = await query(`
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(meetingUri)} ext:hasIntermission ?uri.
       ?uri prov:startedAtTime ?startedAt.

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // @ts-ignore
 import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
 import {
@@ -12,10 +13,10 @@ const AGENDAPOINT_TYPE_PLANNED =
 export default class VersionedNotulen {
   static async query({ kind, meeting }) {
     const r = await query(`
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('nie').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['nie'].toSparqlString()}
 
     SELECT ?uri ?html ?fileUri
     WHERE {

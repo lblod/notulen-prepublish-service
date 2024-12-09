@@ -1,3 +1,7 @@
+/**
+ * @import Meeting from '../models/meeting'
+ */
+
 const errorMessages = {
   nl: {
     meetingPlannedStartRequired:
@@ -7,13 +11,18 @@ const errorMessages = {
   },
 };
 
+/**
+ *
+ * @param {Meeting} meeting
+ * @returns {string[]}
+ */
 export default function validateMeeting(meeting) {
   const errors = [];
   if (!meeting.plannedStart) {
     errors.push(errorMessages.nl.meetingPlannedStartRequired);
   }
   if (!meeting.startedAt) {
-    errors.push(errorMessages.nl.startedAt);
+    errors.push(errorMessages.nl.meetingStartRequired);
   }
   if (!meeting.endedAt) {
     errors.push(errorMessages.nl.meetingEndRequired);
