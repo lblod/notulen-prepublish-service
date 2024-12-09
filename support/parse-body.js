@@ -1,3 +1,4 @@
+// @ts-nocheck
 import InvalidRequest from './invalid-request';
 
 // basic utility function to extract attributes and relationships from a json:api request

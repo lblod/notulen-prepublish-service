@@ -1,3 +1,4 @@
+// @ts-nocheck
 // @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
 import {

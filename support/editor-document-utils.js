@@ -1,3 +1,4 @@
+// @ts-nocheck
 // @ts-ignore
 import { query, sparqlEscapeUri } from 'mu';
 import EditorDocument from './editor-document';

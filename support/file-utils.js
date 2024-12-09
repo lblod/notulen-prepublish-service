@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { stat, writeFile, readFile } from 'fs/promises';
 import { uuid, update } from 'mu';
 // @ts-ignore

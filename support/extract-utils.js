@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Treatment from '../models/treatment';
 import AgendaPoint from '../models/agendapoint';
 import Meeting from '../models/meeting';

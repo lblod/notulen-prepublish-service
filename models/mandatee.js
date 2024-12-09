@@ -1,3 +1,4 @@
+// @ts-nocheck
 export default class Mandatee {
   // eslint doenst like class fields yet?
   // uri;
