@@ -73,12 +73,12 @@ export default class Task {
 
   static async find(uuid) {
     const result = await query(`
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('nuao').toSparqlString()}
-     ${prefixMap.get('task').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('adms').toSparqlString()}
-     ${prefixMap.get('oslc').toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['nuao'].toSparqlString()}
+     ${prefixMap['task'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['adms'].toSparqlString()}
+     ${prefixMap['oslc'].toSparqlString()}
      SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
        BIND(${sparqlEscapeString(uuid)} AS ?uuid)
        ?uri a task:Task;
@@ -103,12 +103,12 @@ export default class Task {
 
   static async query({ meetingUri, type, userUri = null }) {
     const result = await query(`
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('nuao').toSparqlString()}
-     ${prefixMap.get('task').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('adms').toSparqlString()}
-     ${prefixMap.get('oslc').toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['nuao'].toSparqlString()}
+     ${prefixMap['task'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['adms'].toSparqlString()}
+     ${prefixMap['oslc'].toSparqlString()}
      SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
        ?uri a task:Task;
             mu:uuid ?uuid;
@@ -176,10 +176,10 @@ export default class Task {
     }
     //prettier-ignore
     const queryString = `
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("task").toSparqlString()}
-     ${prefixMap.get("adms").toSparqlString()}
-     ${prefixMap.get("oslc").toSparqlString()}
+     ${prefixMap["mu"].toSparqlString()}
+     ${prefixMap["task"].toSparqlString()}
+     ${prefixMap["adms"].toSparqlString()}
+     ${prefixMap["oslc"].toSparqlString()}
 
      DELETE {
        ?uri adms:status ?status.

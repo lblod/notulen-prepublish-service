@@ -7,14 +7,14 @@ export default class Treatment {
   /** @returns {Promise<Treatment[]>} */
   static async findAll({ meetingUuid }) {
     const queryString = `
-     ${prefixMap.get('besluit').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('schema').toSparqlString()}
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('skos').toSparqlString()}
-     ${prefixMap.get('ext').toSparqlString()}
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('pav').toSparqlString()}
+     ${prefixMap['besluit'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['schema'].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['skos'].toSparqlString()}
+     ${prefixMap['ext'].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['pav'].toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
                    mu:uuid ${sparqlEscapeString(meetingUuid)};
@@ -59,13 +59,13 @@ export default class Treatment {
   /** @returns {Promise<Treatment>} */
   static async findUri(uri) {
     const queryString = `
-     ${prefixMap.get('besluit').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('schema').toSparqlString()}
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('skos').toSparqlString()}
-     ${prefixMap.get('ext').toSparqlString()}
-     ${prefixMap.get('pav').toSparqlString()}
+     ${prefixMap['besluit'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['schema'].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['skos'].toSparqlString()}
+     ${prefixMap['ext'].toSparqlString()}
+     ${prefixMap['pav'].toSparqlString()}
       SELECT * WHERE {
        BIND(${sparqlEscapeUri(uri)} as ?uri)
        ?meeting a besluit:Zitting;
@@ -107,13 +107,13 @@ export default class Treatment {
   /** @returns {Promise<Treatment>} */
   static async find(treatmentUuid) {
     const queryString = `
-     ${prefixMap.get('besluit').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('schema').toSparqlString()}
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('skos').toSparqlString()}
-     ${prefixMap.get('ext').toSparqlString()}
-     ${prefixMap.get('pav').toSparqlString()}
+     ${prefixMap['besluit'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['schema'].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['skos'].toSparqlString()}
+     ${prefixMap['ext'].toSparqlString()}
+     ${prefixMap['pav'].toSparqlString()}
       SELECT * WHERE {
        BIND(${sparqlEscapeString(treatmentUuid)} as ?uuid)
        ?meeting a besluit:Zitting;
@@ -208,10 +208,10 @@ export default class Treatment {
 
   async getAttachments() {
     const queryString = `
-      ${prefixMap.get('ext').toSparqlString()}
-      ${prefixMap.get('dct').toSparqlString()}
-      ${prefixMap.get('mu').toSparqlString()}
-      ${prefixMap.get('nfo').toSparqlString()}
+      ${prefixMap['ext'].toSparqlString()}
+      ${prefixMap['dct'].toSparqlString()}
+      ${prefixMap['mu'].toSparqlString()}
+      ${prefixMap['nfo'].toSparqlString()}
       SELECT * WHERE {
         ${sparqlEscapeUri(this.documentContainerUri)} ext:hasAttachments ?uri.
         ?uri dct:isPartOf ?decision;

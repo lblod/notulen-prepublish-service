@@ -43,9 +43,9 @@ function hackedSparqlEscapeString(string, optimizeSpaces = false) {
 
 async function getVersionedContent(uri, contentPredicate) {
   const contentQuery = `
-        ${prefixMap.get('nie').toSparqlString()}
-        ${prefixMap.get('prov').toSparqlString()}
-        ${prefixMap.get('ext').toSparqlString()}
+        ${prefixMap['nie'].toSparqlString()}
+        ${prefixMap['prov'].toSparqlString()}
+        ${prefixMap['ext'].toSparqlString()}
         SELECT ?content ?physicalFileUri
         WHERE {
          OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
@@ -110,16 +110,16 @@ async function handleVersionedResource(
   const logicalFileUri = await writeFileMetadataToDb(fileMetadata);
 
   const query = `
-    ${prefixMap.get('bv').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('pav').toSparqlString()}
-    ${prefixMap.get('sign').toSparqlString()}
-    ${prefixMap.get('publicationStatus').toSparqlString()}
-    ${prefixMap.get('muSession').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
+    ${prefixMap['bv'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['pav'].toSparqlString()}
+    ${prefixMap['sign'].toSparqlString()}
+    ${prefixMap['publicationStatus'].toSparqlString()}
+    ${prefixMap['muSession'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
     DELETE {
       ${sparqlEscapeUri(versionedUri)}
         ${statePredicate} ?state.

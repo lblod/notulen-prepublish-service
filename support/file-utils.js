@@ -36,13 +36,13 @@ export async function writeFileMetadataToDb(metadata) {
   const physicalFilename = metadata.filename;
   const physicalFileUri = metadata.path.replace('/share/', 'share://');
   const fileQuery = `
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('nie').toSparqlString()}
-    ${prefixMap.get('nfo').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('dbpedia').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['nie'].toSparqlString()}
+    ${prefixMap['nfo'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['dbpedia'].toSparqlString()}
    INSERT DATA {
          ${sparqlEscapeUri(logicalFileUri)} a nfo:FileDataObject;
                     nfo:fileName ${sparqlEscapeString(logicalFileName)};
