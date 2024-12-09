@@ -28,21 +28,19 @@
             <span property="eli:language" resource="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept"></span>
           </div>
         {{/each}}
-        {{#if this.votes}}
+        {{#if this.standardVotes}}
           <h3>Stemmingen</h3>
-          {{#each this.votes}}
-            {{#if (eq this.type "standardVote")}}
-              <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
-                <p>
-                  <strong>Onderwerp:</strong>
-                  <span property="besluit:onderwerp">{{this.subject}}</span>,
-                </p>
-                <p>
-                  <strong>Gevolg:</strong>
-                  <span property="besluit:gevolg">{{this.result}}</span>
-                </p>
-              </div>
-            {{/if}}
+          {{#each this.standardVotes}}
+            <div class="c-template-content c-template-content--voting" typeof="http://data.vlaanderen.be/ns/besluit#Stemming" resource="{{this.uri}}" property="besluit:heeftStemming">
+              <p>
+                <strong>Onderwerp:</strong>
+                <span property="besluit:onderwerp">{{this.subject}}</span>,
+              </p>
+              <p>
+                <strong>Gevolg:</strong>
+                <span property="besluit:gevolg">{{this.result}}</span>
+              </p>
+            </div>
           {{/each}}
         {{/if}}
         </div>
