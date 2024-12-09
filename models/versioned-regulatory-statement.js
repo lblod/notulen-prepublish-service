@@ -67,8 +67,8 @@ export default class VersionedRegulatoryStatement {
         ${sparqlEscapeUri(
           versionedTreatmentUri
         )} ext:hasVersionedReglementaireBijlage ${sparqlEscapeUri(
-      versionedRegulatoryStatementUri
-    )}.
+          versionedRegulatoryStatementUri
+        )}.
       }`);
     return new VersionedRegulatoryStatement({
       html,

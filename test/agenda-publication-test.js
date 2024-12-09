@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { strict as assert, equal } from 'assert';
 import { before } from 'mocha';
 import { setupHandleBars } from '../support/setup-handlebars';
@@ -58,6 +59,7 @@ describe('agenda publication template', function () {
     );
     assert(this.dataset.has(adminBodyQuad));
   });
+
   it('has the expected zitting type', function () {
     const typeQuad = factory.quad(
       factory.namedNode(meeting.uri),
@@ -66,6 +68,7 @@ describe('agenda publication template', function () {
     );
     assert(this.dataset.has(typeQuad));
   });
+
   it('has the correct planned start date', function () {
     const plannedStartQuad = factory.quad(
       factory.namedNode(meeting.uri),

@@ -37,6 +37,7 @@ export async function htmlToRdf(html) {
     .map((t) => {
       try {
         return t.toNT();
+        // eslint-disable-next-line no-unused-vars
       } catch (e) {
         return '';
       }

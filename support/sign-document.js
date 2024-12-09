@@ -62,6 +62,7 @@ async function generateStringToHash(
       now;
 
     return stringToHash;
+    // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new Error(
       "unable to sign resource because couldn't find relavant data in the database"
@@ -112,6 +113,7 @@ async function signDocument(
 
   try {
     await update(query);
+    // eslint-disable-next-line no-unused-vars
   } catch (error) {
     throw new Error(
       "unable to sign resource because couldn't insert data into the database"
