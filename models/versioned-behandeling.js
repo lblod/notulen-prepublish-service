@@ -7,13 +7,13 @@ import { prefixMap } from '../support/prefixes';
 export default class VersionedExtract {
   static async find(uuid) {
     const queryString = `
-       ${prefixMap.get('besluit').toSparqlString()}
-       ${prefixMap.get('dct').toSparqlString()}
-       ${prefixMap.get('schema').toSparqlString()}
-       ${prefixMap.get('mu').toSparqlString()}
-       ${prefixMap.get('skos').toSparqlString()}
-       ${prefixMap.get('ext').toSparqlString()}
-       ${prefixMap.get('pav').toSparqlString()}
+       ${prefixMap['besluit'].toSparqlString()}
+       ${prefixMap['dct'].toSparqlString()}
+       ${prefixMap['schema'].toSparqlString()}
+       ${prefixMap['mu'].toSparqlString()}
+       ${prefixMap['skos'].toSparqlString()}
+       ${prefixMap['ext'].toSparqlString()}
+       ${prefixMap['pav'].toSparqlString()}
         SELECT * WHERE {
            BIND(${sparqlEscapeString(uuid)} as ?uuid)
 

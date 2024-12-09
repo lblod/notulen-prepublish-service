@@ -19,16 +19,16 @@ async function generateStringToHash(
 ) {
   now = now.toISOString();
   const queryString = `
-    ${prefixMap.get('muSession').toSparqlString()}
-    ${prefixMap.get('bv').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('pav').toSparqlString()}
-    ${prefixMap.get('sign').toSparqlString()}
-    ${prefixMap.get('publicationStatus').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('nie').toSparqlString()}
+    ${prefixMap['muSession'].toSparqlString()}
+    ${prefixMap['bv'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['pav'].toSparqlString()}
+    ${prefixMap['sign'].toSparqlString()}
+    ${prefixMap['publicationStatus'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['nie'].toSparqlString()}
 
     SELECT DISTINCT ?content ?physicalFileUri ?userUri WHERE{
       OPTIONAL { ${sparqlEscapeUri(
@@ -94,15 +94,15 @@ async function signDocument(
   );
   const hash = generateHash(algorithm, stringToHash);
   const query = `
-    ${prefixMap.get('bv').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('pav').toSparqlString()}
-    ${prefixMap.get('sign').toSparqlString()}
-    ${prefixMap.get('publicationStatus').toSparqlString()}
-    ${prefixMap.get('muSession').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
+    ${prefixMap['bv'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['pav'].toSparqlString()}
+    ${prefixMap['sign'].toSparqlString()}
+    ${prefixMap['publicationStatus'].toSparqlString()}
+    ${prefixMap['muSession'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
 
     INSERT DATA{
       ${sparqlEscapeUri(newResourceUri)}

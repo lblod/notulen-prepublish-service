@@ -17,12 +17,12 @@ export default class ParticipantCache {
       return value;
     } else {
       const queryData = await query(`
-        ${prefixMap.get('besluit').toSparqlString()}
-        ${prefixMap.get('mandaat').toSparqlString()}
-        ${prefixMap.get('org').toSparqlString()}
-        ${prefixMap.get('skos').toSparqlString()}
-        ${prefixMap.get('foaf').toSparqlString()}
-        ${prefixMap.get('persoon').toSparqlString()}
+        ${prefixMap['besluit'].toSparqlString()}
+        ${prefixMap['mandaat'].toSparqlString()}
+        ${prefixMap['org'].toSparqlString()}
+        ${prefixMap['skos'].toSparqlString()}
+        ${prefixMap['foaf'].toSparqlString()}
+        ${prefixMap['persoon'].toSparqlString()}
         SELECT DISTINCT * WHERE {
           ${sparqlEscapeUri(uri)} mandaat:isBestuurlijkeAliasVan ?personUri;
             org:holds ?positionUri.

@@ -5,11 +5,11 @@ import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 export default class AgendaPoint {
   static async findAll({ meetingUuid }) {
     const queryString = `
-     ${prefixMap.get('besluit').toSparqlString()}
-     ${prefixMap.get('dct').toSparqlString()}
-     ${prefixMap.get('schema').toSparqlString()}
-     ${prefixMap.get('mu').toSparqlString()}
-     ${prefixMap.get('skos').toSparqlString()}
+     ${prefixMap['besluit'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['schema'].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['skos'].toSparqlString()}
       SELECT * WHERE {
           ?meeting a besluit:Zitting;
                    mu:uuid ${sparqlEscapeString(meetingUuid)};
@@ -47,10 +47,10 @@ export default class AgendaPoint {
 
   static async findURI(uri) {
     const queryString = `
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('schema').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['schema'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
     SELECT * WHERE {
         BIND(${sparqlEscapeUri(uri)} as ?uri)
         ?uri besluit:geplandOpenbaar ?plannedPublic.

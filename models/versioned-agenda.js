@@ -7,9 +7,9 @@ import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
 export default class VersionedAgenda {
   static async query({ meetingUuid, agendaType }) {
     const result = await query(`
-      ${prefixMap.get('mu').toSparqlString()}
-      ${prefixMap.get('bv').toSparqlString()}
-      ${prefixMap.get('ext').toSparqlString()}
+      ${prefixMap['mu'].toSparqlString()}
+      ${prefixMap['bv'].toSparqlString()}
+      ${prefixMap['ext'].toSparqlString()}
       SELECT ?uri ?agendaType ?meeting ?html
       WHERE {
         BIND(${sparqlEscapeString(agendaType)} as ?agendaType)
@@ -41,10 +41,10 @@ export default class VersionedAgenda {
     const agendaUri = `http://data.lblod.info/id/agendas/${agendaUuid}`;
 
     await update(`
-      ${prefixMap.get('mu').toSparqlString()}
-      ${prefixMap.get('bv').toSparqlString()}
-      ${prefixMap.get('ext').toSparqlString()}
-      ${prefixMap.get('pav').toSparqlString()}
+      ${prefixMap['mu'].toSparqlString()}
+      ${prefixMap['bv'].toSparqlString()}
+      ${prefixMap['ext'].toSparqlString()}
+      ${prefixMap['pav'].toSparqlString()}
 
       INSERT DATA {
         ${sparqlEscapeUri(agendaUri)}
