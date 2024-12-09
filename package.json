@@ -22,10 +22,13 @@
     "n3": "^1.10.0",
     "prettier": "^3.4.2",
     "rdf-validate-shacl": "^0.3.2",
-    "release-it": "^15.5.0"
+    "release-it": "^15.5.0",
+    "typescript": "^5.7.2"
   },
   "scripts": {
-    "lint": "eslint .",
+    "lint:js": "eslint .",
+    "lint:js:fix": "eslint . --fix",
+    "lint:types": "tsc --noEmit",
     "release": "release-it"
   },
   "repository": {
