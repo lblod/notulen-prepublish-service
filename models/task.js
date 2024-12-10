@@ -177,10 +177,10 @@ export default class Task {
     }
     //prettier-ignore
     const queryString = `
-     ${prefixMap.get("mu").toSparqlString()}
-     ${prefixMap.get("task").toSparqlString()}
-     ${prefixMap.get("adms").toSparqlString()}
-     ${prefixMap.get("oslc").toSparqlString()}
+     ${prefixMap["mu"].toSparqlString()}
+     ${prefixMap["task"].toSparqlString()}
+     ${prefixMap["adms"].toSparqlString()}
+     ${prefixMap["oslc"].toSparqlString()}
 
      DELETE {
        ?uri adms:status ?status.
