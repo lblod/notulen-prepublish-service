@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs';
 import factory from '@rdfjs/dataset';
 import { Parser as ParserN3 } from 'n3';

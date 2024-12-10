@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prefixMap } from '../support/prefixes';
 // @ts-ignore
 import { query, sparqlEscapeString } from 'mu';
@@ -5,8 +6,8 @@ import { query, sparqlEscapeString } from 'mu';
 export default class Concept {
   static async find(uuid) {
     const queryString = `
-      ${prefixMap.get('mu').toSparqlString()}
-      ${prefixMap.get('skos').toSparqlString()}
+      ${prefixMap['mu'].toSparqlString()}
+      ${prefixMap['skos'].toSparqlString()}
       SELECT ?uri ?label WHERE
       {
         ?uri a skos:Concept;

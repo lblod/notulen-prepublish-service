@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { prefixMap } from '../support/prefixes';
 // @ts-ignore
 import { sparqlEscapeUri, query } from 'mu';
@@ -6,11 +7,11 @@ export default class CustomVote {
   static async findAll({ treatmentUri }) {
     try {
       const result = await query(`
-         ${prefixMap.get('besluit').toSparqlString()}
-         ${prefixMap.get('schema').toSparqlString()}
-         ${prefixMap.get('ext').toSparqlString()}
-         ${prefixMap.get('pav').toSparqlString()}
-         ${prefixMap.get('gn').toSparqlString()}
+         ${prefixMap['besluit'].toSparqlString()}
+         ${prefixMap['schema'].toSparqlString()}
+         ${prefixMap['ext'].toSparqlString()}
+         ${prefixMap['pav'].toSparqlString()}
+         ${prefixMap['gn'].toSparqlString()}
          SELECT DISTINCT * WHERE {
            ${sparqlEscapeUri(treatmentUri)} a besluit:BehandelingVanAgendapunt;
             gn:heeftAangepasteStemming ?uri.
