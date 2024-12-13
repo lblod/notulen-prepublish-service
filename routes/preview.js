@@ -1,7 +1,6 @@
 // @ts-nocheck
 // @ts-ignore
 import express from 'express';
-// @ts-ignore
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
 import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
@@ -103,7 +102,6 @@ router.get(
       const error = new Error(
         `An error occurred while fetching contents for prepublished agenda ${req.params.zittingIdentifier}: ${err}`
       );
-      // @ts-ignore
       error.status = 500;
       return next(error);
     }

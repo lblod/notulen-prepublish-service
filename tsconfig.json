@@ -4,16 +4,21 @@
     "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "checkJs": true,
-    "strict": true,
-    "lib": [ "dom", "es2022" ],
+    "lib": ["dom", "es2022"],
     "moduleResolution": "bundler",
     "skipLibCheck": true,
+    "strict": false,
+    "plugins": [
+      {
+        "name": "typescript-strict-plugin"
+      }
+    ]
   },
   "include": [
     "app.js",
     "models/**/*",
     "routes/**/*",
     "support/**/*",
-    "test/**/*",
+    "test/**/*"
   ]
 }

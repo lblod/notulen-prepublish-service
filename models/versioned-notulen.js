@@ -10,6 +10,11 @@ import { prefixMap } from '../support/prefixes';
 const AGENDAPOINT_TYPE_PLANNED =
   'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
 
+/**
+ * type-imports
+ * @import Meeting from './meeting'
+ */
+
 export default class VersionedNotulen {
   static async query({ kind, meeting }) {
     const r = await query(`
@@ -56,7 +61,7 @@ export default class VersionedNotulen {
    * @property {string} kind
    * @property {Meeting} meeting
    * @property {string} html
-   * @property {PublicTreatment[]} publicTreatments
+   * @property {string[]} publicTreatments
    */
   /**
    * create a new versioned notulen
