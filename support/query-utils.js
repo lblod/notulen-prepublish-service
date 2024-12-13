@@ -1,4 +1,5 @@
-// @ts-ignore
+// @ts-strict-ignore
+
 import { query, sparqlEscapeUri } from 'mu';
 import { prefixMap } from './prefixes';
 import Mandatee from '../models/mandatee';
@@ -45,7 +46,7 @@ export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
     ? await cache.get(treatment.chairman)
     : null;
   const presentQuery = await query(`
-    ${prefixMap.get('besluit').toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
     SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} besluit:heeftAanwezige ?mandatarisUri.}
     }`);
@@ -56,7 +57,7 @@ export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
   );
   present = sortMandatees(present);
   const notPresentQuery = await query(`
-    ${prefixMap.get('ext').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
     SELECT ?mandatarisUri WHERE {
       {${sparqlEscapeUri(treatment.uri)} ext:heeftAfwezige ?mandatarisUri.}
     }`);
@@ -71,9 +72,9 @@ export async function fetchTreatmentParticipantsWithCache(treatment, cache) {
 
 export async function fetchCurrentUser(sessionId) {
   const q = `
-    ${prefixMap.get('muSession').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
+    ${prefixMap['muSession'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
   SELECT ?userUri
   WHERE {
     ${sparqlEscapeUri(sessionId)} muSession:account/^foaf:account ?userUri.
@@ -92,12 +93,12 @@ export async function fetchParticipationList(
   absentPredicate = 'ext:heeftAfwezigeBijStart'
 ) {
   const presentQuery = await query(`
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('mandaat').toSparqlString()}
-    ${prefixMap.get('org').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
-    ${prefixMap.get('persoon').toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['mandaat'].toSparqlString()}
+    ${prefixMap['org'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
+    ${prefixMap['persoon'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(resourceUri)} ${presentPredicate} ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
@@ -112,13 +113,13 @@ export async function fetchParticipationList(
     (binding) => new Mandatee(binding)
   );
   const notPresentQuery = await query(`
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mandaat').toSparqlString()}
-    ${prefixMap.get('org').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
-    ${prefixMap.get('persoon').toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mandaat'].toSparqlString()}
+    ${prefixMap['org'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
+    ${prefixMap['persoon'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(resourceUri)} ${absentPredicate} ?mandatarisUri.
         ?mandatarisUri mandaat:isBestuurlijkeAliasVan ?personUri.
@@ -144,13 +145,13 @@ export async function fetchParticipationList(
 
 export async function fetchChairmanAndSecretary(uri) {
   const chairmanAndSecretaryQuery = await query(`
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('mandaat').toSparqlString()}
-    ${prefixMap.get('org').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
-    ${prefixMap.get('foaf').toSparqlString()}
-    ${prefixMap.get('persoon').toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['mandaat'].toSparqlString()}
+    ${prefixMap['org'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
+    ${prefixMap['foaf'].toSparqlString()}
+    ${prefixMap['persoon'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       {
       SELECT ?mandatarisUri ?relation WHERE {

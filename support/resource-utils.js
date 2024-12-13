@@ -1,6 +1,8 @@
-// @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
+/**
+ * @param {string} uuid
+ */
 export async function getUri(uuid) {
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -15,6 +17,9 @@ export async function getUri(uuid) {
   return queryResult.results.bindings[0].uri.value;
 }
 
+/**
+ * @param {string} uri
+ */
 export async function getUuid(uri) {
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>

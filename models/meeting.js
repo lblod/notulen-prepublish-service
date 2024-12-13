@@ -1,5 +1,7 @@
+// @ts-strict-ignore
+
 import { prefixMap } from '../support/prefixes';
-import { DateTime } from 'luxon'; // @ts-ignore
+import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import validateMeeting from '../support/validate-meeting';
 import { articlesBasedOnClassifcationMap } from '../support/classification-utils';
@@ -52,13 +54,13 @@ export default class Meeting {
 
   static async findURI(uri) {
     const queryString = `
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
-    ${prefixMap.get('mandaat').toSparqlString()}
-    ${prefixMap.get('notulen').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
+    ${prefixMap['mandaat'].toSparqlString()}
+    ${prefixMap['notulen'].toSparqlString()}
     SELECT * WHERE {
       BIND(${sparqlEscapeUri(uri)} as ?uri)
       ?uri a besluit:Zitting;
@@ -95,13 +97,13 @@ export default class Meeting {
 
   static async find(uuid) {
     const queryString = `
-    ${prefixMap.get('ext').toSparqlString()}
-    ${prefixMap.get('besluit').toSparqlString()}
-    ${prefixMap.get('prov').toSparqlString()}
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('skos').toSparqlString()}
-    ${prefixMap.get('mandaat').toSparqlString()}
-    ${prefixMap.get('notulen').toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
+    ${prefixMap['besluit'].toSparqlString()}
+    ${prefixMap['prov'].toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['skos'].toSparqlString()}
+    ${prefixMap['mandaat'].toSparqlString()}
+    ${prefixMap['notulen'].toSparqlString()}
     SELECT * WHERE {
       BIND(${sparqlEscapeString(uuid)} as ?uuid)
       ?uri a besluit:Zitting;

@@ -1,4 +1,6 @@
-// @ts-ignore
+// @ts-nocheck
+// @ts-strict-ignore
+
 import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
 import {
   hackedSparqlEscapeString,

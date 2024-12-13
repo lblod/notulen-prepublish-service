@@ -1,4 +1,3 @@
-// @ts-ignore
 import { app, errorHandler } from 'mu';
 import { setupHandleBars } from './support/setup-handlebars';
 import previewRouter from './routes/preview';

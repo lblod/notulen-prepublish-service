@@ -14,7 +14,7 @@ declare module Support {
   }
 
   interface QueryHead<T extends string> {
-    link: Array;
+    link: Array<unknown>;
     vars: T;
   }
 
@@ -35,3 +35,5 @@ declare module Support {
     };
   }
 }
+
+declare module 'mu';

@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';
 import { prefixes } from './prefixes';
 import Meeting from '../models/meeting';

@@ -1,15 +1,16 @@
-// @ts-ignore
+// @ts-strict-ignore
+
 import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeUri } from 'mu';
 
 export default class SignedResource {
   static async findURI(uri) {
     const queryString = `
-    ${prefixMap.get('mu').toSparqlString()}
-    ${prefixMap.get('sign').toSparqlString()}
-    ${prefixMap.get('dct').toSparqlString()}
-    ${prefixMap.get('publicationStatus').toSparqlString()}
-    ${prefixMap.get('ext').toSparqlString()}
+    ${prefixMap['mu'].toSparqlString()}
+    ${prefixMap['sign'].toSparqlString()}
+    ${prefixMap['dct'].toSparqlString()}
+    ${prefixMap['publicationStatus'].toSparqlString()}
+    ${prefixMap['ext'].toSparqlString()}
     SELECT DISTINCT *
     WHERE {
       BIND(${sparqlEscapeUri(uri)} as ?uri)
