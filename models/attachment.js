@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 export default class Attachment {
   static fromBinding({ uri, decision, file, type, filename, fileUuid }) {
     return new Attachment({

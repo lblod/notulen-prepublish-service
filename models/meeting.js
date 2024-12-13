@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import { prefixMap } from '../support/prefixes';
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';

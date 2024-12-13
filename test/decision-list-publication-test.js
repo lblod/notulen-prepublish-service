@@ -1,4 +1,6 @@
 // @ts-nocheck
+// @ts-strict-ignore
+
 import { strict as assert } from 'assert';
 import { before } from 'mocha';
 import { setupHandleBars } from '../support/setup-handlebars';

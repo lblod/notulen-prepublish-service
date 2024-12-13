@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import Attachment from './attachment';

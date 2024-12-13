@@ -1,4 +1,6 @@
 // @ts-nocheck
+// @ts-strict-ignore
+
 import express from 'express';
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';

@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @ts-strict-ignore
 
 /**
  * Represents an rdfa-document as entered by the user in the frontend.

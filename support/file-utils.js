@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import { stat, writeFile, readFile } from 'fs/promises';
 import { uuid, update } from 'mu';
 import { sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu';

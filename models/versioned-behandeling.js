@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
 import { hackedSparqlEscapeString } from '../support/pre-importer';
 import { prefixMap } from '../support/prefixes';

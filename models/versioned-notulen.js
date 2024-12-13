@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
 import {
   persistContentToFile,

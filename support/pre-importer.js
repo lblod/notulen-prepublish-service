@@ -1,4 +1,5 @@
-// @ts-nocheck
+// @ts-strict-ignore
+
 import {
   query,
   sparqlEscapeDateTime,
