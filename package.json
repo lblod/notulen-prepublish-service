@@ -31,7 +31,7 @@
   "scripts": {
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
-    "lint:types": "tsc --noEmit",
+    "lint:types": "tsc && tsc-strict",
     "release": "release-it"
   },
   "repository": {
