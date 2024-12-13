@@ -35,3 +35,5 @@ declare module Support {
     };
   }
 }
+
+declare module 'mu';
