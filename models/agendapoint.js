@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { prefixMap } from '../support/prefixes';
-// @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
 export default class AgendaPoint {

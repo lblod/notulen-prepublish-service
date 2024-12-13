@@ -1,5 +1,4 @@
 // @ts-nocheck
-// @ts-ignore
 import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu';
 import { prefixMap } from './prefixes';
 import { createHash } from 'crypto';

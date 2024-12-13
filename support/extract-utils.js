@@ -5,7 +5,6 @@ import Meeting from '../models/meeting';
 import StandardVote from '../models/standard-vote';
 import CustomVote from '../models/custom-vote';
 import Decision from '../models/decision';
-// @ts-ignore
 import { query, sparqlEscapeUri, update } from 'mu';
 import { prefixes } from './prefixes';
 import {

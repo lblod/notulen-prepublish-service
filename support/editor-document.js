@@ -4,7 +4,6 @@
  * Represents an rdfa-document as entered by the user in the frontend.
  */
 
-// @ts-ignore
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars';

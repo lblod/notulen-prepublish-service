@@ -1,5 +1,4 @@
 // @ts-nocheck
-// @ts-ignore
 import express from 'express';
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
@@ -241,9 +240,7 @@ router.post('/extract-previews', async function (req, res, next) {
       const error = new Error(
         `An error occurred while building the extract preview: ${e}`
       );
-      // @ts-ignore
       console.error(e);
-      // @ts-ignore
       error.status = 500;
       return next(error);
     }

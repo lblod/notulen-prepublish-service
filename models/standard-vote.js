@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { prefixMap } from '../support/prefixes';
-// @ts-ignore
 import { sparqlEscapeUri, query } from 'mu';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 import { sortMandatees } from '../support/query-utils';

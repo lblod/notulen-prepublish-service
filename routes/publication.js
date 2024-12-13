@@ -1,5 +1,4 @@
 // @ts-nocheck
-// @ts-ignore
 import express from 'express';
 import Meeting from '../models/meeting';
 import Treatment from '../models/treatment';

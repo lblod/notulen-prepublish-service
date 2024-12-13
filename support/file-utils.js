@@ -1,7 +1,6 @@
 // @ts-nocheck
 import { stat, writeFile, readFile } from 'fs/promises';
 import { uuid, update } from 'mu';
-// @ts-ignore
 import { sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu';
 import { prefixMap } from '../support/prefixes';
 /**
