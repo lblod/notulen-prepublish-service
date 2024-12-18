@@ -45,6 +45,7 @@ export default class Intermission {
     );
   }
 
+  /** @param {import('mu').BindingObject} bound */
   static fromBinding({
     uri,
     startedAt,

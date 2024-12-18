@@ -32,6 +32,7 @@ export default class CustomVote {
     }
   }
 
+  /** @param {import('mu').BindingObject} bound */
   static fromBinding({ uri, position, content, context }) {
     return new CustomVote({
       uri: uri.value,

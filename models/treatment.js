@@ -153,6 +153,7 @@ export default class Treatment {
     }
   }
 
+  /** @param {import('mu').BindingObject} bound */
   static fromBinding({
     uuid,
     uri,

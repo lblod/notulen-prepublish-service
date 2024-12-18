@@ -40,6 +40,7 @@ export default class StandardVote {
     }
   }
 
+  /** @param {import('mu').BindingObject} bound */
   static fromBinding({
     uri,
     subject,

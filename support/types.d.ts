@@ -1,35 +1,30 @@
 declare module 'mu' {
   import { Express, RequestHandler } from "express";
 
-  export type BindingObject<Obj extends Record<string, string | string[]>> = {
+  type ObjectToBind = Record<string, boolean | string | null>
+  export type BindingObject<Obj extends ObjectToBind = ObjectToBind> = {
     [Prop in keyof Obj]: {
       type: string,
       value: string,
     };
   };
 
-  export interface QueryResult<Binding = Record<string, RDF.Term>> {
-    results: {
-      bindings: Binding[];
-    };
-  }
 
-  export type SparqlResponse = {
+  export type SparqlResponse<IsAsk = false, Obj extends ObjectToBind = ObjectToBind> = IsAsk extends true ?
+  {
+    head: {};
+    boolean: boolean;
+  } : {
     head: {
       vars: string[];
     };
     results: {
-      bindings: {
-        [key: string]: {
-          type: string;
-          value: string;
-        };
-      }[];
+      bindings: BindingObject<Obj>[];
     };
   };
 
   export const app: Express;
-  export const query: (query: string) => Promise<SparqlResponse>;
+  export const query: <isAsk = false, Obj extends ObjectToBind = ObjectToBind>(query: string) => Promise<SparqlResponse<isAsk, Obj>>;
   export const update: (query: string) => Promise<void>;
   export const uuid: () => string;
   export const sparqlEscape: (value: any, type: string) => string;

@@ -30,6 +30,8 @@ export default class AgendaPoint {
          }
       }
    `;
+    /** @type {import('mu').SparqlResponse<false, ApData>} */
+    // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
       console.warn(
@@ -46,6 +48,7 @@ export default class AgendaPoint {
     }
   }
 
+  /** @param {string} uri */
   static async findURI(uri) {
     const queryString = `
     ${prefixMap['besluit'].toSparqlString()}
@@ -68,6 +71,8 @@ export default class AgendaPoint {
           ?type skos:prefLabel ?typeName.
       }
     }`;
+    /** @type {import('mu').SparqlResponse<false, ApData>} */
+    // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
       return AgendaPoint.fromBinding(result.results.bindings[0]);
@@ -77,6 +82,7 @@ export default class AgendaPoint {
     }
   }
 
+  /** @param {import('mu').BindingObject<ApData>} bound */
   static fromBinding({
     uri,
     title,
@@ -99,6 +105,18 @@ export default class AgendaPoint {
     });
   }
 
+  /**
+    @typedef {object} ApData
+    @property {string} uri
+    @property {string} title
+    @property {string} position
+    @property {boolean} plannedPublic
+    @property {string | null} [addedAfter = null]
+    @property {string | null} [description = null]
+    @property {string | null} [type = null]
+    @property {string | null} [typeName = null]
+*/
+  /** @param {ApData} args */
   constructor({
     uri,
     title,
