@@ -16,3 +16,23 @@ export async function ensureTask(meeting, taskType, userUri) {
   }
   return task;
 }
+
+/**
+ * @param {import('express').Response} res
+ * @param {import('../models/meeting').default} meeting
+ * @param {string} taskType
+ * @param {string} [userUri]
+ * */
+export async function returnEnsuredTaskId(res, meeting, taskType, userUri) {
+  const task = await ensureTask(meeting, taskType, userUri);
+
+  res.json({
+    data: {
+      id: task.id,
+      status: 'accepted',
+      type: task.type,
+    },
+  });
+
+  return task;
+}
