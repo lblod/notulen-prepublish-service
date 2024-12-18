@@ -3,7 +3,7 @@
 import Task from '../models/task';
 
 /**
- * @param meeting
+ * @param {import('../models/meeting').default} meeting
  * @param {string} taskType
  * @param {string} [userUri]
  * */
