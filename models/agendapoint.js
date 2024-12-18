@@ -1,5 +1,5 @@
 // @ts-strict-ignore
-
+import AppError from '../support/error-utils';
 import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
@@ -76,6 +76,12 @@ export default class AgendaPoint {
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
       return AgendaPoint.fromBinding(result.results.bindings[0]);
+    } else if (result.results.bindings.length > 1) {
+      throw new AppError(
+        500,
+        `multiple agendapoints found for uri ${uri}`,
+        true
+      );
     } else {
       console.warn(`no agendapoint found for uri ${uri}`);
       return [];

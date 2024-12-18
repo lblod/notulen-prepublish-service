@@ -87,11 +87,9 @@ function handleWithJob(handler, errorMsgGenerator, status = 200) {
     } catch (err) {
       console.error(err);
       const errorString = errorMsgGenerator(req, err);
-      pushJobResult(
-        jobUuid,
-        (typeof err === 'object' && err?.statusCode) ?? 500,
-        [{ title: errorString }]
-      );
+      pushJobResult(jobUuid, (typeof err === 'object' && err?.status) ?? 500, [
+        { title: errorString },
+      ]);
     }
   };
 }
@@ -100,8 +98,12 @@ router.get('/prepublish/job-result/:jobUuid', (req, res) => {
   const jobUuid = req.params.jobUuid;
 
   if (prepublishJobResults.has(jobUuid)) {
-    const { status, result } = prepublishJobResults.get(jobUuid);
+    let { status, result } = prepublishJobResults.get(jobUuid);
     prepublishJobResults.delete(jobUuid);
+    if (status === 404) {
+      // 404 is used to signify 'keep polling for a result', so we need to avoid sending it
+      status = 400;
+    }
     res.status(status).send(result);
   } else {
     res.status(404).send('UUID not found, production may be ongoing yet.');

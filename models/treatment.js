@@ -3,6 +3,7 @@
 import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 import Attachment from './attachment';
+import AppError from '../support/error-utils';
 
 export default class Treatment {
   /** @returns {Promise<Treatment[]>} */
@@ -96,12 +97,22 @@ export default class Treatment {
         const treatment = Treatment.fromBinding(result.results.bindings[0]);
         await treatment.getAttachments();
         return treatment;
+      } else if (result.results.bindings.length > 1) {
+        throw new AppError(
+          500,
+          `found ${result.results.bindings.length} treatments for uri ${uri}`,
+          true
+        );
       } else {
-        throw `did not find treatment with uri ${uri}`;
+        throw new AppError(404, `found no treatment for uri ${uri}`, true);
       }
     } catch (e) {
       console.error(e);
-      throw `failed to retrieve treatment with uri ${uri}`;
+      throw new AppError(
+        500,
+        `failed to retrieve treatment with uri ${uri}`,
+        false
+      );
     }
   }
 
