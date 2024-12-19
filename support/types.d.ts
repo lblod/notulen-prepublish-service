@@ -1,33 +1,43 @@
 declare module 'mu' {
-  import { Express, RequestHandler } from "express";
+  import { Express, RequestHandler } from 'express';
 
-  type ObjectToBind = Record<string, boolean | string | null>
+  export type ObjectToBind = Record<string, unknown>;
   export type BindingObject<Obj extends ObjectToBind = ObjectToBind> = {
     [Prop in keyof Obj]: {
-      type: string,
-      value: string,
+      type: string;
+      value: string;
     };
   };
 
-
-  export type SparqlResponse<IsAsk = false, Obj extends ObjectToBind = ObjectToBind> = IsAsk extends true ?
-  {
-    head: {};
-    boolean: boolean;
-  } : {
-    head: {
-      vars: string[];
-    };
-    results: {
-      bindings: BindingObject<Obj>[];
-    };
-  };
+  export type SparqlResponse<
+    ObjOrIsAsk extends ObjectToBind | true = ObjectToBind,
+  > = ObjOrIsAsk extends ObjectToBind
+    ? {
+        head: {
+          vars: string[];
+        };
+        results: {
+          bindings: BindingObject<ObjOrIsAsk>[];
+        };
+      }
+    : {
+        head: unknown;
+        boolean: boolean;
+      };
 
   export const app: Express;
-  export const query: <isAsk = false, Obj extends ObjectToBind = ObjectToBind>(query: string) => Promise<SparqlResponse<isAsk, Obj>>;
+  /**
+   * The parameter ObjOrIsAsk should be the type of an object which the returned data will be passed
+   * in to. This allows TS to give us a return value that has the same keys mapped to Binding
+   * objects. If this is an ASK query, pass `true` instead as the return of this query will be
+   * different.
+   */
+  export const query: <ObjOrIsAsk extends ObjectToBind | true = ObjectToBind>(
+    query: string
+  ) => Promise<SparqlResponse<ObjOrIsAsk>>;
   export const update: (query: string) => Promise<void>;
   export const uuid: () => string;
-  export const sparqlEscape: (value: any, type: string) => string;
+  export const sparqlEscape: (value: unknown, type: string) => string;
   export const sparqlEscapeString: (value: string) => string;
   export const sparqlEscapeUri: (value: string) => string;
   export const sparqlEscapeInt: (value: number) => string;
@@ -40,11 +50,11 @@ declare module 'mu' {
   // this is a tagged template string function
   export const sparql: (
     strings: TemplateStringsArray,
-    ...values: any[]
+    ...values: unknown[]
   ) => string;
   export const SPARQL: (
     strings: TemplateStringsArray,
-    ...values: any[]
+    ...values: unknown[]
   ) => string;
 
   const mu: {
