@@ -21,6 +21,7 @@ import validateTreatment from './validate-treatment';
 import VersionedExtract from '../models/versioned-behandeling';
 import { handleVersionedResource } from './pre-importer';
 import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL, IS_PREVIEW } from './constants';
+import { isCustomVote } from './vote-utils';
 
 // This file contains helpers for exporting, signing and publishing an extract of the meeting notes
 // an extract is the treatment of one agendapoint and all it's related info
@@ -132,7 +133,7 @@ export async function buildExtractDataForTreatment(
     // only try fetching voters if people were present
     await Promise.all(
       votes.map((vote) =>
-        vote.type === 'customVote' ? vote : vote.fetchVoters(participantCache)
+        isCustomVote(vote) ? vote : vote.fetchVoters(participantCache)
       )
     );
   }

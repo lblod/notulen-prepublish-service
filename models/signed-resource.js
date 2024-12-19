@@ -72,6 +72,7 @@ export default class SignedResource {
     }
   }
 
+  /** @param {import('mu').BindingObject} bound */
   static fromBinding({
     uri,
     uuid,

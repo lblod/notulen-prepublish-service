@@ -84,6 +84,8 @@ export default class VersionedNotulen {
     //
     // could arguably also no-op instead of error for sake of idempotence,
     // but this is more explicit
+    /** @type {import('mu').SparqlResponse<true>} */
+    // @ts-ignore
     const exists = await query(`
       ASK { ${sparqlEscapeUri(versionedNotulenUri)} ?p ?v. }
       `);
