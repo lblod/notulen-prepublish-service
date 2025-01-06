@@ -80,9 +80,9 @@ export async function fetchCurrentUser(sessionId) {
     ${sparqlEscapeUri(sessionId)} muSession:account/^foaf:account ?userUri.
   }
   `;
-  const result = query(q);
+  const result = await query(q);
   if (result?.results?.bindings.length === 1) {
-    return result.results.bindings.userUri.value;
+    return result.results.bindings[0].userUri.value;
   } else {
     return null;
   }
