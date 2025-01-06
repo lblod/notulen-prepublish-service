@@ -71,7 +71,7 @@ export default class AgendaPoint {
           ?type skos:prefLabel ?typeName.
       }
     }`;
-    /** @type {import('mu').SparqlResponse<false, ApData>} */
+    /** @type {import('mu').SparqlResponse<ApData>} */
     // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
