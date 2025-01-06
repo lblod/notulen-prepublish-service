@@ -1,8 +1,10 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
 import { DateTime } from 'luxon';
+import { prefixMap } from '../support/prefixes';
+
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
 const POSITION_LABEL_MAP = {
@@ -45,7 +47,7 @@ export default class Intermission {
     );
   }
 
-  /** @param {import('mu').BindingObject} bound */
+  /** @param {BindingObject} bound */
   static fromBinding({
     uri,
     startedAt,

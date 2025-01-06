@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 import Attachment from './attachment';
 import AppError from '../support/error-utils';
 
@@ -164,7 +165,7 @@ export default class Treatment {
     }
   }
 
-  /** @param {import('mu').BindingObject} bound */
+  /** @param {BindingObject} bound */
   static fromBinding({
     uuid,
     uri,

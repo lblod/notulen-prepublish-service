@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 import express from 'express';
+/** @import { Request, RequestHandler, Response } from 'express' */
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
 import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
@@ -48,7 +49,7 @@ function pushJobResult(uuid, status, result) {
 /**
  * Creates a new job.
  *
- * @param {import('express').Response} res Express response object.
+ * @param {Response} res Express response object.
  * @param {number} [status=200] status code to send when created.
  * @return job Uuid
  */
@@ -71,11 +72,11 @@ function yieldJobId(res, status = 200) {
  * if the handler throws.
  * A job is like a Task, but the state lives entirely in server memory, so is intended for
  * non-critical behaviour.
- * @param {(req: import('express').Request) => Promise<object>} handler
- * @param {(req: import('express').Request, err: unknown) => string} errorMsgGenerator use the context of the request
+ * @param {(req: Request) => Promise<object>} handler
+ * @param {(req: Request, err: unknown) => string} errorMsgGenerator use the context of the request
  * and the error to produce a message
  * @param {number} [status=200] status code to send when created.
- * @return {import('express').RequestHandler}
+ * @return {RequestHandler}
  */
 function handleWithJob(handler, errorMsgGenerator, status = 200) {
   return async (req, res) => {

@@ -3,6 +3,7 @@
 import { prefixMap } from '../support/prefixes';
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
 import validateMeeting from '../support/validate-meeting';
 import { articlesBasedOnClassifcationMap } from '../support/classification-utils';
 import AppError from '../support/error-utils';
@@ -156,7 +157,7 @@ export default class Meeting {
     }
   }
 
-  /** @param {import('mu').BindingObject} binding */
+  /** @param {BindingObject} binding */
   static fromBinding(binding) {
     return new Meeting({
       uuid: binding.uuid.value,

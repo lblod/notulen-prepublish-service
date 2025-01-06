@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 
 export default class Concept {
   /** @param {string} uuid */
@@ -24,7 +25,7 @@ export default class Concept {
     }
   }
 
-  /** @param {import('mu').BindingObject} binding */
+  /** @param {BindingObject} binding */
   constructor({ uri, label }) {
     this.uri = uri.value;
     this.label = label.value;

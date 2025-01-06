@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 
+/** @import { Response } from 'express' */
 import Task from '../models/task';
+/** @import Meeting from '../models/meeting' */
 
 /**
- * @param {import('../models/meeting').default} meeting
+ * @param {Meeting} meeting
  * @param {string} taskType
  * @param {string} [userUri]
  * */
@@ -18,8 +20,8 @@ export async function ensureTask(meeting, taskType, userUri) {
 }
 
 /**
- * @param {import('express').Response} res
- * @param {import('../models/meeting').default} meeting
+ * @param {Response} res
+ * @param {Meeting} meeting
  * @param {string} taskType
  * @param {string} [userUri]
  * */

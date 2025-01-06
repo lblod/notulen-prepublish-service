@@ -1,12 +1,14 @@
 // @ts-strict-ignore
 
 import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
+/** @import { SparqlResponse } from 'mu' */
 import {
   persistContentToFile,
   writeFileMetadataToDb,
   getFileContentForUri,
 } from '../support/file-utils';
 import { prefixMap } from '../support/prefixes';
+
 const AGENDAPOINT_TYPE_PLANNED =
   'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
 
@@ -84,7 +86,7 @@ export default class VersionedNotulen {
     //
     // could arguably also no-op instead of error for sake of idempotence,
     // but this is more explicit
-    /** @type {import('mu').SparqlResponse<true>} */
+    /** @type {SparqlResponse<true>} */
     // @ts-ignore
     const exists = await query(`
       ASK { ${sparqlEscapeUri(versionedNotulenUri)} ?p ?v. }

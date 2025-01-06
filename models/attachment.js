@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 
+/** @import { BindingObject } from 'mu' */
+
 export default class Attachment {
-  /** @param {import('mu').BindingObject} bound */
+  /** @param {BindingObject} bound */
   static fromBinding({ uri, decision, file, type, filename, fileUuid }) {
     return new Attachment({
       uri: uri.value,

@@ -1,7 +1,9 @@
 // @ts-strict-ignore
+
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject, SparqlResponse } from 'mu' */
 import AppError from '../support/error-utils';
 import { prefixMap } from '../support/prefixes';
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
 export default class AgendaPoint {
   static async findAll({ meetingUuid }) {
@@ -30,7 +32,7 @@ export default class AgendaPoint {
          }
       }
    `;
-    /** @type {import('mu').SparqlResponse<ApData>} */
+    /** @type {SparqlResponse<ApData>} */
     // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
@@ -71,7 +73,7 @@ export default class AgendaPoint {
           ?type skos:prefLabel ?typeName.
       }
     }`;
-    /** @type {import('mu').SparqlResponse<ApData>} */
+    /** @type {SparqlResponse<ApData>} */
     // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
@@ -88,7 +90,7 @@ export default class AgendaPoint {
     }
   }
 
-  /** @param {import('mu').BindingObject<ApData>} bound */
+  /** @param {BindingObject<ApData>} bound */
   static fromBinding({
     uri,
     title,
