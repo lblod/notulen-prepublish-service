@@ -46,13 +46,13 @@ async function addVotesToTreatment(treatment) {
   const standardVotes = await StandardVote.findAll({
     treatmentUri: treatment.uri,
   });
+
   const customVotes = await CustomVote.findAll({ treatmentUri: treatment.uri });
-  const votes = [...standardVotes, ...customVotes];
-  votes.sort((a, b) => a.position - b.position);
-  if (votes.length > 0) {
-    // this makes it easier to check if there are votes in the template
-    treatment.votes = votes;
-  }
+
+  standardVotes.sort((a, b) => a.position - b.position);
+  customVotes.sort((a, b) => a.position - b.position);
+  treatment.standardVotes = standardVotes;
+  treatment.customVotes = customVotes;
 }
 
 export function constructHtmlForDecisionList(meeting, treatments) {
