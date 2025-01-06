@@ -80,7 +80,7 @@ function yieldJobId(res, status = 200) {
  */
 function handleWithJob(handler, errorMsgGenerator, status = 200) {
   return async (req, res) => {
-    const jobUuid = yieldJobId(res);
+    const jobUuid = yieldJobId(res, 202);
 
     try {
       const data = await handler(req);

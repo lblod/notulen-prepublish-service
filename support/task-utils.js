@@ -28,7 +28,7 @@ export async function ensureTask(meeting, taskType, userUri) {
 export async function returnEnsuredTaskId(res, meeting, taskType, userUri) {
   const task = await ensureTask(meeting, taskType, userUri);
 
-  res.json({
+  res.status(202).json({
     data: {
       id: task.id,
       status: 'accepted',
