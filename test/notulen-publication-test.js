@@ -1,4 +1,6 @@
 // @ts-nocheck
+// @ts-strict-ignore
+
 import factory from '@rdfjs/dataset';
 import { strict as assert } from 'assert';
 import { before } from 'mocha';

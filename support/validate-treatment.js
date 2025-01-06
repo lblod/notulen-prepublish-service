@@ -1,15 +1,22 @@
 import Decision from '../models/decision';
+/**
+ * @import Treatment from '../models/treatment'
+ */
+
 const errorMessages = {
   nl: {
-    besluitTypeRequired: (title) =>
+    besluitTypeRequired: (/** @type {string} */ title) =>
       `Besluit met titel "${title}" heeft nog geen type, een type is vereist om besluiten correct te publiceren`,
   },
   en: {
-    besluitTypeRequired: (title) =>
+    besluitTypeRequired: (/** @type {string} */ title) =>
       `Decision with title "${title}" does not have a type yet, a type is required to properly publish decisions.`,
   },
 };
 
+/**
+ * @param {Treatment} treatment
+ */
 export default async function validateTreatment(treatment) {
   const errors = [];
   const documentId = treatment.editorDocumentUuid;

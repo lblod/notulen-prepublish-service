@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+
 import Task from '../models/task';
 
 /**

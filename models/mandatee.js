@@ -1,3 +1,5 @@
+// @ts-strict-ignore
+
 export default class Mandatee {
   // eslint doenst like class fields yet?
   // uri;

@@ -1,5 +1,6 @@
+// @ts-strict-ignore
+
 import { prefixMap } from '../support/prefixes';
-// @ts-ignore
 import { sparqlEscapeUri, query } from 'mu';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 import { sortMandatees } from '../support/query-utils';
@@ -8,10 +9,10 @@ export default class StandardVote {
   static async findAll({ treatmentUri }) {
     try {
       const result = await query(`
-         ${prefixMap.get('besluit').toSparqlString()}
-         ${prefixMap.get('schema').toSparqlString()}
-         ${prefixMap.get('dct').toSparqlString()}
-         ${prefixMap.get('mandaat').toSparqlString()}
+         ${prefixMap['besluit'].toSparqlString()}
+         ${prefixMap['schema'].toSparqlString()}
+         ${prefixMap['dct'].toSparqlString()}
+         ${prefixMap['mandaat'].toSparqlString()}
          SELECT DISTINCT * WHERE {
            ${sparqlEscapeUri(treatmentUri)} a besluit:BehandelingVanAgendapunt;
                                             besluit:heeftStemming ?uri.
@@ -96,7 +97,7 @@ export default class StandardVote {
 
   async fetchVoters(participantCache) {
     const attendeesQuery = await query(`
-  ${prefixMap.get('besluit').toSparqlString()}
+  ${prefixMap['besluit'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftAanwezige ?mandatarisUri.
     }
@@ -108,7 +109,7 @@ export default class StandardVote {
     );
     this.attendees = sortMandatees(this.attendees);
     const votersQuery = await query(`
-  ${prefixMap.get('besluit').toSparqlString()}
+  ${prefixMap['besluit'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftStemmer ?mandatarisUri.
     }
@@ -120,7 +121,7 @@ export default class StandardVote {
     );
     this.voters = sortMandatees(this.voters);
     const positiveVotersQuery = await query(`
-  ${prefixMap.get('besluit').toSparqlString()}
+  ${prefixMap['besluit'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftVoorstander ?mandatarisUri.
     }
@@ -132,7 +133,7 @@ export default class StandardVote {
     );
     this.positiveVoters = sortMandatees(this.positiveVoters);
     const negativeVotersQuery = await query(`
-  ${prefixMap.get('besluit').toSparqlString()}
+  ${prefixMap['besluit'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftTegenstander ?mandatarisUri.
     }
@@ -144,7 +145,7 @@ export default class StandardVote {
     );
     this.negativeVoters = sortMandatees(this.negativeVoters);
     const abstentionVotersQuery = await query(`
-  ${prefixMap.get('besluit').toSparqlString()}
+  ${prefixMap['besluit'].toSparqlString()}
     SELECT DISTINCT * WHERE {
       ${sparqlEscapeUri(this.uri)} besluit:heeftOnthouder ?mandatarisUri.
     }

@@ -1,6 +1,7 @@
-// @ts-ignore
+// @ts-nocheck
+// @ts-strict-ignore
+
 import express from 'express';
-// @ts-ignore
 import { uuid } from 'mu';
 import { constructHtmlForAgenda } from '../support/agenda-utils';
 import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter';
@@ -102,7 +103,6 @@ router.get(
       const error = new Error(
         `An error occurred while fetching contents for prepublished agenda ${req.params.zittingIdentifier}: ${err}`
       );
-      // @ts-ignore
       error.status = 500;
       return next(error);
     }
@@ -242,9 +242,7 @@ router.post('/extract-previews', async function (req, res, next) {
       const error = new Error(
         `An error occurred while building the extract preview: ${e}`
       );
-      // @ts-ignore
       console.error(e);
-      // @ts-ignore
       error.status = 500;
       return next(error);
     }

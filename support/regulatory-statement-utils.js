@@ -1,5 +1,4 @@
 import { handleVersionedResource } from './pre-importer';
-// @ts-ignore
 import { query, update, sparqlEscapeUri } from 'mu';
 import { DOCUMENT_PUBLISHED_STATUS } from './constants';
 import VersionedRegulatoryStatement from '../models/versioned-regulatory-statement';
