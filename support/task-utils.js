@@ -10,7 +10,7 @@ export async function ensureTask(meeting, taskType, userUri) {
     ? await Task.query({ meetingUri: meeting.uri, type: taskType, userUri })
     : await Task.query({ meetingUri: meeting.uri, type: taskType });
   if (!task) {
-    task = await Task.create(meeting, taskType);
+    task = await Task.create(meeting, taskType, userUri);
   }
   return task;
 }

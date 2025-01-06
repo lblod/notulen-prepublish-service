@@ -37,7 +37,7 @@ export class TaskError {
 }
 
 export default class Task {
-  static async create(meeting, type) {
+  static async create(meeting, type, userUri) {
     const id = uuid();
     const uri = `http://lblod.data.gift/tasks/${id}`;
     const created = Date.now();
@@ -56,6 +56,7 @@ export default class Task {
         dct:modified ${sparqlEscapeDateTime(created)};
         dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
         dct:type ${sparqlEscapeString(type)};
+        ${userUri ? `nuao:involves ${sparqlEscapeUri(userUri)};` : ''}
         nuao:involves ${sparqlEscapeUri(meeting.uri)}.
     }
   `;
@@ -72,6 +73,9 @@ export default class Task {
   }
 
   static async find(uuid) {
+    // If a userUri is included, this actually finds 2 results as there are 2 `nuao:involves`
+    // triples. This doesn't cause any side effects though as nothing relies on this value here and
+    // all other data is the same.
     const result = await query(`
      ${prefixMap.get('mu').toSparqlString()}
      ${prefixMap.get('nuao').toSparqlString()}
