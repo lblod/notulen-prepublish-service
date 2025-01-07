@@ -23,7 +23,7 @@ import {
   publishVersionedNotulen,
   NOTULEN_KIND_PUBLIC,
 } from '../support/notulen-utils';
-import { ensureTask } from '../support/task-utils';
+import { returnEnsuredTaskId } from '../support/task-utils';
 import {
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
@@ -91,17 +91,11 @@ router.post(
     try {
       const meetingUuid = req.params.zittingIdentifier;
       const meeting = await Meeting.find(meetingUuid);
-      publishingTask = await ensureTask(
+      publishingTask = await returnEnsuredTaskId(
+        res,
         meeting,
         TASK_TYPE_PUBLISHING_DECISION_LIST
       );
-      res.json({
-        data: {
-          id: publishingTask.id,
-          status: 'accepted',
-          type: publishingTask.type,
-        },
-      });
     } catch (err) {
       console.log(err);
       const error = new Error(
@@ -201,18 +195,11 @@ router.post(
     try {
       meetingUuid = req.params.zittingIdentifier;
       meeting = await Meeting.find(meetingUuid);
-      publishingTask = await ensureTask(
+      publishingTask = await returnEnsuredTaskId(
+        res,
         meeting,
         TASK_TYPE_PUBLISHING_MEETING_NOTES
       );
-
-      res.json({
-        data: {
-          id: publishingTask.id,
-          status: 'accepted',
-          type: publishingTask.type,
-        },
-      });
     } catch (err) {
       console.log(err);
       const error = new Error(

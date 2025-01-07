@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils';
 import { sortMandatees } from '../support/query-utils';
 
@@ -40,6 +41,7 @@ export default class StandardVote {
     }
   }
 
+  /** @param {BindingObject} bound */
   static fromBinding({
     uri,
     subject,

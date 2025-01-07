@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 
 export default class SignedResource {
   static async findURI(uri) {
@@ -72,6 +73,7 @@ export default class SignedResource {
     }
   }
 
+  /** @param {BindingObject} bound */
   static fromBinding({
     uri,
     uuid,

@@ -1,7 +1,8 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { sparqlEscapeUri, query } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 
 export default class CustomVote {
   static async findAll({ treatmentUri }) {
@@ -32,6 +33,7 @@ export default class CustomVote {
     }
   }
 
+  /** @param {BindingObject} bound */
   static fromBinding({ uri, position, content, context }) {
     return new CustomVote({
       uri: uri.value,

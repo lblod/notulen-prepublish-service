@@ -1,9 +1,10 @@
 import globals from 'globals';
 import pluginJs from '@eslint/js';
+/** @import { Linter } from 'eslint' */
 import mochaPlugin from 'eslint-plugin-mocha';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 
-/** @type {import('eslint').Linter.Config[]} */
+/** @type {Linter.Config[]} */
 export default [
   pluginJs.configs.recommended,
   mochaPlugin.configs.flat.recommended,

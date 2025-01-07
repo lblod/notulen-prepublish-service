@@ -1,7 +1,9 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject, SparqlResponse } from 'mu' */
+import AppError from '../support/error-utils';
+import { prefixMap } from '../support/prefixes';
 
 export default class AgendaPoint {
   static async findAll({ meetingUuid }) {
@@ -30,6 +32,8 @@ export default class AgendaPoint {
          }
       }
    `;
+    /** @type {SparqlResponse<ApData>} */
+    // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 0) {
       console.warn(
@@ -46,6 +50,7 @@ export default class AgendaPoint {
     }
   }
 
+  /** @param {string} uri */
   static async findURI(uri) {
     const queryString = `
     ${prefixMap['besluit'].toSparqlString()}
@@ -68,15 +73,24 @@ export default class AgendaPoint {
           ?type skos:prefLabel ?typeName.
       }
     }`;
+    /** @type {SparqlResponse<ApData>} */
+    // @ts-ignore Couldn't find a good way to do generic function calls
     const result = await query(queryString);
     if (result.results.bindings.length === 1) {
       return AgendaPoint.fromBinding(result.results.bindings[0]);
+    } else if (result.results.bindings.length > 1) {
+      throw new AppError(
+        500,
+        `multiple agendapoints found for uri ${uri}`,
+        true
+      );
     } else {
       console.warn(`no agendapoint found for uri ${uri}`);
       return [];
     }
   }
 
+  /** @param {BindingObject<ApData>} bound */
   static fromBinding({
     uri,
     title,
@@ -99,6 +113,18 @@ export default class AgendaPoint {
     });
   }
 
+  /**
+    @typedef {object} ApData
+    @property {string} uri
+    @property {string} title
+    @property {string} position
+    @property {boolean} plannedPublic
+    @property {string | null} [addedAfter = null]
+    @property {string | null} [description = null]
+    @property {string | null} [type = null]
+    @property {string | null} [typeName = null]
+*/
+  /** @param {ApData} args */
   constructor({
     uri,
     title,

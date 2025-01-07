@@ -3,8 +3,10 @@
 import { prefixMap } from '../support/prefixes';
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
 import validateMeeting from '../support/validate-meeting';
 import { articlesBasedOnClassifcationMap } from '../support/classification-utils';
+import AppError from '../support/error-utils';
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 
@@ -52,6 +54,7 @@ export default class Meeting {
     this.optimizeSpaces = optimizeSpaces;
   }
 
+  /** @param {string} uri */
   static async findURI(uri) {
     const queryString = `
     ${prefixMap['ext'].toSparqlString()}
@@ -89,12 +92,20 @@ export default class Meeting {
       }
     }`;
     const result = await query(queryString);
-    if (result.results.bindings.length !== 1) {
-      throw `found ${result.results.bindings.length} meetings for uri ${uri}`;
+    if (result.results.bindings.length === 1) {
+      return Meeting.fromBinding(result.results.bindings[0]);
+    } else if (result.results.bindings.length > 1) {
+      throw new AppError(
+        500,
+        `found ${result.results.bindings.length} meetings for uri ${uri}`,
+        true
+      );
+    } else {
+      throw new AppError(404, `found no meeting for uri ${uri}`, true);
     }
-    return Meeting.fromBinding(result.results.bindings[0]);
   }
 
+  /** @param {string} uuid */
   static async find(uuid) {
     const queryString = `
     ${prefixMap['ext'].toSparqlString()}
@@ -133,12 +144,20 @@ export default class Meeting {
       }
     }`;
     const result = await query(queryString);
-    if (result.results.bindings.length !== 1) {
-      throw `found ${result.results.bindings.length} meetings for id ${uuid}`;
+    if (result.results.bindings.length === 1) {
+      return Meeting.fromBinding(result.results.bindings[0]);
+    } else if (result.results.bindings.length > 1) {
+      throw new AppError(
+        500,
+        `found ${result.results.bindings.length} meetings for id ${uuid}`,
+        true
+      );
+    } else {
+      throw new AppError(404, `found no meeting for id ${uuid}`, true);
     }
-    return Meeting.fromBinding(result.results.bindings[0]);
   }
 
+  /** @param {BindingObject} binding */
   static fromBinding(binding) {
     return new Meeting({
       uuid: binding.uuid.value,
@@ -156,6 +175,7 @@ export default class Meeting {
     });
   }
 
+  /** @param {string} adminBodyUri */
   generateAdminBodyArticle(adminBodyUri) {
     return articlesBasedOnClassifcationMap[adminBodyUri];
   }

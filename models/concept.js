@@ -1,9 +1,11 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
 import { query, sparqlEscapeString } from 'mu';
+/** @import { BindingObject } from 'mu' */
+import { prefixMap } from '../support/prefixes';
 
 export default class Concept {
+  /** @param {string} uuid */
   static async find(uuid) {
     const queryString = `
       ${prefixMap['mu'].toSparqlString()}
@@ -23,6 +25,7 @@ export default class Concept {
     }
   }
 
+  /** @param {BindingObject} binding */
   constructor({ uri, label }) {
     this.uri = uri.value;
     this.label = label.value;
