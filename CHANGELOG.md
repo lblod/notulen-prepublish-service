@@ -10,6 +10,24 @@
 
 
 
+
+## 2.6.0 (2025-01-07)
+
+#### :rocket: Enhancement
+* [#124](https://github.com/lblod/notulen-prepublish-service/pull/124) Improve error handling for multiple results ([@piemonkey](https://github.com/piemonkey))
+
+#### :bug: Bug Fix
+* [#121](https://github.com/lblod/notulen-prepublish-service/pull/121) GN-5336: hide 'stemmingen' title when there are no standard votes ([@elpoelma](https://github.com/elpoelma))
+* [#123](https://github.com/lblod/notulen-prepublish-service/pull/123) Fix checking of user ids when limiting running tasks ([@piemonkey](https://github.com/piemonkey))
+
+#### :house: Internal
+* [#120](https://github.com/lblod/notulen-prepublish-service/pull/120) Improved jsdoc/type-checking setup ([@elpoelma](https://github.com/elpoelma))
+* [#122](https://github.com/lblod/notulen-prepublish-service/pull/122) Update base image to 1.8.0 and node version to 20.11.0 ([@elpoelma](https://github.com/elpoelma))
+
+#### Committers: 2
+- Elena Poelman ([@elpoelma](https://github.com/elpoelma))
+- [@piemonkey](https://github.com/piemonkey)
+
 ## 2.5.2 (2024-12-05)
 
 #### :bug: Bug Fix
