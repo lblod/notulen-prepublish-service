@@ -185,7 +185,7 @@ function appendAttachmentsToDocument(
       previewType
     );
     const decisionContainer = dom.window.document.querySelector(
-      `[resource="${decisionKey}"]`
+      `[about="${decisionKey}"]`
     );
     if (decisionContainer) {
       decisionContainer.insertAdjacentHTML('beforeend', htmlToAdd);
