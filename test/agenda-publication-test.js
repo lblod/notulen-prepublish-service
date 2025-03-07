@@ -3,11 +3,11 @@
 
 import { strict as assert, equal } from 'assert';
 import { before } from 'mocha';
-import { setupHandleBars } from '../support/setup-handlebars';
-import { constructHtmlForAgendaFromData } from '../support/agenda-utils';
-import Meeting from '../models/meeting';
-import AgendaPoint from '../models/agendapoint';
-import { loadDataset, htmlToRdf, shaclReportToMessage } from './helpers';
+import { setupHandleBars } from "../support/setup-handlebars.js";
+import { constructHtmlForAgendaFromData } from "../support/agenda-utils.js";
+import Meeting from "../models/meeting.js";
+import AgendaPoint from "../models/agendapoint.js";
+import { loadDataset, htmlToRdf, shaclReportToMessage } from "./helpers.js";
 import factory from '@rdfjs/dataset';
 import SHACLValidator from 'rdf-validate-shacl';
 

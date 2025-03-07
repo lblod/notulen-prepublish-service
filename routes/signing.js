@@ -2,49 +2,49 @@
 // @ts-strict-ignore
 
 import express from 'express';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import SignedResource from '../models/signed-resource';
-import { returnEnsuredTaskId } from '../support/task-utils';
+import Meeting from "../models/meeting.js";
+import Treatment from "../models/treatment.js";
+import SignedResource from "../models/signed-resource.js";
+import { returnEnsuredTaskId } from "../support/task-utils.js";
 import {
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
   TASK_TYPE_SIGNING_MEETING_NOTES,
-} from '../models/task';
-import validateMeeting from '../support/validate-meeting';
-import validateTreatment from '../support/validate-treatment';
+} from "../models/task.js";
+import validateMeeting from "../support/validate-meeting.js";
+import validateTreatment from "../support/validate-treatment.js";
 import {
   ensureVersionedAgendaForMeeting,
   signVersionedAgenda,
-} from '../support/agenda-utils';
+} from "../support/agenda-utils.js";
 import {
   ensureVersionedBesluitenLijstForZitting,
   signVersionedBesluitenlijst,
-} from '../support/besluit-exporter';
+} from "../support/besluit-exporter.js";
 import {
   ensureVersionedNotulen,
   NOTULEN_KIND_FULL,
   signVersionedNotulen,
-} from '../support/notulen-utils';
+} from "../support/notulen-utils.js";
 import {
   ensureVersionedExtract,
   signVersionedExtract,
-} from '../support/extract-utils';
-import { fetchCurrentUser } from '../support/query-utils';
+} from "../support/extract-utils.js";
+import { fetchCurrentUser } from "../support/query-utils.js";
 import {
   getCurrentVersion,
   getLinkedDocuments,
-} from '../support/editor-document-utils';
+} from "../support/editor-document-utils.js";
 import {
   ensureVersionedRegulatoryStatement,
   signVersionedRegulatoryStatement,
-} from '../support/regulatory-statement-utils';
-import { getUri } from '../support/resource-utils';
+} from "../support/regulatory-statement-utils.js";
+import { getUri } from "../support/resource-utils.js";
 
-import { parseBody } from '../support/parse-body';
-import VersionedExtract from '../models/versioned-behandeling';
+import { parseBody } from "../support/parse-body.js";
+import VersionedExtract from "../models/versioned-behandeling.js";
 
 const router = express.Router();
 

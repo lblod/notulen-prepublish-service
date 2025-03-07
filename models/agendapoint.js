@@ -2,8 +2,8 @@
 
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 /** @import { BindingObject, SparqlResponse } from 'mu' */
-import AppError from '../support/error-utils';
-import { prefixMap } from '../support/prefixes';
+import AppError from "../support/error-utils.js";
+import { prefixMap } from "../support/prefixes.js";
 
 export default class AgendaPoint {
   static async findAll({ meetingUuid }) {

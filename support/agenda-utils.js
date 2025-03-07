@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 
-import { PUBLISHER_TEMPLATES } from './setup-handlebars';
-import { prefixes } from './prefixes';
-import Meeting from '../models/meeting';
-import AgendaPoint from '../models/agendapoint';
-import VersionedAgenda from '../models/versioned-agenda';
-import Concept from '../models/concept';
-import { handleVersionedResource } from './pre-importer';
+import { PUBLISHER_TEMPLATES } from "./setup-handlebars.js";
+import { prefixes } from "./prefixes.js";
+import Meeting from "../models/meeting.js";
+import AgendaPoint from "../models/agendapoint.js";
+import VersionedAgenda from "../models/versioned-agenda.js";
+import Concept from "../models/concept.js";
+import { handleVersionedResource } from "./pre-importer.js";
 /**
  * This file contains helpers for exporting, signing and publishing content from the agenda.
  */

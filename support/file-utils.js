@@ -3,7 +3,7 @@
 import { stat, writeFile, readFile } from 'fs/promises';
 import { uuid, update } from 'mu';
 import { sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu';
-import { prefixMap } from '../support/prefixes';
+import { prefixMap } from "../support/prefixes.js";
 /**
  * reads a file from the shared drive and returns its content
  * @param {string} shareUri the uri of the file to read

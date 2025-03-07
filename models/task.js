@@ -10,7 +10,7 @@ import {
   update,
   uuid,
 } from 'mu';
-import { prefixMap } from '../support/prefixes';
+import { prefixMap } from "../support/prefixes.js";
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';
 export const TASK_TYPE_PUBLISHING_DECISION_LIST = 'decisionListPublication';

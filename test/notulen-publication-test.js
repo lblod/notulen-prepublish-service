@@ -5,17 +5,17 @@ import factory from '@rdfjs/dataset';
 import { strict as assert } from 'assert';
 import { before } from 'mocha';
 import SHACLValidator from 'rdf-validate-shacl';
-import AgendaPoint from '../models/agendapoint';
-import Intermission from '../models/intermission';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import Attachment from '../models/attachment';
-import { constructHtmlForMeetingNotesFromData } from '../support/notulen-utils';
-import { prefixes } from '../support/prefixes';
-import { setupHandleBars } from '../support/setup-handlebars';
-import { htmlToRdf, loadDataset, shaclReportToMessage } from './helpers';
-import { appendAttachmentsToDocument } from '../support/editor-document';
-import { IS_FINAL } from '../support/constants';
+import AgendaPoint from "../models/agendapoint.js";
+import Intermission from "../models/intermission.js";
+import Meeting from "../models/meeting.js";
+import Treatment from "../models/treatment.js";
+import Attachment from "../models/attachment.js";
+import { constructHtmlForMeetingNotesFromData } from "../support/notulen-utils.js";
+import { prefixes } from "../support/prefixes.js";
+import { setupHandleBars } from "../support/setup-handlebars.js";
+import { htmlToRdf, loadDataset, shaclReportToMessage } from "./helpers.js";
+import { appendAttachmentsToDocument } from "../support/editor-document.js";
+import { IS_FINAL } from "../support/constants.js";
 
 const person1 = {
   uri: 'http://my-example.org/mandatee/1',

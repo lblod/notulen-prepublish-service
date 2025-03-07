@@ -1,45 +1,45 @@
 // @ts-strict-ignore
 
 import express from 'express';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import validateMeeting from '../support/validate-meeting';
-import validateTreatment from '../support/validate-treatment';
+import Meeting from "../models/meeting.js";
+import Treatment from "../models/treatment.js";
+import validateMeeting from "../support/validate-meeting.js";
+import validateTreatment from "../support/validate-treatment.js";
 import {
   ensureVersionedAgendaForMeeting,
   publishVersionedAgenda,
-} from '../support/agenda-utils';
+} from "../support/agenda-utils.js";
 import {
   ensureVersionedBesluitenLijstForZitting,
   publishVersionedBesluitenlijst,
-} from '../support/besluit-exporter';
+} from "../support/besluit-exporter.js";
 import {
   ensureVersionedExtract,
   publishVersionedExtract,
   isPublished,
-} from '../support/extract-utils';
+} from "../support/extract-utils.js";
 import {
   ensureVersionedNotulen,
   publishVersionedNotulen,
   NOTULEN_KIND_PUBLIC,
-} from '../support/notulen-utils';
-import { returnEnsuredTaskId } from '../support/task-utils';
+} from "../support/notulen-utils.js";
+import { returnEnsuredTaskId } from "../support/task-utils.js";
 import {
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_PUBLISHING_DECISION_LIST,
   TASK_TYPE_PUBLISHING_MEETING_NOTES,
-} from '../models/task';
+} from "../models/task.js";
 import {
   getCurrentVersion,
   getLinkedDocuments,
-} from '../support/editor-document-utils';
-import { getUri } from '../support/resource-utils';
+} from "../support/editor-document-utils.js";
+import { getUri } from "../support/resource-utils.js";
 import {
   ensureVersionedRegulatoryStatement,
   publishVersionedRegulatoryStatement,
-} from '../support/regulatory-statement-utils';
+} from "../support/regulatory-statement-utils.js";
 
 const router = express.Router();
 

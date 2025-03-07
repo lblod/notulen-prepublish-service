@@ -3,12 +3,12 @@
 
 import { strict as assert } from 'assert';
 import { before } from 'mocha';
-import { setupHandleBars } from '../support/setup-handlebars';
-import { constructHtmlForDecisionList } from '../support/besluit-exporter';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import Decision from '../models/decision';
-import { loadDataset, htmlToRdf, shaclReportToMessage } from './helpers';
+import { setupHandleBars } from "../support/setup-handlebars.js";
+import { constructHtmlForDecisionList } from "../support/besluit-exporter.js";
+import Meeting from "../models/meeting.js";
+import Treatment from "../models/treatment.js";
+import Decision from "../models/decision.js";
+import { loadDataset, htmlToRdf, shaclReportToMessage } from "./helpers.js";
 import factory from '@rdfjs/dataset';
 import SHACLValidator from 'rdf-validate-shacl';
 

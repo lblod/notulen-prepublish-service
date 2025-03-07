@@ -2,7 +2,7 @@
 
 import { query, sparqlEscapeString } from 'mu';
 /** @import { BindingObject } from 'mu' */
-import { prefixMap } from '../support/prefixes';
+import { prefixMap } from "../support/prefixes.js";
 
 export default class Concept {
   /** @param {string} uuid */

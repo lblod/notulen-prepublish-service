@@ -6,8 +6,8 @@ import {
   persistContentToFile,
   writeFileMetadataToDb,
   getFileContentForUri,
-} from '../support/file-utils';
-import { prefixMap } from '../support/prefixes';
+} from "../support/file-utils.js";
+import { prefixMap } from "../support/prefixes.js";
 
 const AGENDAPOINT_TYPE_PLANNED =
   'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';

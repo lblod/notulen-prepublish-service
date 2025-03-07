@@ -8,13 +8,13 @@ import {
   update,
   uuid,
 } from 'mu';
-import { prefixMap } from './prefixes';
-import { signDocument } from './sign-document';
+import { prefixMap } from "./prefixes.js";
+import { signDocument } from "./sign-document.js";
 import {
   getFileContentForUri,
   persistContentToFile,
   writeFileMetadataToDb,
-} from './file-utils';
+} from "./file-utils.js";
 
 function cleanupTriples(triples) {
   const cleantriples = {};
