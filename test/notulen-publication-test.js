@@ -141,51 +141,68 @@ const treatmentData1 = {
   articleNumber: Number(agendapoint1.position) + 1,
   attachments: [attachment1],
   votes: [stemming],
-  content: `<div property="prov:generated" about="http://my-example.org/besluit/1" typeof="http://data.vlaanderen.be/ns/besluit#Besluit http://mu.semte.ch/vocabularies/ext/BesluitNieuweStijl https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793" data-editor-position-level="3" data-editor-rdfa-position-level="2"><span property="ext:hiddenBesluitType" class="u-hidden">https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793</span>
-      <p>Openbare titel besluit:</p>
-      <h4 class="h4" property="eli:title" datatype="xsd:string">Title 1</h4>
-      <span style="display:none;" property="eli:language" about="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept">&nbsp;</span>
-      <br>
-      <p>Korte openbare beschrijving:</p>
-      <p property="eli:description" datatype="xsd:string">Description 1</p>
-      <br>
-
-      <div property="besluit:motivering" lang="nl" data-editor-position-level="2" data-editor-rdfa-position-level="1">
-        <p>
-          <span class="mark-highlight-manual">geef bestuursorgaan op</span>,
-        </p>
-        <br>
-
-        <h5 data-editor-position-level="1">Bevoegdheid</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Rechtsgrond die bepaalt dat dit orgaan bevoegd is.</span></li></ul>
-        <br>
-
-        <h5>Juridische context</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Voeg juridische context in</span></li></ul>
-        <br>
-
-        <h5>Feitelijke context en argumentatie</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Voeg context en argumentatie in</span></li></ul>
-      </div>
-      <br>
-      <br>
-
-      <h5>Beslissing</h5>
-
-      <div property="prov:value" datatype="xsd:string">
-        <div property="eli:has_part" about="http://data.lblod.info/artikels/9176600b-2c48-4774-864d-c648c84b5232" typeof="besluit:Artikel">
-          <div property="eli:number" datatype="xsd:string">Artikel 1</div>
-          <span style="display:none;" property="eli:language" about="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept">&nbsp;</span>
-          <div property="prov:value" datatype="xsd:string">
-            <span class="mark-highlight-manual">Voer inhoud in</span>
-          </div>
+  content: `<div class="say-editable say-block-rdfa" data-label="Besluit" about="http://my-example.org/besluit/1">
+  <div style="display: none" class="say-hidden" data-rdfa-container="true"><span about="http://my-example.org/besluit/1" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://data.vlaanderen.be/ns/besluit#Besluit"></span><span about="http://my-example.org/besluit/1" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://mu.semte.ch/vocabularies/ext/BesluitNieuweStijl"></span><span about="http://my-example.org/besluit/1" property="http://data.europa.eu/eli/ontology#language" resource="http://publications.europa.eu/resource/authority/language/NLD"></span><span about="http://my-example.org/besluit/1" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793"></span><span rev="http://www.w3.org/ns/prov#generated" resource="http://my-example.org/behandeling/1"></span></div>
+  <div data-content-container="true">
+     <div class="say-editable say-block-rdfa" data-label="Openbare titel besluit" about="http://my-example.org/besluit/1" property="http://data.europa.eu/eli/ontology#title" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <h4 data-indentation-level="0" style="" level="4" indentationlevel="0" alignment="left" class="say-heading"><span class="mark-highlight-manual say-placeholder" placeholdertext="Geef titel besluit op" contenteditable="false">Geef titel besluit op</span></h4>
         </div>
-        <br>
-        <div class="mark-highlight-manual"><span data-editor-highlight="true">Voeg nieuw artikel in</span></div> 
-        <br>
-      </div>
-
-    </div>`,
+     </div>
+     <div class="say-editable say-block-rdfa" data-label="Korte openbare beschrijving" about="http://my-example.org/besluit/1" property="http://data.europa.eu/eli/ontology#description" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Geef korte beschrijving op" contenteditable="false">Geef korte beschrijving op</span></p>
+        </div>
+     </div>
+     <div class="say-editable say-block-rdfa" data-label="Motivering" about="http://my-example.org/besluit/1" property="http://data.vlaanderen.be/ns/besluit#motivering" lang="nl" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="geef bestuursorgaan op" contenteditable="false">geef bestuursorgaan op</span>,</p>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Bevoegdheid</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Rechtsgrond die bepaalt dat dit orgaan bevoegd is." contenteditable="false">Rechtsgrond die bepaalt dat dit orgaan bevoegd is.</span></p>
+              </li>
+           </ul>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Juridische context</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voeg juridische context in" contenteditable="false">Voeg juridische context in</span></p>
+              </li>
+           </ul>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Feitelijke context en argumentatie</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voeg context en argumentatie in" contenteditable="false">Voeg context en argumentatie in</span></p>
+              </li>
+           </ul>
+        </div>
+     </div>
+     <p class="say-paragraph"><br class="say-hard-break"><br class="say-hard-break"></p>
+     <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Beslissing</h5>
+     <div class="say-editable say-block-rdfa" data-label="Artikels" about="http://my-example.org/besluit/1" property="http://www.w3.org/ns/prov#value" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <div data-say-render-as="structure" data-say-has-title="false" data-say-structure-type="article" data-say-header-format="name" data-say-header-tag="h5" data-say-number="1" data-say-romanize="false" data-say-is-only-article="true" about="http://data.lblod.info/artikels/--ref-uuid4-7a0552ff-4fb1-4e42-98d6-dd88faf60f0c" property="http://www.w3.org/ns/prov#value" datatype="http://www.w3.org/2001/XMLSchema#string" lang="">
+              <div style="display: none" class="say-hidden" data-rdfa-container="true"><span about="http://data.lblod.info/artikels/--ref-uuid4-7a0552ff-4fb1-4e42-98d6-dd88faf60f0c" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://data.vlaanderen.be/ns/besluit#Artikel"></span><span rev="http://data.europa.eu/eli/ontology#has_part" resource="http://my-example.org/besluit/1"></span></div>
+              <div data-content-container="true">
+                 <div>
+                    <h5><span data-say-structure-header-name="true">Enig artikel </span><span style="display: none;" data-say-structure-header-number="true" property="http://data.europa.eu/eli/ontology#number" datatype="http://www.w3.org/2001/XMLSchema#string">1</span></h5>
+                    <div property="https://say.data.gift/ns/body" datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral">
+                       <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voer inhoud in" contenteditable="false">Voer inhoud in</span></p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+  </div>
+</div>`,
 };
 
 const treatmentData2 = {
@@ -202,51 +219,68 @@ const treatmentData2 = {
   meeting: meeting,
   prefixes,
   articleNumber: Number(agendapoint2.position) + 1,
-  content: `<div property="prov:generated" about="http://my-example.org/besluit/2" typeof="http://data.vlaanderen.be/ns/besluit#Besluit http://mu.semte.ch/vocabularies/ext/BesluitNieuweStijl https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793" data-editor-position-level="3" data-editor-rdfa-position-level="2"><span property="ext:hiddenBesluitType" class="u-hidden">https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793</span>
-      <p>Openbare titel besluit:</p>
-      <h4 class="h4" property="eli:title" datatype="xsd:string">Title 2</h4>
-      <span style="display:none;" property="eli:language" about="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept">&nbsp;</span>
-      <br>
-      <p>Korte openbare beschrijving:</p>
-      <p property="eli:description" datatype="xsd:string">Description 2</p>
-      <br>
-
-      <div property="besluit:motivering" lang="nl" data-editor-position-level="2" data-editor-rdfa-position-level="1">
-        <p>
-          <span class="mark-highlight-manual">geef bestuursorgaan op</span>,
-        </p>
-        <br>
-
-        <h5 data-editor-position-level="1">Bevoegdheid</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Rechtsgrond die bepaalt dat dit orgaan bevoegd is.</span></li></ul>
-        <br>
-
-        <h5>Juridische context</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Voeg juridische context in</span></li></ul>
-        <br>
-
-        <h5>Feitelijke context en argumentatie</h5>
-        <ul class="bullet-list"><li><span class="mark-highlight-manual">Voeg context en argumentatie in</span></li></ul>
-      </div>
-      <br>
-      <br>
-
-      <h5>Beslissing</h5>
-
-      <div property="prov:value" datatype="xsd:string">
-        <div property="eli:has_part" about="http://data.lblod.info/artikels/9176600b-2c48-4774-864d-c648c84b5232" typeof="besluit:Artikel">
-          <div property="eli:number" datatype="xsd:string">Artikel 1</div>
-          <span style="display:none;" property="eli:language" about="http://publications.europa.eu/resource/authority/language/NLD" typeof="skos:Concept">&nbsp;</span>
-          <div property="prov:value" datatype="xsd:string">
-            <span class="mark-highlight-manual">Voer inhoud in</span>
-          </div>
+  content: `<div class="say-editable say-block-rdfa" data-label="Besluit" about="http://my-example.org/besluit/2">
+  <div style="display: none" class="say-hidden" data-rdfa-container="true"><span about="http://my-example.org/besluit/2" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://data.vlaanderen.be/ns/besluit#Besluit"></span><span about="http://my-example.org/besluit/2" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://mu.semte.ch/vocabularies/ext/BesluitNieuweStijl"></span><span about="http://my-example.org/besluit/2" property="http://data.europa.eu/eli/ontology#language" resource="http://publications.europa.eu/resource/authority/language/NLD"></span><span about="http://my-example.org/besluit/2" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="https://data.vlaanderen.be/id/concept/BesluitType/e96ec8af-6480-4b32-876a-fefe5f0a3793"></span><span rev="http://www.w3.org/ns/prov#generated" resource="http://my-example.org/behandeling/2"></span></div>
+  <div data-content-container="true">
+     <div class="say-editable say-block-rdfa" data-label="Openbare titel besluit" about="http://my-example.org/besluit/2" property="http://data.europa.eu/eli/ontology#title" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <h4 data-indentation-level="0" style="" level="4" indentationlevel="0" alignment="left" class="say-heading"><span class="mark-highlight-manual say-placeholder" placeholdertext="Geef titel besluit op" contenteditable="false">Geef titel besluit op</span></h4>
         </div>
-        <br>
-        <div class="mark-highlight-manual"><span data-editor-highlight="true">Voeg nieuw artikel in</span></div> 
-        <br>
-      </div>
-
-    </div>`,
+     </div>
+     <div class="say-editable say-block-rdfa" data-label="Korte openbare beschrijving" about="http://my-example.org/besluit/2" property="http://data.europa.eu/eli/ontology#description" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Geef korte beschrijving op" contenteditable="false">Geef korte beschrijving op</span></p>
+        </div>
+     </div>
+     <div class="say-editable say-block-rdfa" data-label="Motivering" about="http://my-example.org/besluit/2" property="http://data.vlaanderen.be/ns/besluit#motivering" lang="nl" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="geef bestuursorgaan op" contenteditable="false">geef bestuursorgaan op</span>,</p>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Bevoegdheid</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Rechtsgrond die bepaalt dat dit orgaan bevoegd is." contenteditable="false">Rechtsgrond die bepaalt dat dit orgaan bevoegd is.</span></p>
+              </li>
+           </ul>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Juridische context</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voeg juridische context in" contenteditable="false">Voeg juridische context in</span></p>
+              </li>
+           </ul>
+           <p class="say-paragraph"><br class="say-hard-break"></p>
+           <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Feitelijke context en argumentatie</h5>
+           <ul style="unordered" hierarchical="false" class="say-bullet-list">
+              <li class="say-list-item" data-list-marker="1. ">
+                 <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voeg context en argumentatie in" contenteditable="false">Voeg context en argumentatie in</span></p>
+              </li>
+           </ul>
+        </div>
+     </div>
+     <p class="say-paragraph"><br class="say-hard-break"><br class="say-hard-break"></p>
+     <h5 data-indentation-level="0" style="" level="5" indentationlevel="0" alignment="left" class="say-heading">Beslissing</h5>
+     <div class="say-editable say-block-rdfa" data-label="Artikels" about="http://my-example.org/besluit/2" property="http://www.w3.org/ns/prov#value" datatype="http://www.w3.org/2001/XMLSchema#string" lang="" data-literal-node="true">
+        <div style="display: none" class="say-hidden" data-rdfa-container="true"></div>
+        <div data-content-container="true">
+           <div data-say-render-as="structure" data-say-has-title="false" data-say-structure-type="article" data-say-header-format="name" data-say-header-tag="h5" data-say-number="1" data-say-romanize="false" data-say-is-only-article="true" about="http://data.lblod.info/artikels/--ref-uuid4-7a0552ff-4fb1-4e42-98d6-dd88faf60f0c" property="http://www.w3.org/ns/prov#value" datatype="http://www.w3.org/2001/XMLSchema#string" lang="">
+              <div style="display: none" class="say-hidden" data-rdfa-container="true"><span about="http://data.lblod.info/artikels/--ref-uuid4-7a0552ff-4fb1-4e42-98d6-dd88faf60f0c" property="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" resource="http://data.vlaanderen.be/ns/besluit#Artikel"></span><span rev="http://data.europa.eu/eli/ontology#has_part" resource="http://my-example.org/besluit/2"></span></div>
+              <div data-content-container="true">
+                 <div>
+                    <h5><span data-say-structure-header-name="true">Enig artikel </span><span style="display: none;" data-say-structure-header-number="true" property="http://data.europa.eu/eli/ontology#number" datatype="http://www.w3.org/2001/XMLSchema#string">1</span></h5>
+                    <div property="https://say.data.gift/ns/body" datatype="http://www.w3.org/1999/02/22-rdf-syntax-ns#XMLLiteral">
+                       <p class="say-paragraph"><span class="mark-highlight-manual say-placeholder" placeholdertext="Voer inhoud in" contenteditable="false">Voer inhoud in</span></p>
+                    </div>
+                 </div>
+              </div>
+           </div>
+        </div>
+     </div>
+  </div>
+</div>`,
 };
 
 const intermission = new Intermission({
@@ -548,32 +582,28 @@ describe('notulen publication template', function () {
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
       factory.namedNode(
-        `http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`
+        `http://my-example.org/files/${attachment1.fileUuid}/download`
       )
     );
 
     const attachment1ReverseQuad = factory.quad(
       factory.namedNode(
-        `http://my-example.org/files/${attachment1.fileUuid}/download?name=${attachment1.filename}`
+        `http://my-example.org/files/${attachment1.fileUuid}/download`
       ),
       factory.namedNode('dct:isPartOf'),
-      factory.literal(
-        'http://my-example.org/besluit/1',
-        'http://www.w3.org/2001/XMLSchema#string'
-      )
+      factory.namedNode('http://my-example.org/besluit/1')
     );
 
     const attachment2Quad = factory.quad(
       factory.namedNode('http://my-example.org/besluit/1'),
       factory.namedNode('eli:related_to'),
       factory.namedNode(
-        `http://my-example.org/files/${attachment2.fileUuid}/download?name=${attachment2.filename}`
+        `http://my-example.org/files/${attachment2.fileUuid}/download`
       )
     );
-
     assert(dataset.has(attachment1Quad));
-    //assert(dataset.has(attachment1ReverseQuad));
-    //assert(dataset.has(attachment2Quad));
+    assert(dataset.has(attachment1ReverseQuad));
+    assert(dataset.has(attachment2Quad));
   });
 
   it('validates the basic shacl profile', async function () {
