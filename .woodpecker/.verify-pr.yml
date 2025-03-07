@@ -15,6 +15,8 @@ steps:
     image: docker
     commands:
       - docker run --rm -v `pwd`:/app -e NODE_ENV=test -e PUBLICATION_BASE_URL=http://my-example.org --name foo nvdk/mu-javascript-template
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
 when:
   event:
     - pull_request
