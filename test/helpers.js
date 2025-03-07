@@ -3,9 +3,7 @@
 import fs from 'fs';
 import factory from '@rdfjs/dataset';
 import { Parser as ParserN3 } from 'n3';
-import { analyse as analyseRdfa } from '@lblod/marawa/rdfa-context-scanner';
 import { RdfaParser } from 'rdfa-streaming-parser';
-import jsdom from 'jsdom';
 
 export async function loadDataset(filepath) {
   const file = fs.readFileSync(filepath, 'utf-8');

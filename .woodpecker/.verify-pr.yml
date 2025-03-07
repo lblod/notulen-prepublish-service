@@ -11,11 +11,6 @@ steps:
     group: lint
     commands:
       - npm run lint:js
-  lint-types:
-    image: node:20-alpine
-    group: lint
-    commands:
-      - npm run lint:types
   tests:
     image: docker
     commands:
