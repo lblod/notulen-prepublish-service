@@ -11,6 +11,15 @@
 
 
 
+
+## 2.6.1 (2025-03-07)
+
+#### :bug: Bug Fix
+* [#125](https://github.com/lblod/notulen-prepublish-service/pull/125) Correctly target besluit container ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 2.6.0 (2025-01-07)
 
 #### :rocket: Enhancement
