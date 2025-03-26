@@ -1,33 +1,21 @@
 steps:
-  install:
-    image: node:20-alpine
-    commands:
-      - npm i
-      # Our lockfile is incompatible with the version of npm used with node:14. The old scripts just
-      # `npm i`, so we do that. We should update to a sane node version and change this.
-      # - npm ci
-  lint-js:
-    image: node:20-alpine
-    group: lint
-    commands:
-      - npm run lint:js
   tests:
     image: semtech/mu-javascript-template:latest
-    working_dir: /app
     group: tests
+    environment:
+      NODE_ENV: "development"
     commands:
       # complexer then it should be, should be f
-      - cat package.json
-      - pwd
+      - mkdir -p /usr/src/app/app/node_modules && cp -r ./ /usr/src/app/app
+      # merge package uses /app
+      - cp -r ./ /app/
       - cd /usr/src/app
-      - cp -r /app ./
       - ./prepare-package-json.sh
       - ./transpile-sources.sh
-      - cd /usr/src/app/app/
+      - cd /usr/src/dist/
       - npm install
-      - cat package.json
+      - npm run lint:js
       - npm run test
-
 when:
   event:
     - pull_request
