@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
-/** @import { BindingObject, SparqlResponse } from 'mu' */
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu/sparql.js';
+/** @import { BindingObject, SparqlResponse } from 'mu/sparql.js' */
 import AppError from "../support/error-utils.js";
 import { prefixMap } from "../support/prefixes.js";
 

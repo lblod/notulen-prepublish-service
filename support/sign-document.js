@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 
-import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu';
+import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu/sparql.js';
 import { prefixMap } from "./prefixes.js";
 import { createHash } from 'crypto';
 import { getFileContentForUri } from "./file-utils.js";

@@ -8,8 +8,8 @@ import {
   sparqlEscapeString,
   sparqlEscapeUri,
   update,
-  uuid,
-} from 'mu';
+} from 'mu/sparql.js';
+import { v1 as uuid } from 'uuid';
 import { prefixMap } from "../support/prefixes.js";
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';

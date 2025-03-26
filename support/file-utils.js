@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
 import { stat, writeFile, readFile } from 'fs/promises';
-import { uuid, update } from 'mu';
-import { sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu';
+import { v1 as uuid } from 'uuid';
+import { update, sparqlEscapeUri, sparqlEscapeString, sparqlEscapeDateTime } from 'mu/sparql.js';
 import { prefixMap } from "../support/prefixes.js";
 /**
  * reads a file from the shared drive and returns its content

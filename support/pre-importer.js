@@ -6,8 +6,8 @@ import {
   sparqlEscapeString,
   sparqlEscapeUri,
   update,
-  uuid,
-} from 'mu';
+} from 'mu/sparql.js';
+import { v1 as uuid } from 'uuid';
 import { prefixMap } from "./prefixes.js";
 import { signDocument } from "./sign-document.js";
 import {

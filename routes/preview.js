@@ -2,7 +2,7 @@
 
 import express from 'express';
 /** @import { Request, RequestHandler, Response } from 'express' */
-import { uuid } from 'mu';
+import { v1 as uuid } from 'uuid';
 import { constructHtmlForAgenda } from "../support/agenda-utils.js";
 import { buildBesluitenLijstForMeetingId } from "../support/besluit-exporter.js";
 import {

@@ -5,17 +5,18 @@ import factory from '@rdfjs/dataset';
 import { strict as assert } from 'assert';
 import { before } from 'mocha';
 import SHACLValidator from 'rdf-validate-shacl';
-import AgendaPoint from "../models/agendapoint.js";
-import Intermission from "../models/intermission.js";
-import Meeting from "../models/meeting.js";
-import Treatment from "../models/treatment.js";
-import Attachment from "../models/attachment.js";
-import { constructHtmlForMeetingNotesFromData } from "../support/notulen-utils.js";
-import { prefixes } from "../support/prefixes.js";
-import { setupHandleBars } from "../support/setup-handlebars.js";
-import { htmlToRdf, loadDataset, shaclReportToMessage } from "./helpers.js";
-import { appendAttachmentsToDocument } from "../support/editor-document.js";
-import { IS_FINAL } from "../support/constants.js";
+import AgendaPoint from '../models/agendapoint.js';
+import Intermission from '../models/intermission.js';
+import Meeting from '../models/meeting.js';
+import Treatment from '../models/treatment.js';
+import Attachment from '../models/attachment.js';
+import { constructHtmlForMeetingNotesFromData } from '../support/notulen-utils.js';
+import { prefixes } from '../support/prefixes.js';
+import { setupHandleBars } from '../support/setup-handlebars.js';
+import { htmlToRdf, loadDataset, shaclReportToMessage } from './helpers.js';
+import { appendAttachmentsToDocument } from '../support/editor-document.js';
+import { IS_FINAL } from '../support/constants.js';
+import path from 'path';
 
 const person1 = {
   uri: 'http://my-example.org/mandatee/1',
@@ -315,6 +316,8 @@ describe('notulen publication template', function () {
     setupHandleBars();
     const html = constructNotulen();
     this.dataset = await htmlToRdf(html);
+    //Mock the publication base url
+    process.env.PUBLICATION_BASE_URL = 'http://my-example.org'
   });
 
   it('has the expected administrative body linked to the meeting', function () {
@@ -572,6 +575,7 @@ describe('notulen publication template', function () {
 
   it('attachments are linked correctly to the behandeling', async function () {
     setupHandleBars();
+    
     const html = appendAttachmentsToDocument(
       treatmentData1.content,
       [attachment1, attachment2],
@@ -607,7 +611,7 @@ describe('notulen publication template', function () {
   });
 
   it('validates the basic shacl profile', async function () {
-    const shacl = await loadDataset(__dirname + '/shapes/meeting.ttl');
+    const shacl = await loadDataset(path.resolve('test/shapes/meeting.ttl'));
     const validator = new SHACLValidator(shacl, { factory });
     const report = await validator.validate(this.dataset);
     assert(report.conforms, shaclReportToMessage(report));

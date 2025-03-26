@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
-import { analyse } from '@lblod/marawa/rdfa-context-scanner';
-import { cleanupTriples } from "../support/pre-importer.js";
-import { editorDocumentFromUuid } from "../support/editor-document.js";
+import { analyse } from '@lblod/marawa/rdfa-context-scanner.js';
+import { cleanupTriples } from '../support/pre-importer.js';
+import { editorDocumentFromUuid } from '../support/editor-document.js';
 
 export default class Decision {
   static async extractDecisionsFromDocument(editorDocumentUuid, previewType) {

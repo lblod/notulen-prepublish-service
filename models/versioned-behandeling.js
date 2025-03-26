@@ -1,6 +1,7 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
+import { query, sparqlEscapeString, sparqlEscapeUri, update } from 'mu/sparql.js';
+import { v1 as uuid } from 'uuid';
 import { hackedSparqlEscapeString } from "../support/pre-importer.js";
 import { prefixMap } from "../support/prefixes.js";
 

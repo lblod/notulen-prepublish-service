@@ -1,6 +1,6 @@
 import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import path from 'path';
 
 const templateNameToFile = {
   agenda: 'agenda-prepublish.hbs',
@@ -28,7 +28,7 @@ export function setupHandleBars() {
 function compileTemplates() {
   for (const [key, filename] of Object.entries(templateNameToFile)) {
     const templateStr = readFileSync(
-      join(__dirname, 'templates', filename)
+      path.resolve('support/templates', filename)
     ).toString();
     const template = Handlebars.compile(templateStr, { strict: true });
     PUBLISHER_TEMPLATES.set(key, template);
@@ -38,7 +38,7 @@ function compileTemplates() {
 function registerPartials() {
   for (const [key, filename] of Object.entries(partialNameToFile)) {
     const templateStr = readFileSync(
-      join(__dirname, 'templates', 'partials', filename)
+      path.resolve( 'support/templates', 'partials', filename)
     ).toString();
     Handlebars.registerPartial(key, templateStr);
   }

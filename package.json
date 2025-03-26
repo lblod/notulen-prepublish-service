@@ -3,6 +3,7 @@
   "version": "2.6.0",
   "description": "mu-semtech service to extract knowledge from documents",
   "main": "app.js",
+  "type": "module",
   "dependencies": {
     "@lblod/marawa": "0.8.0-beta.3",
     "handlebars": "^4.7.7",
@@ -26,6 +27,7 @@
     "rdf-validate-shacl": "^0.3.2",
     "rdfa-streaming-parser": "^3.0.1",
     "release-it": "^15.5.0",
+    "specifier-resolution-node": "^1.1.4",
     "typescript": "^5.7.2",
     "typescript-strict-plugin": "^2.4.4"
   },
@@ -33,7 +35,7 @@
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "release": "release-it",
-    "release": "release-it"
+    "test": "mocha 'test/**/*.js' --exit"
   },
   "repository": {
     "type": "git",

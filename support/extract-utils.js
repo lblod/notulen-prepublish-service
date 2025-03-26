@@ -6,7 +6,7 @@ import Meeting from "../models/meeting.js";
 import StandardVote from "../models/standard-vote.js";
 import CustomVote from "../models/custom-vote.js";
 import Decision from "../models/decision.js";
-import { query, sparqlEscapeUri, update } from 'mu';
+import { query, sparqlEscapeUri, update } from 'mu/sparql.js';
 import { prefixes } from "./prefixes.js";
 import {
   buildParticipantCache,
