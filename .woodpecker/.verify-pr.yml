@@ -1,6 +1,6 @@
 steps:
   install:
-    image: node:20-alpine
+    image: semtech/mu-javascript-template:latest
     commands:
       - npm i
       # Our lockfile is incompatible with the version of npm used with node:14. The old scripts just
@@ -11,12 +11,12 @@ steps:
     commands:
       - /app/scripts/setup-ide/run.sh
   lint-js:
-    image: node:20-alpine
+    image: semtech/mu-javascript-template:latest
     group: lint
     commands:
       - npm run lint:js
   tests:
-    image: node:20-alpine
+    image: semtech/mu-javascript-template:latest
     group: tests
     commands:
       - npm run test
