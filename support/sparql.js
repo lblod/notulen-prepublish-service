@@ -92,8 +92,6 @@ function executeQuery(queryString, options) {
     .query(queryString)
     .executeRaw()
     .then((response) => {
-      const temp = httpContext;
-
       if (
         httpContext.get('response') &&
         !httpContext.get('response').headersSent
@@ -135,7 +133,7 @@ function executeQuery(queryString, options) {
         // Catch invalid JSON
         try {
           return JSON.parse(body);
-        } catch (ex) {
+        } catch {
           return null;
         }
       }
