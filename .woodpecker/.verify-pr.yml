@@ -9,7 +9,7 @@ steps:
   install-mu:
     image: semtech/mu-javascript-template:latest
     commands:
-      - mu script setup-ide
+      - bash setup-ide/run.sh
   lint-js:
     image: node:20-alpine
     group: lint
