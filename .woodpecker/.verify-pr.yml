@@ -6,6 +6,10 @@ steps:
       # Our lockfile is incompatible with the version of npm used with node:14. The old scripts just
       # `npm i`, so we do that. We should update to a sane node version and change this.
       # - npm ci
+  install-mu:
+    image: semtech/mu-javascript-template:latest
+    commands:
+      - mu script setup-ide
   lint-js:
     image: node:20-alpine
     group: lint
