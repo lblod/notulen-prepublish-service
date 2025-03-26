@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 
-/** @import { BindingObject } from 'mu/sparql.js' */
+/** @import { BindingObject } from '../support/sparql.js' */
 
 export default class Attachment {
   /** @param {BindingObject} bound */

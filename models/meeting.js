@@ -2,8 +2,8 @@
 
 import { prefixMap } from '../support/prefixes.js';
 import { DateTime } from 'luxon';
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu/sparql.js';
-/** @import { BindingObject } from 'mu/sparql.js' */
+import { query, sparqlEscapeString, sparqlEscapeUri } from '../support/sparql.js';
+/** @import { BindingObject } from '../support/sparql.js' */
 import validateMeeting from '../support/validate-meeting.js';
 import { articlesBasedOnClassifcationMap } from '../support/classification-utils.js';
 import AppError from '../support/error-utils.js';

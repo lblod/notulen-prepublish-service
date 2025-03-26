@@ -6,9 +6,13 @@
   "type": "module",
   "dependencies": {
     "@lblod/marawa": "0.8.0-beta.3",
+    "env-var": "^7.5.0",
+    "express-http-context": "^1.2.5",
     "handlebars": "^4.7.7",
     "jsdom": "^16.7.0",
-    "luxon": "^1.28.1"
+    "luxon": "^1.28.1",
+    "sparql-client-2": "^0.6.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
