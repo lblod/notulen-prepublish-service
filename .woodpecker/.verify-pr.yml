@@ -23,6 +23,7 @@ steps:
       - ./transpile-sources.sh
       - cd /usr/src/app/app/
       - npm install
+      - cat package.json
       - npm run test
 
 when:
