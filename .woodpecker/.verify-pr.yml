@@ -21,7 +21,7 @@ steps:
       - cp -r /app ./
       - ./prepare-package-json.sh
       - ./transpile-sources.sh
-      - cd /usr/src/app
+      - cd /usr/src/app/app/
       - npm install
       - cat package.json
       - npm run test
