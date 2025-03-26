@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeUri } from './sparql.js';
+import { query, sparqlEscapeUri } from 'mu/sparql.js';
 import { prefixMap } from './prefixes.js';
 import Mandatee from '../models/mandatee.js';
 import ParticipantCache from './participant-cache.js';

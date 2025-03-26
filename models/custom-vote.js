@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
-import { sparqlEscapeUri, query } from '../support/sparql.js';
-/** @import { BindingObject } from '../support/sparql.js' */
+import { sparqlEscapeUri, query } from 'mu/sparql.js';
+/** @import { BindingObject } from 'mu/sparql.js' */
 import { prefixMap } from '../support/prefixes.js';
 
 export default class CustomVote {

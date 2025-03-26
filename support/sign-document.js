@@ -5,7 +5,7 @@ import {
   sparqlEscapeUri,
   sparqlEscapeString,
   query,
-} from './sparql.js';
+} from 'mu/sparql.js';
 import { prefixMap } from './prefixes.js';
 import { createHash } from 'crypto';
 import { getFileContentForUri } from './file-utils.js';

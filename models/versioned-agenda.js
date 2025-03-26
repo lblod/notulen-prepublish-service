@@ -8,7 +8,7 @@ import {
   sparqlEscapeString,
   update,
   sparqlEscapeUri,
-} from '../support/sparql.js';
+} from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
 
 export default class VersionedAgenda {

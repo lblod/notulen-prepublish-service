@@ -7,7 +7,7 @@ import {
   sparqlEscapeUri,
   sparqlEscapeString,
   sparqlEscapeDateTime,
-} from './sparql.js';
+} from 'mu/sparql.js';
 import { prefixMap } from '../support/prefixes.js';
 /**
  * reads a file from the shared drive and returns its content

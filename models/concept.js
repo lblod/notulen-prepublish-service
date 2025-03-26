@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString } from '../support/sparql.js';
-/** @import { BindingObject } from '../support/sparql.js' */
+import { query, sparqlEscapeString } from 'mu/sparql.js';
+/** @import { BindingObject } from 'mu/sparql.js' */
 import { prefixMap } from '../support/prefixes.js';
 
 export default class Concept {

@@ -5,9 +5,9 @@ import {
   sparqlEscapeString,
   update,
   sparqlEscapeUri,
-} from '../support/sparql.js';
+} from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
-/** @import { SparqlResponse } from '../support/sparql.js' */
+/** @import { SparqlResponse } from 'mu/sparql.js' */
 import {
   persistContentToFile,
   writeFileMetadataToDb,

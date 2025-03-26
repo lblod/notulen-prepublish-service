@@ -6,7 +6,7 @@ import {
   sparqlEscapeString,
   sparqlEscapeUri,
   update,
-} from './sparql.js';
+} from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
 import {
   hackedSparqlEscapeString,

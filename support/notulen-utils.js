@@ -1,6 +1,6 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeUri } from './sparql.js';
+import { query, sparqlEscapeUri } from 'mu/sparql.js';
 import AgendaPoint from '../models/agendapoint.js';
 import Concept from '../models/concept.js';
 import Intermission from '../models/intermission.js';
