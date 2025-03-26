@@ -12,11 +12,17 @@ steps:
     commands:
       - npm run lint:js
   tests:
-    image: semtech/mu-javascript-template:feature-dev-experience-tryouts
+    image: semtech/mu-javascript-template:latest
+    working_dir: /app
     group: tests
     commands:
-      - /app/scripts/setup-ide/run.sh
-      - ls /app/node_modules
+      # complexer then it should be, should be f
+      - cd /usr/src/app
+      - cp -r /app ./
+      - ./prepare-package-json.sh
+      - ./transpile-sources.sh
+      - cd /usr/src/app/app/
+      - npm install
       - npm run test
 
 when:
