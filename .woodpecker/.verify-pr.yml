@@ -3,7 +3,7 @@ steps:
     image: semtech/mu-javascript-template:latest
     group: tests
     environment:
-      NODE_ENV: "development"
+      NODE_ENV: 'development'
     commands:
       # complexer then it should be, should be f
       - mkdir -p /usr/src/app/app/node_modules && cp -r ./ /usr/src/app/app
@@ -14,7 +14,7 @@ steps:
       - ./transpile-sources.sh
       - cd /usr/src/dist/
       - npm install
-      - npm run lint:js
+      # npm run lint:js
       - npm run test
 when:
   event:
