@@ -1,21 +1,30 @@
 steps:
-  tests:
+  setup:
     image: semtech/mu-javascript-template:latest
     group: tests
     environment:
       NODE_ENV: "development"
     commands:
-      # complexer then it should be, should be f
       - mkdir -p /usr/src/app/app/node_modules && cp -r ./ /usr/src/app/app
-      # merge package uses /app
       - cp -r ./ /app/
       - cd /usr/src/app
       - ./prepare-package-json.sh
       - ./transpile-sources.sh
-      - cd /usr/src/dist/
       - npm install
+  lint:
+    image: semtech/mu-javascript-template:latest
+    environment:
+      NODE_ENV: "development"
+    commands:
+      - cd /usr/src/dist/
       - npm run lint:js
-      - npm run test
+  test:
+    image: semtech/mu-javascript-template:latest
+    environment:
+      NODE_ENV: "development"
+    commands:
+      - cd /usr/src/dist/
+      - npm run lint:js
 when:
   event:
     - pull_request
