@@ -17,6 +17,8 @@ steps:
     group: tests
     commands:
       # complexer then it should be, should be f
+      - cat package.json
+      - pwd
       - cd /usr/src/app
       - cp -r /app ./
       - ./prepare-package-json.sh
