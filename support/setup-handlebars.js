@@ -38,7 +38,7 @@ function compileTemplates() {
 function registerPartials() {
   for (const [key, filename] of Object.entries(partialNameToFile)) {
     const templateStr = readFileSync(
-      path.resolve( 'support/templates', 'partials', filename)
+      path.resolve('support/templates', 'partials', filename)
     ).toString();
     Handlebars.registerPartial(key, templateStr);
   }

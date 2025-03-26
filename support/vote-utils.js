@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import CustomVote from "../models/custom-vote.js";
+import CustomVote from '../models/custom-vote.js';
 // eslint-disable-next-line no-unused-vars
-import StandardVote from "../models/standard-vote.js";
+import StandardVote from '../models/standard-vote.js';
 
 /**
  * @param {CustomVote | StandardVote} vote

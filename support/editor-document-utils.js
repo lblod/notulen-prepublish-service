@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
 import { query, sparqlEscapeUri } from 'mu/sparql.js';
-import EditorDocument from "./editor-document.js";
+import EditorDocument from './editor-document.js';
 
 /**
  *

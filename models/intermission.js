@@ -3,7 +3,7 @@
 import { query, sparqlEscapeUri } from 'mu/sparql.js';
 /** @import { BindingObject } from 'mu/sparql.js' */
 import { DateTime } from 'luxon';
-import { prefixMap } from "../support/prefixes.js";
+import { prefixMap } from '../support/prefixes.js';
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 

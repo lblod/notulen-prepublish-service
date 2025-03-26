@@ -150,7 +150,9 @@ describe('decision list publication template', function () {
   });
 
   it('validates the basic shacl profile', async function () {
-    const shacl = await loadDataset(path.resolve('test/shapes/decision-list.ttl'));
+    const shacl = await loadDataset(
+      path.resolve('test/shapes/decision-list.ttl')
+    );
     const validator = new SHACLValidator(shacl, { factory });
     const report = await validator.validate(this.dataset);
     assert(report.conforms, shaclReportToMessage(report));

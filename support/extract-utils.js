@@ -1,27 +1,31 @@
 // @ts-strict-ignore
 
-import Treatment from "../models/treatment.js";
-import AgendaPoint from "../models/agendapoint.js";
-import Meeting from "../models/meeting.js";
-import StandardVote from "../models/standard-vote.js";
-import CustomVote from "../models/custom-vote.js";
-import Decision from "../models/decision.js";
+import Treatment from '../models/treatment.js';
+import AgendaPoint from '../models/agendapoint.js';
+import Meeting from '../models/meeting.js';
+import StandardVote from '../models/standard-vote.js';
+import CustomVote from '../models/custom-vote.js';
+import Decision from '../models/decision.js';
 import { query, sparqlEscapeUri, update } from 'mu/sparql.js';
-import { prefixes } from "./prefixes.js";
+import { prefixes } from './prefixes.js';
 import {
   buildParticipantCache,
   fetchParticipationList,
   fetchParticipationListForTreatment,
   fetchTreatmentParticipantsWithCache,
-} from "./query-utils.js";
-import { editorDocumentFromUuid } from "./editor-document.js";
-import { PUBLISHER_TEMPLATES } from "./setup-handlebars.js";
-import validateMeeting from "./validate-meeting.js";
-import validateTreatment from "./validate-treatment.js";
-import VersionedExtract from "../models/versioned-behandeling.js";
-import { handleVersionedResource } from "./pre-importer.js";
-import { DOCUMENT_PUBLISHED_STATUS, IS_FINAL, IS_PREVIEW } from "./constants.js";
-import { isCustomVote } from "./vote-utils.js";
+} from './query-utils.js';
+import { editorDocumentFromUuid } from './editor-document.js';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
+import validateMeeting from './validate-meeting.js';
+import validateTreatment from './validate-treatment.js';
+import VersionedExtract from '../models/versioned-behandeling.js';
+import { handleVersionedResource } from './pre-importer.js';
+import {
+  DOCUMENT_PUBLISHED_STATUS,
+  IS_FINAL,
+  IS_PREVIEW,
+} from './constants.js';
+import { isCustomVote } from './vote-utils.js';
 
 // This file contains helpers for exporting, signing and publishing an extract of the meeting notes
 // an extract is the treatment of one agendapoint and all it's related info

@@ -317,7 +317,7 @@ describe('notulen publication template', function () {
     const html = constructNotulen();
     this.dataset = await htmlToRdf(html);
     //Mock the publication base url
-    process.env.PUBLICATION_BASE_URL = 'http://my-example.org'
+    process.env.PUBLICATION_BASE_URL = 'http://my-example.org';
   });
 
   it('has the expected administrative body linked to the meeting', function () {
@@ -575,7 +575,7 @@ describe('notulen publication template', function () {
 
   it('attachments are linked correctly to the behandeling', async function () {
     setupHandleBars();
-    
+
     const html = appendAttachmentsToDocument(
       treatmentData1.content,
       [attachment1, attachment2],

@@ -8,13 +8,13 @@ import {
   update,
 } from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
-import { prefixMap } from "./prefixes.js";
-import { signDocument } from "./sign-document.js";
+import { prefixMap } from './prefixes.js';
+import { signDocument } from './sign-document.js';
 import {
   getFileContentForUri,
   persistContentToFile,
   writeFileMetadataToDb,
-} from "./file-utils.js";
+} from './file-utils.js';
 
 function cleanupTriples(triples) {
   const cleantriples = {};

@@ -1,4 +1,4 @@
-import InvalidRequest from "./invalid-request.js";
+import InvalidRequest from './invalid-request.js';
 
 /**
  * @typedef {Object} Relationship

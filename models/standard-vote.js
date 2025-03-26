@@ -2,9 +2,9 @@
 
 import { sparqlEscapeUri, query } from 'mu/sparql.js';
 /** @import { BindingObject } from 'mu/sparql.js' */
-import { prefixMap } from "../support/prefixes.js";
-import { whoVotesBasedOnClassifcationMap } from "../support/classification-utils.js";
-import { sortMandatees } from "../support/query-utils.js";
+import { prefixMap } from '../support/prefixes.js';
+import { whoVotesBasedOnClassifcationMap } from '../support/classification-utils.js';
+import { sortMandatees } from '../support/query-utils.js';
 
 export default class StandardVote {
   static async findAll({ treatmentUri }) {

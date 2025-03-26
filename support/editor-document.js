@@ -6,9 +6,9 @@
 
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu/sparql.js';
 import jsdom from 'jsdom';
-import { PUBLISHER_TEMPLATES } from "./setup-handlebars.js";
-import { IS_FINAL } from "./constants.js";
-import { prefixMap } from "./prefixes.js";
+import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
+import { IS_FINAL } from './constants.js';
+import { prefixMap } from './prefixes.js';
 
 /**
  * removeTemplateComments: remove all nodes that are a template comment. This should be done for

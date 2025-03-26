@@ -3,25 +3,25 @@
 import express from 'express';
 /** @import { Request, RequestHandler, Response } from 'express' */
 import { v1 as uuid } from 'uuid';
-import { constructHtmlForAgenda } from "../support/agenda-utils.js";
-import { buildBesluitenLijstForMeetingId } from "../support/besluit-exporter.js";
+import { constructHtmlForAgenda } from '../support/agenda-utils.js';
+import { buildBesluitenLijstForMeetingId } from '../support/besluit-exporter.js';
 import {
   buildAllExtractsForMeeting,
   buildExtractData,
   constructHtmlForExtract,
-} from "../support/extract-utils.js";
-import InvalidRequest from "../support/invalid-request.js";
-import { constructHtmlForMeetingNotes } from "../support/notulen-utils.js";
-import { parseBody } from "../support/parse-body.js";
-import validateMeeting from "../support/validate-meeting.js";
-import validateTreatment from "../support/validate-treatment.js";
-import { IS_PREVIEW } from "../support/constants.js";
+} from '../support/extract-utils.js';
+import InvalidRequest from '../support/invalid-request.js';
+import { constructHtmlForMeetingNotes } from '../support/notulen-utils.js';
+import { parseBody } from '../support/parse-body.js';
+import validateMeeting from '../support/validate-meeting.js';
+import validateTreatment from '../support/validate-treatment.js';
+import { IS_PREVIEW } from '../support/constants.js';
 import {
   generateNotulenPreview,
   NOTULEN_KIND_PUBLIC,
-} from "../support/notulen-utils.js";
-import Meeting from "../models/meeting.js";
-import Treatment from "../models/treatment.js";
+} from '../support/notulen-utils.js';
+import Meeting from '../models/meeting.js';
+import Treatment from '../models/treatment.js';
 const router = express.Router();
 
 /***

@@ -1,9 +1,14 @@
 // @ts-strict-ignore
 
-import { prefixMap } from "../support/prefixes.js";
-import { hackedSparqlEscapeString } from "../support/pre-importer.js";
+import { prefixMap } from '../support/prefixes.js';
+import { hackedSparqlEscapeString } from '../support/pre-importer.js';
 
-import { query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu/sparql.js';
+import {
+  query,
+  sparqlEscapeString,
+  update,
+  sparqlEscapeUri,
+} from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
 
 export default class VersionedAgenda {

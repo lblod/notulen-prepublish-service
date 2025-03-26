@@ -1,14 +1,19 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu/sparql.js';
+import {
+  query,
+  sparqlEscapeString,
+  update,
+  sparqlEscapeUri,
+} from 'mu/sparql.js';
 import { v1 as uuid } from 'uuid';
 /** @import { SparqlResponse } from 'mu/sparql.js' */
 import {
   persistContentToFile,
   writeFileMetadataToDb,
   getFileContentForUri,
-} from "../support/file-utils.js";
-import { prefixMap } from "../support/prefixes.js";
+} from '../support/file-utils.js';
+import { prefixMap } from '../support/prefixes.js';
 
 const AGENDAPOINT_TYPE_PLANNED =
   'http://lblod.data.gift/concepts/bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';

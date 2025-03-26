@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
 /** @import { Response } from 'express' */
-import Task from "../models/task.js";
+import Task from '../models/task.js';
 /** @import Meeting from '../models/meeting' */
 
 /**

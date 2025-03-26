@@ -1,4 +1,4 @@
-import Decision from "../models/decision.js";
+import Decision from '../models/decision.js';
 /**
  * @import Treatment from '../models/treatment'
  */
