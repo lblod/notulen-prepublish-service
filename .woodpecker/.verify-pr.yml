@@ -16,6 +16,7 @@ steps:
     group: tests
     commands:
       - /app/scripts/setup-ide/run.sh
+      - ls /app/node_modules
       - npm run test
 
 when:
