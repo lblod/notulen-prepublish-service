@@ -11,10 +11,10 @@ steps:
       - cp -r ./ /app/
       - cd /usr/src/app
       - ./prepare-package-json.sh
+      - cp -R /usr/src/app/helpers/mu /usr/src/app/app/node_modules/mu
       - ./transpile-sources.sh
       - cd /usr/src/dist/
       - npm install
-      - cp -R /usr/src/app/helpers/mu /usr/src/app/app/node_modules/mu
       # npm run lint:js
       - npm run test
 when:
