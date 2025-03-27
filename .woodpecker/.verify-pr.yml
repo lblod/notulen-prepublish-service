@@ -1,6 +1,5 @@
 steps:
   lint-js:
-    image: semtech/mu-javascript-template:latest
     image: node:20-alpine
     group: lint
     commands:
