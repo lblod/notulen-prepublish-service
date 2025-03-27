@@ -1,4 +1,11 @@
 steps:
+  lint-js:
+    image: semtech/mu-javascript-template:latest
+    image: node:20-alpine
+    group: lint
+    commands:
+      - npm i
+      - npm run lint:js
   tests:
     image: semtech/mu-javascript-template:latest
     group: tests
@@ -17,7 +24,6 @@ steps:
       - cd /usr/src/dist/
       - npm install
       - cp -R /usr/src/app/helpers/mu /usr/src/dist/node_modules/mu
-      # npm run lint:js
       - npm run test
 when:
   event:
