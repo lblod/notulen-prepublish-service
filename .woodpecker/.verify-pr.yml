@@ -21,7 +21,7 @@ steps:
       - ./transpile-sources.sh
 
       - cd /usr/src/dist/
-      - npm ci
+      - npm i
       - cp -R /usr/src/app/helpers/mu /usr/src/dist/node_modules/mu
       - npm run test
 when:
