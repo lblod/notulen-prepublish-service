@@ -3,7 +3,7 @@ steps:
     image: node:20-alpine
     group: lint
     commands:
-      - npm i
+      - npm ci
       - npm run lint:js
   tests:
     image: semtech/mu-javascript-template:latest
@@ -11,7 +11,7 @@ steps:
     environment:
       NODE_ENV: 'development'
     commands:
-      # complexer then it should be, should be f
+      # complexer then it should be, will be migrated to a internal script in the future fingers crossed
       - mkdir -p /usr/src/app/app/node_modules && cp -r ./ /usr/src/app/app
       # merge package uses /app
       - cp -r ./ /app/
@@ -21,7 +21,7 @@ steps:
       - ./transpile-sources.sh
 
       - cd /usr/src/dist/
-      - npm install
+      - npm ci
       - cp -R /usr/src/app/helpers/mu /usr/src/dist/node_modules/mu
       - npm run test
 when:
