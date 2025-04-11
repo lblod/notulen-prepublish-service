@@ -1,9 +1,15 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
-import { hackedSparqlEscapeString } from '../support/pre-importer';
+import { prefixMap } from '../support/prefixes.js';
+import { hackedSparqlEscapeString } from '../support/pre-importer.js';
 
-import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
+import {
+  query,
+  sparqlEscapeString,
+  update,
+  sparqlEscapeUri,
+} from 'mu/sparql.js';
+import { v1 as uuid } from 'uuid';
 
 export default class VersionedAgenda {
   static async query({ meetingUuid, agendaType }) {

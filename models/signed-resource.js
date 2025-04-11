@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeUri } from 'mu';
-/** @import { BindingObject } from 'mu' */
-import { prefixMap } from '../support/prefixes';
+import { query, sparqlEscapeUri } from 'mu/sparql.js';
+/** @import { BindingObject } from 'mu/sparql.js' */
+import { prefixMap } from '../support/prefixes.js';
 
 export default class SignedResource {
   static async findURI(uri) {

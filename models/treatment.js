@@ -1,10 +1,10 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
-/** @import { BindingObject } from 'mu' */
-import { prefixMap } from '../support/prefixes';
-import Attachment from './attachment';
-import AppError from '../support/error-utils';
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu/sparql.js';
+/** @import { BindingObject } from 'mu/sparql.js' */
+import { prefixMap } from '../support/prefixes.js';
+import Attachment from './attachment.js';
+import AppError from '../support/error-utils.js';
 
 export default class Treatment {
   /** @returns {Promise<Treatment[]>} */
