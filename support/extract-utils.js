@@ -102,6 +102,7 @@ export async function buildExtractData(
  * @param {string} previewType
  * @param {boolean} [isPublic=true]
  * @param {any} [participantCache=null]
+ * @returns {Promise<ExtractData>}
  */
 export async function buildExtractDataForTreatment(
   treatment,
@@ -111,6 +112,7 @@ export async function buildExtractDataForTreatment(
   participantCache = null
 ) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
+
   let participationList;
   if (participantCache) {
     participationList = await fetchTreatmentParticipantsWithCache(
@@ -123,6 +125,7 @@ export async function buildExtractDataForTreatment(
       participantCache = buildParticipantCache(participationList);
     }
   }
+
   const standardVotes = await StandardVote.findAll({
     treatmentUri: treatment.uri,
   });
@@ -137,6 +140,11 @@ export async function buildExtractDataForTreatment(
       )
     );
   }
+
+  const decisions = await Decision.extractDecisionsFromDocument(
+    treatment.editorDocumentUuid
+  );
+
   let content;
   if (isPublic) {
     const document = await editorDocumentFromUuid(
@@ -146,14 +154,12 @@ export async function buildExtractDataForTreatment(
     );
     content = document?.content ?? '';
   } else {
-    const decisions = await Decision.extractDecisionsFromDocument(
-      treatment.editorDocumentUuid
-    );
     const template = PUBLISHER_TEMPLATES.get(
       'decisionsTitleAndDescriptionOnly'
     );
     content = template({ decisions });
   }
+
   return {
     treatment,
     agendapoint,
@@ -163,9 +169,25 @@ export async function buildExtractDataForTreatment(
     votes,
     content,
     articleNumber: Number(treatment.position) + 1,
+    decisions,
   };
 }
 
+/**
+ * @typedef {Object} ExtractData
+ * @property {Treatment} treatment
+ * @property {AgendaPoint | any[]} agendapoint - The weird types are due to the return of AgendaPoint.findURI()
+ * @property {Meeting} meeting
+ * @property {string} prefixes
+ * @property {unknown} participationList
+ * @property {(StandardVote | CustomVote)[]} votes
+ * @property {string} content
+ * @property {number} articleNumber
+ * @property {Decision[]} decisions
+ */
+/**
+ * @param {ExtractData} extractData
+ */
 export function constructHtmlForExtract(extractData) {
   const template = PUBLISHER_TEMPLATES.get('extract');
   const html = template(extractData);
