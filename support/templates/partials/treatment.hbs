@@ -103,6 +103,10 @@
     </div>
   {{/if}}
   <div class="c-template-content c-template-content--treatment">
+    {{#each this.decisions}}
+      <span property="http://www.w3.org/ns/prov#generated"
+            resource="{{this.uri}}"></span>
+    {{/each}}
     {{{content}}}
   </div>
 </div>
