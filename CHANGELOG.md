@@ -12,6 +12,15 @@
 
 
 
+
+## 2.6.2 (2025-06-20)
+
+#### :bug: Bug Fix
+* [#127](https://github.com/lblod/notulen-prepublish-service/pull/127) Add decision linking information to treatment HTML ([@piemonkey](https://github.com/piemonkey))
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
 ## 2.6.1 (2025-03-07)
 
 #### :bug: Bug Fix
