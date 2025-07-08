@@ -1,13 +1,8 @@
 // @ts-strict-ignore
 
-import {
-  query,
-  sparqlEscapeString,
-  update,
-  sparqlEscapeUri,
-} from 'mu/sparql.js';
+import { query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
 import { v1 as uuid } from 'uuid';
-/** @import { SparqlResponse } from 'mu/sparql.js' */
+/** @import { SparqlResponse } from 'mu' */
 import {
   persistContentToFile,
   writeFileMetadataToDb,

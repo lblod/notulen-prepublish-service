@@ -1,7 +1,7 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeUri } from 'mu/sparql.js';
-/** @import { BindingObject } from 'mu/sparql.js' */
+import { query, sparqlEscapeUri } from 'mu';
+/** @import { BindingObject } from 'mu' */
 import { DateTime } from 'luxon';
 import { prefixMap } from '../support/prefixes.js';
 

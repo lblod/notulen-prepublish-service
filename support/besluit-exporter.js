@@ -1,12 +1,7 @@
 // @ts-nocheck
 // @ts-strict-ignore
 
-import {
-  query,
-  sparqlEscapeString,
-  sparqlEscapeUri,
-  update,
-} from 'mu/sparql.js';
+import { query, sparqlEscapeString, sparqlEscapeUri, update } from 'mu';
 import { v1 as uuid } from 'uuid';
 import {
   hackedSparqlEscapeString,

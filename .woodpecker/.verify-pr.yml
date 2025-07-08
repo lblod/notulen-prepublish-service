@@ -6,14 +6,14 @@ steps:
       - npm ci
       - npm run lint:js
   tests:
-    image: semtech/mu-javascript-template:latest
+    image: semtech/mu-javascript-template:feature-dev-experience-tryouts
     group: tests
     environment:
       NODE_ENV: 'development'
     commands:
       # complexer then it should be, will be migrated to a internal script in the future fingers crossed
       - mkdir -p /usr/src/app/app/node_modules && cp -r ./ /usr/src/app/app
-      # merge package uses /app
+      # merge package uses /app instead of /usr/src/app that's why we have to copy it to both
       - cp -r ./ /app/
       - cd /usr/src/app
       - ./prepare-package-json.sh
@@ -21,7 +21,7 @@ steps:
       - ./transpile-sources.sh
 
       - cd /usr/src/dist/
-      - npm ci
+      - npm i
       - cp -R /usr/src/app/helpers/mu /usr/src/dist/node_modules/mu
       - npm run test
 when:

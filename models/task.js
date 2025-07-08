@@ -8,7 +8,7 @@ import {
   sparqlEscapeString,
   sparqlEscapeUri,
   update,
-} from 'mu/sparql.js';
+} from 'mu';
 import { v1 as uuid } from 'uuid';
 import { prefixMap } from '../support/prefixes.js';
 

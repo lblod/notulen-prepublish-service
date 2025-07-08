@@ -1,4 +1,4 @@
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu/sparql.js';
+import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 
 /**
  * @param {string} uuid
