@@ -39,6 +39,7 @@
   "scripts": {
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
+    "lint:types": "tsc && tsc-strict",
     "release": "release-it",
     "test": "mocha 'test/**/*.js' --exit"
   },

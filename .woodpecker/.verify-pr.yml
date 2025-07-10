@@ -1,10 +1,11 @@
 steps:
-  lint-js:
+  lint:
     image: node:20-alpine
     group: lint
     commands:
       - npm ci
       - npm run lint:js
+      - npm run lint:types
   tests:
     image: semtech/mu-javascript-template:feature-seperate-server-start
     group: tests
