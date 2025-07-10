@@ -6,7 +6,7 @@ steps:
       - npm ci
       - npm run lint:js
   tests:
-    image: semtech/mu-javascript-template:feature-dev-experience-tryouts
+    image: semtech/mu-javascript-template:feature-seperate-server-start
     group: tests
     environment:
       NODE_ENV: 'development'
