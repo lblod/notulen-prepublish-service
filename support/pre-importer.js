@@ -207,7 +207,7 @@ async function checkValidSignature(versionedUri, sessionId) {
     }
   `;
   const queryResult = await query(validationQuery);
-  return !queryResult.results.bindings[0]?.invalid.value;
+  return queryResult.results.bindings[0]?.invalid.value !== '1';
 }
 
 async function checkValidPublication(versionedUri) {
