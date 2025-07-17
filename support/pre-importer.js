@@ -85,6 +85,19 @@ async function handleVersionedResource(
   customContentPredicate,
   attachments
 ) {
+  if (type === 'signature') {
+    const isValidSignature = await checkValidSignature(versionedUri, sessionId);
+    if (!isValidSignature)
+      throw new Error(
+        `The resource with uri ${versionedUri} cannot be signed by ${sessionId}`
+      );
+  } else {
+    const isValidPublication = await checkValidPublication(versionedUri);
+    if (!isValidPublication)
+      throw new Error(
+        `The resource with uri ${versionedUri} cannot be publised as it has been published before`
+      );
+  }
   const now = new Date();
   const newResourceUuid = uuid();
   const resourceType =
@@ -158,6 +171,65 @@ async function handleVersionedResource(
     'sha256'
   );
   return newResourceUri;
+}
+
+async function checkValidSignature(versionedUri, sessionId) {
+  const validationQuery = `
+  ${prefixMap['dct'].toSparqlString()}
+   ${prefixMap['sign'].toSparqlString()}
+   ${prefixMap['muSession'].toSparqlString()}
+   ${prefixMap['foaf'].toSparqlString()}
+   ${prefixMap['ext'].toSparqlString()}
+    SELECT ?invalid WHERE {
+      OPTIONAL {
+        ?a a sign:SignedResource;
+          dct:subject ${sparqlEscapeUri(versionedUri)}.
+        ?b a sign:SignedResource;
+          dct:subject ${sparqlEscapeUri(versionedUri)}.
+        FILTER(?a != ?b)
+        FILTER NOT EXISTS {
+          ?a ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
+        }
+        FILTER NOT EXISTS {
+          ?b ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
+        }
+      }
+      OPTIONAL {
+        ?c a sign:SignedResource; 
+           dct:subject ${sparqlEscapeUri(versionedUri)};
+          sign:signatory ?userUri.
+        FILTER NOT EXISTS {
+          ?c ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
+        }
+      }
+      BIND( BOUND(?a) || BOUND(?c) AS ?invalid)
+      ${sparqlEscapeUri(sessionId)} muSession:account/^foaf:account ?userUri.
+    }
+  `;
+  const queryResult = await query(validationQuery);
+  return queryResult.results.bindings[0]?.invalid.value !== '1';
+}
+
+async function checkValidPublication(versionedUri) {
+  const validationQuery = `
+  ${prefixMap['dct'].toSparqlString()}
+   ${prefixMap['sign'].toSparqlString()}
+   ${prefixMap['muSession'].toSparqlString()}
+   ${prefixMap['foaf'].toSparqlString()}
+   ${prefixMap['ext'].toSparqlString()}
+    SELECT ?invalid WHERE {
+      OPTIONAL {
+        ?a a sign:PublishedResource;
+          dct:subject ${sparqlEscapeUri(versionedUri)}.
+        FILTER NOT EXISTS {
+          ?a ext:deleted "true"^^<http://mu.semte.ch/vocabularies/typed-literals/boolean>.
+        }
+      }
+      BIND( BOUND(?a) AS ?invalid)
+    }
+  `;
+  const queryResult = await query(validationQuery);
+  return queryResult.results.bindings[0]?.invalid.value !== '1';
 }
 
 export { hackedSparqlEscapeString, handleVersionedResource, cleanupTriples };
