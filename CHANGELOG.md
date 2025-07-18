@@ -13,6 +13,15 @@
 
 
 
+
+## 2.7.0 (2025-07-18)
+
+#### :rocket: Enhancement
+* [#128](https://github.com/lblod/notulen-prepublish-service/pull/128) Validate signature and publication ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
 ## 2.6.2 (2025-06-20)
 
 #### :bug: Bug Fix
