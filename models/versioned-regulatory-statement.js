@@ -1,12 +1,13 @@
 // @ts-strict-ignore
 
-import { uuid, query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
+import { query, sparqlEscapeString, update, sparqlEscapeUri } from 'mu';
+import { v1 as uuid } from 'uuid';
 import {
   persistContentToFile,
   writeFileMetadataToDb,
   getFileContentForUri,
-} from '../support/file-utils';
-import { prefixMap } from '../support/prefixes';
+} from '../support/file-utils.js';
+import { prefixMap } from '../support/prefixes.js';
 // using the english name here, but the model is in dutch
 export default class VersionedRegulatoryStatement {
   static async query({ regulatoryStatementDocumentUri }) {

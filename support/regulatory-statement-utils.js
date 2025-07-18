@@ -1,8 +1,8 @@
-import { handleVersionedResource } from './pre-importer';
+import { handleVersionedResource } from './pre-importer.js';
 import { query, update, sparqlEscapeUri } from 'mu';
-import { DOCUMENT_PUBLISHED_STATUS } from './constants';
+import { DOCUMENT_PUBLISHED_STATUS } from './constants.js';
 /** @import EditorDocument from './editor-document' */
-import VersionedRegulatoryStatement from '../models/versioned-regulatory-statement';
+import VersionedRegulatoryStatement from '../models/versioned-regulatory-statement.js';
 
 /**
  *

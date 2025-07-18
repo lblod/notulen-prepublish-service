@@ -1,8 +1,9 @@
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
-import { hackedSparqlEscapeString } from '../support/pre-importer';
-import { prefixMap } from '../support/prefixes';
+import { query, sparqlEscapeString, sparqlEscapeUri, update } from 'mu';
+import { v1 as uuid } from 'uuid';
+import { hackedSparqlEscapeString } from '../support/pre-importer.js';
+import { prefixMap } from '../support/prefixes.js';
 
 // using the english name here, but the model is in dutch
 export default class VersionedExtract {

@@ -3,11 +3,17 @@
   "version": "2.7.0",
   "description": "mu-semtech service to extract knowledge from documents",
   "main": "app.js",
+  "type": "module",
   "dependencies": {
     "@lblod/marawa": "0.8.0-beta.3",
+    "env-var": "^7.5.0",
+    "express-http-context": "^1.2.5",
     "handlebars": "^4.7.7",
     "jsdom": "^16.7.0",
-    "luxon": "^1.28.1"
+    "luxon": "^1.28.1",
+    "shacl-engine": "^1.0.2",
+    "sparql-client-2": "^0.6.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
@@ -24,7 +30,9 @@
     "n3": "^1.10.0",
     "prettier": "^3.4.2",
     "rdf-validate-shacl": "^0.3.2",
+    "rdfa-streaming-parser": "^3.0.1",
     "release-it": "^15.5.0",
+    "specifier-resolution-node": "^1.1.4",
     "typescript": "^5.7.2",
     "typescript-strict-plugin": "^2.4.4"
   },
@@ -32,7 +40,8 @@
     "lint:js": "eslint .",
     "lint:js:fix": "eslint . --fix",
     "lint:types": "tsc && tsc-strict",
-    "release": "release-it"
+    "release": "release-it",
+    "test": "mocha 'test/**/*.js' --exit"
   },
   "repository": {
     "type": "git",

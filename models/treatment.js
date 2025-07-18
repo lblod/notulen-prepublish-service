@@ -2,9 +2,9 @@
 
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 /** @import { BindingObject } from 'mu' */
-import { prefixMap } from '../support/prefixes';
-import Attachment from './attachment';
-import AppError from '../support/error-utils';
+import { prefixMap } from '../support/prefixes.js';
+import Attachment from './attachment.js';
+import AppError from '../support/error-utils.js';
 
 export default class Treatment {
   /** @returns {Promise<Treatment[]>} */

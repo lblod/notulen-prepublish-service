@@ -1,21 +1,24 @@
 // @ts-strict-ignore
 
 import { query, sparqlEscapeUri } from 'mu';
-import AgendaPoint from '../models/agendapoint';
-import Concept from '../models/concept';
-import Intermission from '../models/intermission';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import VersionedNotulen from '../models/versioned-notulen';
-import { ensureAgendapointType } from './agenda-utils';
-import { IS_FINAL } from './constants';
-import { buildExtractDataForTreatment } from './extract-utils';
-import { handleVersionedResource } from './pre-importer';
-import { prefixes } from './prefixes';
-import { fetchParticipationList, buildParticipantCache } from './query-utils';
-import { PUBLISHER_TEMPLATES } from './setup-handlebars';
-import validateMeeting from './validate-meeting';
-import validateTreatment from './validate-treatment';
+import AgendaPoint from '../models/agendapoint.js';
+import Concept from '../models/concept.js';
+import Intermission from '../models/intermission.js';
+import Meeting from '../models/meeting.js';
+import Treatment from '../models/treatment.js';
+import VersionedNotulen from '../models/versioned-notulen.js';
+import { ensureAgendapointType } from './agenda-utils.js';
+import { IS_FINAL } from './constants.js';
+import { buildExtractDataForTreatment } from './extract-utils.js';
+import { handleVersionedResource } from './pre-importer.js';
+import { prefixes } from './prefixes.js';
+import {
+  fetchParticipationList,
+  buildParticipantCache,
+} from './query-utils.js';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
+import validateMeeting from './validate-meeting.js';
+import validateTreatment from './validate-treatment.js';
 export const DRAFT_DECISON_PUBLISHED_STATUS =
   'http://mu.semte.ch/application/concepts/ef8e4e331c31430bbdefcdb2bdfbcc06';
 const PLANNED_AGENDAPOINT_TYPE_ID = 'bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
