@@ -1,18 +1,19 @@
 // @ts-nocheck
 // @ts-strict-ignore
 
-import { query, sparqlEscapeString, sparqlEscapeUri, update, uuid } from 'mu';
+import { query, sparqlEscapeString, sparqlEscapeUri, update } from 'mu';
+import { v1 as uuid } from 'uuid';
 import {
   hackedSparqlEscapeString,
   handleVersionedResource,
-} from './pre-importer';
-import { PUBLISHER_TEMPLATES } from './setup-handlebars';
-import { prefixes } from './prefixes';
-import Meeting from '../models/meeting';
-import Treatment from '../models/treatment';
-import Decision from '../models/decision';
-import StandardVote from '../models/standard-vote';
-import CustomVote from '../models/custom-vote';
+} from './pre-importer.js';
+import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
+import { prefixes } from './prefixes.js';
+import Meeting from '../models/meeting.js';
+import Treatment from '../models/treatment.js';
+import Decision from '../models/decision.js';
+import StandardVote from '../models/standard-vote.js';
+import CustomVote from '../models/custom-vote.js';
 
 export async function buildBesluitenLijstForMeetingId(meetingUuid) {
   const meeting = await Meeting.find(meetingUuid);

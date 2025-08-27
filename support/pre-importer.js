@@ -6,15 +6,15 @@ import {
   sparqlEscapeString,
   sparqlEscapeUri,
   update,
-  uuid,
 } from 'mu';
-import { prefixMap } from './prefixes';
-import { signDocument } from './sign-document';
+import { v1 as uuid } from 'uuid';
+import { prefixMap } from './prefixes.js';
+import { signDocument } from './sign-document.js';
 import {
   getFileContentForUri,
   persistContentToFile,
   writeFileMetadataToDb,
-} from './file-utils';
+} from './file-utils.js';
 
 function cleanupTriples(triples) {
   const cleantriples = {};

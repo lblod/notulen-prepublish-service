@@ -3,8 +3,7 @@
 import fs from 'fs';
 import factory from '@rdfjs/dataset';
 import { Parser as ParserN3 } from 'n3';
-import { analyse as analyseRdfa } from '@lblod/marawa/rdfa-context-scanner';
-import jsdom from 'jsdom';
+import { RdfaParser } from 'rdfa-streaming-parser';
 
 export async function loadDataset(filepath) {
   const file = fs.readFileSync(filepath, 'utf-8');
@@ -28,24 +27,19 @@ export async function parse(triples) {
   });
 }
 
-// TODO consider using other rdfa libraries, marawa might not be the best option for this
-export async function htmlToRdf(html) {
-  const dom = new jsdom.JSDOM(`<body>${html}</body>`);
-  const topDomNode = dom.window.document.querySelector('body');
-  const contexts = analyseRdfa(topDomNode)
-    .map((block) => block.context)
-    .flat();
-  const triples = contexts
-    .map((t) => {
-      try {
-        return t.toNT();
-        // eslint-disable-next-line no-unused-vars
-      } catch (e) {
-        return '';
-      }
-    })
-    .join('\n');
-  return await parse(triples);
+export function htmlToRdf(html) {
+  return new Promise((res, rej) => {
+    const myParser = new RdfaParser({ contentType: 'text/html' });
+    const dataset = factory.dataset();
+    myParser
+      .on('data', (data) => {
+        dataset.add(data);
+      })
+      .on('error', rej)
+      .on('end', () => res(dataset));
+    myParser.write(html);
+    myParser.end();
+  });
 }
 
 function shaclSeverityToString(severity) {

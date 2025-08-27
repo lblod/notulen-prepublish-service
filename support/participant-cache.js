@@ -1,8 +1,8 @@
 // @ts-strict-ignore
 
 import { query, sparqlEscapeUri } from 'mu';
-import { prefixMap } from './prefixes';
-import Mandatee from '../models/mandatee';
+import { prefixMap } from './prefixes.js';
+import Mandatee from '../models/mandatee.js';
 
 export default class ParticipantCache {
   constructor() {

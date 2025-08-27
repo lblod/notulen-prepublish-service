@@ -2,7 +2,7 @@
 
 import { sparqlEscapeUri, query } from 'mu';
 /** @import { BindingObject } from 'mu' */
-import { prefixMap } from '../support/prefixes';
+import { prefixMap } from '../support/prefixes.js';
 
 export default class CustomVote {
   static async findAll({ treatmentUri }) {

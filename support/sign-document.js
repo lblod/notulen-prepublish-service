@@ -1,9 +1,9 @@
 // @ts-strict-ignore
 
 import { update, sparqlEscapeUri, sparqlEscapeString, query } from 'mu';
-import { prefixMap } from './prefixes';
+import { prefixMap } from './prefixes.js';
 import { createHash } from 'crypto';
-import { getFileContentForUri } from './file-utils';
+import { getFileContentForUri } from './file-utils.js';
 
 // Create a hash for the signed - or public resource based on:
 

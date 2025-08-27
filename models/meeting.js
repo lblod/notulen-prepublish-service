@@ -1,12 +1,12 @@
 // @ts-strict-ignore
 
-import { prefixMap } from '../support/prefixes';
+import { prefixMap } from '../support/prefixes.js';
 import { DateTime } from 'luxon';
 import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
 /** @import { BindingObject } from 'mu' */
-import validateMeeting from '../support/validate-meeting';
-import { articlesBasedOnClassifcationMap } from '../support/classification-utils';
-import AppError from '../support/error-utils';
+import validateMeeting from '../support/validate-meeting.js';
+import { articlesBasedOnClassifcationMap } from '../support/classification-utils.js';
+import AppError from '../support/error-utils.js';
 
 const dateFormat = process.env.DATE_FORMAT || 'dd/MM/yyyy HH:mm';
 

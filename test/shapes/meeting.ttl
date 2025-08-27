@@ -188,7 +188,6 @@
 		sh:name "taal" ;
 		sh:description "De taal van de verschijningsvorm." ;
 		sh:path <http://data.europa.eu/eli/ontology#language> ;
-		sh:class <http://www.w3.org/2004/02/skos/core#Concept> ;
 		sh:minCount 1 ;
 		sh:maxCount 1 ;
 		qb:codeList <http://publications.europa.eu/mdr/authority/language/index.html> ;
