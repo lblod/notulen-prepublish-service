@@ -15,6 +15,14 @@
 
 
 ## 2.8.0 (2026-01-22)
+#### :rocket: Enhancement
+* [#126](https://github.com/lblod/notulen-prepublish-service/pull/126) Add tests to notulen prepublish service ([@lagartoverde](https://github.com/lagartoverde))
+
+#### :bug: Bug Fix
+* [#129](https://github.com/lblod/notulen-prepublish-service/pull/129) Add link to agendapoint in extracts (([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
 
 ## 2.7.0 (2025-07-18)
 
