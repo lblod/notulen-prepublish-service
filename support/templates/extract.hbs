@@ -10,7 +10,9 @@
           datatype="http://www.w3.org/2001/XMLSchema#dateTime" class="is-required"></span>
     <span property="http://www.w3.org/ns/prov#endedAtTime"
           content="{{this.meeting.endedAt}}"
-          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>
+          datatype="http://www.w3.org/2001/XMLSchema#dateTime"></span>  
+      <span property="http://data.vlaanderen.be/ns/besluit#behandelt"
+          resource="{{this.treatment.agendapoint}}"></span>
     {{> treatment}}
   </div>
 </div>
