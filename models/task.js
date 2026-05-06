@@ -316,7 +316,8 @@ export default class Task {
   }
 
   /**
-   * Internal -
+   * Internal - try to set status to running, but does not do so if another running task already
+   * exists.
    * @returns {Promise<Task>}
    */
   async _tryToStart() {
@@ -366,6 +367,12 @@ export default class Task {
     }`;
     await update(queryString);
 
-    return Task.find(this.id);
+    // TODO add retry logic instead of just failing
+    const updated = await Task.find(this.id);
+    if (updated.status !== TASK_STATUS_RUNNING) {
+      console.error('Task blocked');
+      throw new Error('Task blocked');
+    }
+    return updated;
   }
 }

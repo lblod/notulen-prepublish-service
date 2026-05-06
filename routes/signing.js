@@ -260,7 +260,7 @@ router.post(
     }
 
     try {
-      await signingTask.updateStatus(TASK_STATUS_RUNNING);
+      signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
       const meetingUuid = req.params.zittingIdentifier;
       const meeting = await Meeting.find(meetingUuid);
       const treatments = await Treatment.findAll({ meetingUuid });
