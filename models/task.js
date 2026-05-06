@@ -7,6 +7,7 @@ import {
   update,
 } from 'mu';
 import { v1 as uuid } from 'uuid';
+import { DateTime } from 'luxon';
 import { prefixMap } from '../support/prefixes.js';
 import AppError from '../support/error-utils.js';
 /** @import Meeting from './meeting' */
@@ -51,9 +52,11 @@ export class TaskError {
 
 export default class Task {
   /**
+   * Creates a new task. If a running task of the same type for the same meeting already exists, it
+   * is created in the 'created' state, otherwise it is created in the 'running' state.
    * @param {Meeting} meeting
    * @param {string} type
-   * @param {string} userUri
+   * @param {string} [userUri]
    * @returns {Promise<Task>}
    */
   static async create(meeting, type, userUri) {
@@ -66,29 +69,41 @@ export default class Task {
      PREFIX    task: <http://redpencil.data.gift/vocabularies/tasks/>
      PREFIX    dct: <http://purl.org/dc/terms/>
      PREFIX    adms: <http://www.w3.org/ns/adms#>
-     INSERT DATA {
-        ${sparqlEscapeUri(uri)} a task:Task;
-        mu:uuid ${sparqlEscapeString(id)};
-        adms:status ${sparqlEscapeUri(TASK_STATUS_CREATED)};
-        task:numberOfRetries ${sparqlEscapeInt(0)};
-        dct:created ${sparqlEscapeDateTime(created)};
-        dct:modified ${sparqlEscapeDateTime(created)};
-        dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-        dct:type ${sparqlEscapeString(type)};
-        ${userUri ? `nuao:involves ${sparqlEscapeUri(userUri)};` : ''}
-        nuao:involves ${sparqlEscapeUri(meeting.uri)}.
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['nuao'].toSparqlString()}
+     ${prefixMap['task'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['adms'].toSparqlString()}
+     ${prefixMap['xsd'].toSparqlString()}
+     ${prefixMap['ext'].toSparqlString()}
+     INSERT {
+       ${sparqlEscapeUri(uri)} a task:Task;
+         mu:uuid ${sparqlEscapeString(id)};
+         adms:status ?status;
+         task:numberOfRetries ${sparqlEscapeInt(0)};
+         dct:created ${sparqlEscapeDateTime(created)};
+         dct:modified ${sparqlEscapeDateTime(created)};
+         dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+         dct:type ${sparqlEscapeString(type)};
+         ${userUri ? `nuao:involves ${sparqlEscapeUri(userUri)};` : ''}
+         nuao:involves ${sparqlEscapeUri(meeting.uri)};
+         ext:blockedBy ?blocking.
+    } WHERE {
+      OPTIONAL {
+        ?blocking a task:Task;
+          adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
+          dct:modified ?blockModified;
+          dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+          dct:type ${sparqlEscapeString(type)};
+          nuao:involves ${sparqlEscapeUri(meeting.uri)}.
+        FILTER (?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: 10 }).toJSDate())})
+      }
+      BIND(IF(BOUND(?blocking), ${sparqlEscapeUri(TASK_STATUS_CREATED)}, ${sparqlEscapeUri(TASK_STATUS_RUNNING)}) AS ?status)
     }
   `;
     await update(queryString);
-    return new Task({
-      id,
-      type,
-      involves: meeting.uri,
-      created,
-      modified: created,
-      status: TASK_STATUS_CREATED,
-      uri,
-    });
+
+    return this.find(id);
   }
 
   /**
@@ -230,37 +245,47 @@ export default class Task {
     this.error = error ?? null;
   }
 
-  async updateStatus(status, reason) {
+  /**
+   * Internal - actually update status
+   * @param {string} status - the status to set
+   * @param {string} [reason] - an error reason to set as a message
+   * @returns {Promise<Task>}
+   */
+  async _setStatus(status, reason) {
     let taskError = null;
     if (reason) {
       taskError = new TaskError({ message: reason });
     }
     //prettier-ignore
     const queryString = `
-     ${prefixMap["mu"].toSparqlString()}
-     ${prefixMap["task"].toSparqlString()}
-     ${prefixMap["adms"].toSparqlString()}
-     ${prefixMap["oslc"].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['task'].toSparqlString()}
+     ${prefixMap['adms'].toSparqlString()}
+     ${prefixMap['oslc'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
 
      DELETE {
        ?uri adms:status ?status.
+       ?uri dct:modified ?modified.
        ?uri task:error ?error.
        ?error ?errorP ?errorV.
      }
      INSERT {
-       ?uri adms:status ${sparqlEscapeUri(status)}.
+       ?uri adms:status ${sparqlEscapeUri(status)};
+            dct:modified ${sparqlEscapeDateTime(Date.now())}.
        ${
          taskError
            ? `?uri task:error ${sparqlEscapeUri(taskError.uri)}.
-	      ${sparqlEscapeUri(taskError.uri)} a oslc:Error.
-	      ${sparqlEscapeUri(taskError.uri)} mu:uuid ${sparqlEscapeString(taskError.id)}. 
-	      ${sparqlEscapeUri(taskError.uri)} oslc:message ${sparqlEscapeString(taskError.message)}.`
+              ${sparqlEscapeUri(taskError.uri)} a oslc:Error.
+              ${!taskError.id ? '' : `${sparqlEscapeUri(taskError.uri)} mu:uuid ${sparqlEscapeString(taskError.id)}.`} 
+              ${sparqlEscapeUri(taskError.uri)} oslc:message ${sparqlEscapeString(taskError.message)}.`
            : ''
        }
      }
      WHERE {
        ?uri a task:Task;
             mu:uuid ${sparqlEscapeString(this.id)};
+            dct:modified ?modified;
             adms:status ?status.
        OPTIONAL {
          ?uri task:error ?error.
@@ -269,7 +294,80 @@ export default class Task {
     }`;
     await update(queryString);
     this.status = status;
-
     this.error = taskError;
+
+    return this;
+  }
+
+  /**
+   * Update the task status if necessary
+   * @param {string} status - the status to set
+   * @param {string} [reason] - an error reason to set as a message
+   * @returns {Promise<Task>} - a task with the updated status. This could be a new object or could
+   * be the same one, so modifications should not be made to the object.
+   */
+  async updateStatus(status, reason) {
+    if (status === this.status) {
+      return this;
+    }
+    if (status !== TASK_STATUS_RUNNING) {
+      return this._setStatus(status, reason);
+    }
+    return this._tryToStart();
+  }
+
+  /**
+   * Internal -
+   * @returns {Promise<Task>}
+   */
+  async _tryToStart() {
+    //FIXME blockedBy
+    //prettier-ignore
+    const queryString = `
+     ${prefixMap["mu"].toSparqlString()}
+     ${prefixMap["task"].toSparqlString()}
+     ${prefixMap["adms"].toSparqlString()}
+     ${prefixMap["dct"].toSparqlString()}
+     ${prefixMap["nuao"].toSparqlString()}
+     ${prefixMap["xsd"].toSparqlString()}
+
+     DELETE {
+       ?uri adms:status ?oldStatus.
+       ?uri dct:modified ?modified.
+       ?uri task:error ?error.
+       ?error ?errorP ?errorV.
+     }
+     INSERT {
+       ?uri adms:status ?status;
+            dct:modified ${sparqlEscapeDateTime(Date.now())}.
+     }
+     WHERE {
+       ?uri a task:Task;
+            mu:uuid ${sparqlEscapeString(this.id)};
+            dct:modified ?modified;
+            adms:status ?oldStatus.
+      OPTIONAL {
+        ?blocking a task:Task;
+          adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
+          dct:modified ?blockModified;
+          dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+          dct:type ${sparqlEscapeString(this.type)};
+          nuao:involves ${sparqlEscapeUri(this.involves)}.
+        FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: 10 }).toJSDate())})
+      }
+
+      BIND(IF(
+        BOUND(?blocking),
+        ?oldStatus,
+        ${sparqlEscapeUri(TASK_STATUS_RUNNING)}
+      ) AS ?status)
+       OPTIONAL {
+         ?uri task:error ?error.
+         ?error ?errorP ?errorV.
+       }
+    }`;
+    await update(queryString);
+
+    return Task.find(this.id);
   }
 }

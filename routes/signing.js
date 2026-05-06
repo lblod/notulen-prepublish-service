@@ -1,4 +1,3 @@
-// @ts-nocheck
 // @ts-strict-ignore
 
 import express from 'express';
@@ -45,6 +44,7 @@ import { getUri } from '../support/resource-utils.js';
 
 import { parseBody } from '../support/parse-body.js';
 import VersionedExtract from '../models/versioned-behandeling.js';
+/** @import Task from '../models/task' */
 
 const router = express.Router();
 
@@ -73,7 +73,7 @@ router.post(
       );
       return res.send({ success: true }).end();
     } catch (err) {
-      console.log(err);
+      console.error('Error signing agenda', err);
       const error = new Error(
         `An error occurred while signing the agenda ${req.params.meetingUuid}: ${err}`
       );
@@ -89,6 +89,7 @@ router.post(
 router.post(
   '/signing/besluitenlijst/sign/:zittingIdentifier',
   async function (req, res, next) {
+    /** @type {Task} */
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
@@ -101,7 +102,7 @@ router.post(
         userUri
       );
     } catch (err) {
-      console.log(err);
+      console.error('Error signing decision list', err);
       const error = new Error(
         `An error occurred while signing the besluitenlijst ${req.params.zittingIdentifier}: ${err}`
       );
@@ -176,7 +177,7 @@ router.post(
         return res.send({ success: true }).end();
       }
     } catch (err) {
-      console.log(err);
+      console.error('Error signing behandeling', err);
       const error = new Error(
         `An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`
       );
@@ -192,6 +193,7 @@ router.post(
 router.post('/signed-resources', async function (req, res, next) {
   try {
     const { relationships } = parseBody(req.body);
+    // @ts-ignore we could move to zod to get nice types here
     const versionedTreatmentUuid = relationships?.['versioned-behandeling']?.id;
     if (versionedTreatmentUuid) {
       const versionedTreatment = await VersionedExtract.find(
@@ -221,9 +223,9 @@ router.post('/signed-resources', async function (req, res, next) {
       }
     }
   } catch (err) {
-    console.log(err);
+    console.error('Error while creating signed resource', err);
     const error = new Error(
-      `An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`
+      `An error occurred while signing the resource: ${err}`
     );
     return next(error);
   }
@@ -236,6 +238,7 @@ router.post('/signed-resources', async function (req, res, next) {
 router.post(
   '/signing/notulen/sign/:zittingIdentifier',
   async function (req, res, next) {
+    /** @type {Task | undefined} */
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
@@ -248,8 +251,8 @@ router.post(
         userUri
       );
     } catch (err) {
-      console.log(err);
-      await signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
+      console.error('Error attempting to create signing task', err);
+      await signingTask?.updateStatus(TASK_STATUS_FAILURE, err.message);
       const error = new Error(
         `An error occurred while signing the meeting notes ${req.params.zittingIdentifier}: ${err}`
       );
@@ -285,6 +288,7 @@ router.post(
 
       await signingTask.updateStatus(TASK_STATUS_SUCCESS);
     } catch (err) {
+      console.error('Error signing notulen', err);
       await signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
     }
   }
