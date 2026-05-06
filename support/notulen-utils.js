@@ -116,12 +116,10 @@ export async function ensureVersionedNotulen(
   publicTreatments = []
 ) {
   let versionedNotulen = await VersionedNotulen.query({ meeting, kind });
-  let notulenUri;
   if (versionedNotulen) {
     console.log(
       `Reusing versioned notulen ${versionedNotulen.uri} of kind ${kind}`
     );
-    notulenUri = versionedNotulen.uri;
     if (versionedNotulen.html) {
       return versionedNotulen.uri;
     } else {
@@ -153,7 +151,6 @@ export async function ensureVersionedNotulen(
     html = constructHtmlForMeetingNotesFromData(data);
   }
   versionedNotulen = await VersionedNotulen.create({
-    notulenUri,
     meeting,
     html,
     kind,
