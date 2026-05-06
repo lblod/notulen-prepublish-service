@@ -49,8 +49,8 @@ async function getVersionedContent(uri, contentPredicate) {
         ${prefixMap['ext'].toSparqlString()}
         SELECT ?content ?physicalFileUri
         WHERE {
-         OPTIONAL { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
-         OPTIONAL { ${sparqlEscapeUri(
+         { ${sparqlEscapeUri(uri)} ${contentPredicate} ?content. }
+         UNION { ${sparqlEscapeUri(
            uri
          )} prov:generated/^nie:dataSource ?physicalFileUri. }
         }`;
