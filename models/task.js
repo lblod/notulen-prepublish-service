@@ -1,6 +1,3 @@
-// @ts-nocheck
-// @ts-strict-ignore
-
 import {
   query,
   sparqlEscapeDateTime,
@@ -12,6 +9,7 @@ import {
 import { v1 as uuid } from 'uuid';
 import { prefixMap } from '../support/prefixes.js';
 import AppError from '../support/error-utils.js';
+/** @import Meeting from './meeting' */
 /** @import { BindingObject } from 'mu' */
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';
@@ -27,21 +25,37 @@ export const TASK_STATUS_SUCCESS =
 export const TASK_STATUS_RUNNING =
   'http://lblod.data.gift/besluit-publicatie-melding-statuses/ongoing';
 export class TaskError {
+  /**
+   * @typedef {object} TaskErrorArgs
+   * @property {string} [id]
+   * @property {string} [uri]
+   * @property {string} message
+   */
+  /** @param {TaskErrorArgs} args */
   constructor({ id, uri, message }) {
     if (uri) {
       // we don't want to generate a new id if we got a uri, even if it's null
+      /** @type {string | undefined} */
       this.id = id;
+      /** @type {string} */
       this.uri = uri;
     } else {
       this.id = id ?? uuid();
       this.uri = `http://redpencil.data.gift/id/jobs/error/${this.id}`;
     }
 
+    /** @type {string} */
     this.message = message;
   }
 }
 
 export default class Task {
+  /**
+   * @param {Meeting} meeting
+   * @param {string} type
+   * @param {string} userUri
+   * @returns {Promise<Task>}
+   */
   static async create(meeting, type, userUri) {
     const id = uuid();
     const uri = `http://lblod.data.gift/tasks/${id}`;
@@ -164,7 +178,7 @@ export default class Task {
    * @returns {Task}
    */
   static fromBinding(binding) {
-    let taskError = null;
+    let taskError = undefined;
     if (binding.error?.value) {
       taskError = new TaskError({
         uri: binding.error.value,
@@ -185,15 +199,35 @@ export default class Task {
     });
   }
 
+  /**
+   * @typedef {object} TaskArgs
+   * @property {string} id
+   * @property {string} type
+   * @property {string} involves - The meeting that this task acts on
+   * @property {string} created
+   * @property {string} modified
+   * @property {string} status
+   * @property {string} uri
+   * @property {TaskError} [error]
+   */
+  /** @param {TaskArgs} taskArgs */
   constructor({ id, uri, created, status, modified, type, involves, error }) {
+    /** @type {string} */
     this.id = id;
+    /** @type {string} */
     this.type = type;
+    /** @type {string} - The meeting that this task acts on */
     this.involves = involves;
+    /** @type {string} */
     this.created = created;
+    /** @type {string} */
     this.modified = modified;
+    /** @type {string} */
     this.status = status;
+    /** @type {string} */
     this.uri = uri;
-    this.error = error;
+    /** @type {TaskError | null} */
+    this.error = error ?? null;
   }
 
   async updateStatus(status, reason) {
