@@ -15,6 +15,7 @@ declare module 'mu' {
     ? {
         head: {
           vars: string[];
+          link: [];
         };
         results: {
           bindings: BindingObject<ObjOrIsAsk>[];
@@ -32,8 +33,14 @@ declare module 'mu' {
    * objects. If this is an ASK query, pass `true` instead as the return of this query will be
    * different.
    */
+  export interface UserOptions {
+    sudo?: boolean;
+    scope?: string;
+    endpoint?: string;
+  }
   export const query: <ObjOrIsAsk extends ObjectToBind | true = ObjectToBind>(
-    query: string
+    query: string,
+    opts?: UserOptions,
   ) => Promise<SparqlResponse<ObjOrIsAsk>>;
   export const update: (query: string) => Promise<void>;
   export const uuid: () => string;
@@ -43,7 +50,7 @@ declare module 'mu' {
   export const sparqlEscapeInt: (value: number) => string;
   export const sparqlEscapeDecimal: (value: number) => string;
   export const sparqlEscapeFloat: (value: number) => string;
-  export const sparqlEscapeDateTime: (value: Date) => string;
+  export const sparqlEscapeDateTime: (value: Date | string | number) => string;
   export const sparqlEscapeBool: (value: boolean) => string;
   export const sparqlEscapeDate: (value: Date) => string;
   export const errorHandler: RequestHandler;
@@ -74,6 +81,7 @@ declare module 'mu' {
     errorHandler: typeof errorHandler;
     sparql: typeof sparql;
     SPARQL: typeof SPARQL;
+    newSparqlClient: typeof newSparqlClient;
   };
   export default mu;
 }
