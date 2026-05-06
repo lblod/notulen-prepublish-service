@@ -11,6 +11,8 @@ import {
 } from 'mu';
 import { v1 as uuid } from 'uuid';
 import { prefixMap } from '../support/prefixes.js';
+import AppError from '../support/error-utils.js';
+/** @import { BindingObject } from 'mu' */
 
 export const TASK_TYPE_SIGNING_DECISION_LIST = 'decisionListSignature';
 export const TASK_TYPE_PUBLISHING_DECISION_LIST = 'decisionListPublication';
@@ -75,10 +77,11 @@ export default class Task {
     });
   }
 
+  /**
+   * @param {string} uuid
+   * @returns {Promise<Task>}
+   */
   static async find(uuid) {
-    // If a userUri is included, this actually finds 2 results as there are 2 `nuao:involves`
-    // triples. This doesn't cause any side effects though as nothing relies on this value here and
-    // all other data is the same.
     const result = await query(`
      ${prefixMap['mu'].toSparqlString()}
      ${prefixMap['nuao'].toSparqlString()}
@@ -86,6 +89,7 @@ export default class Task {
      ${prefixMap['dct'].toSparqlString()}
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
+     ${prefixMap['besluit'].toSparqlString()}
      SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
        BIND(${sparqlEscapeString(uuid)} AS ?uuid)
        ?uri a task:Task;
@@ -96,8 +100,9 @@ export default class Task {
             nuao:involves ?involves;
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
+        ?involves a besluit:Zitting.
        OPTIONAL {
-	 ?uri task:error ?error.
+         ?uri task:error ?error.
          ?error mu:uuid ?errorId.
          ?error oslc:message ?errorMessage.
        }
@@ -105,9 +110,20 @@ export default class Task {
    `);
     if (result.results.bindings.length) {
       return Task.fromBinding(result.results.bindings[0]);
-    } else return null;
+    }
+    throw new AppError(404, `task with id ${uuid} was not found`);
   }
 
+  /**
+   * @typedef {object} QueryArgs
+   * @property {string} meetingUri
+   * @property {string} type
+   * @property {string | null} [userUri]
+   */
+  /**
+   * @param {QueryArgs} args
+   * @returns {Promise<Task | null>}
+   */
   static async query({ meetingUri, type, userUri = null }) {
     const result = await query(`
      ${prefixMap['mu'].toSparqlString()}
@@ -116,7 +132,7 @@ export default class Task {
      ${prefixMap['dct'].toSparqlString()}
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
-     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
+     SELECT ?uri ?uuid ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ${sparqlEscapeString(type)};
@@ -127,7 +143,7 @@ export default class Task {
             adms:status ?status.
 
        OPTIONAL {
-	 ?uri task:error ?error.
+         ?uri task:error ?error.
          ?error mu:uuid ?errorId.
          ?error oslc:message ?errorMessage.
        }
@@ -137,12 +153,16 @@ export default class Task {
     if (result.results.bindings.length) {
       return Task.fromBinding({
         ...result.results.bindings[0],
-        type: type,
-        involves: meetingUri,
+        type: { type: 'string', value: type },
+        involves: { type: 'uri', value: meetingUri },
       });
     } else return null;
   }
 
+  /**
+   * @param {BindingObject} binding
+   * @returns {Task}
+   */
   static fromBinding(binding) {
     let taskError = null;
     if (binding.error?.value) {
