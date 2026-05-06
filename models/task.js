@@ -256,7 +256,6 @@ export default class Task {
     if (reason) {
       taskError = new TaskError({ message: reason });
     }
-    //prettier-ignore
     const queryString = `
      ${prefixMap['mu'].toSparqlString()}
      ${prefixMap['task'].toSparqlString()}
@@ -322,14 +321,13 @@ export default class Task {
    */
   async _tryToStart() {
     //FIXME blockedBy
-    //prettier-ignore
     const queryString = `
-     ${prefixMap["mu"].toSparqlString()}
-     ${prefixMap["task"].toSparqlString()}
-     ${prefixMap["adms"].toSparqlString()}
-     ${prefixMap["dct"].toSparqlString()}
-     ${prefixMap["nuao"].toSparqlString()}
-     ${prefixMap["xsd"].toSparqlString()}
+     ${prefixMap['mu'].toSparqlString()}
+     ${prefixMap['task'].toSparqlString()}
+     ${prefixMap['adms'].toSparqlString()}
+     ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['nuao'].toSparqlString()}
+     ${prefixMap['xsd'].toSparqlString()}
 
      DELETE {
        ?uri adms:status ?oldStatus.
