@@ -320,7 +320,9 @@ export default class Task {
   }
 
   /**
-   * Update the task status if necessary
+   * Update the task status if necessary. If the status matches, this is a no-op.
+   * Setting the task to RUNNING triggers block detection, which only returns once the task can
+   * proceed, or fails if it cannot after limited retries.
    * @param {string} status - the status to set
    * @param {string} [reason] - an error reason to set as a message
    * @returns {Promise<Task>} - a task with the updated status. This could be a new object or could
@@ -338,7 +340,7 @@ export default class Task {
 
   /**
    * Internal - try to set status to running, but does not do so if another running task already
-   * exists.
+   * exists. Retries a configurable number of times before failing.
    * @returns {Promise<Task>}
    */
   async _tryToStart() {
@@ -351,7 +353,6 @@ export default class Task {
         await new Promise((res) => setTimeout(res, TASK_RETRY_DELAY_MS));
         retryCount++;
       }
-      //FIXME blockedBy
       const queryString = `
        ${prefixMap['mu'].toSparqlString()}
        ${prefixMap['task'].toSparqlString()}
@@ -359,17 +360,20 @@ export default class Task {
        ${prefixMap['dct'].toSparqlString()}
        ${prefixMap['nuao'].toSparqlString()}
        ${prefixMap['xsd'].toSparqlString()}
+       ${prefixMap['ext'].toSparqlString()}
 
        DELETE {
          ?uri adms:status ?oldStatus.
          ?uri dct:modified ?modified.
          ?uri task:numberOfRetries ?retries.
+         ?uri ext:blockedBy ?oldBlocking.
          ?uri task:error ?error.
          ?error ?errorP ?errorV.
        }
        INSERT {
          ?uri adms:status ?status;
               task:numberOfRetries ${sparqlEscapeInt(retryCount)};
+              ext:blockedBy ?blocking;
               dct:modified ${sparqlEscapeDateTime(Date.now())}.
        }
        WHERE {
@@ -378,21 +382,19 @@ export default class Task {
               dct:modified ?modified;
               task:numberOfRetries ?retries;
               adms:status ?oldStatus.
-        OPTIONAL {
-          ?blocking a task:Task;
-                    adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
-                    dct:modified ?blockModified;
-                    dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-                    dct:type ${sparqlEscapeString(this.type)};
-                    nuao:involves ${sparqlEscapeUri(this.involves)}.
-          FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: TASK_LOCK_EXPIRY_MINS }).toJSDate())})
-        }
-
-        BIND(IF(
-          BOUND(?blocking),
-          ?oldStatus,
-          ${sparqlEscapeUri(TASK_STATUS_RUNNING)}
-        ) AS ?status)
+         OPTIONAL {
+           ?uri ext:blockedBy ?oldBlocking.
+         }
+         OPTIONAL {
+           ?blocking a task:Task;
+                     adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
+                     dct:modified ?blockModified;
+                     dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+                     dct:type ${sparqlEscapeString(this.type)};
+                     nuao:involves ${sparqlEscapeUri(this.involves)}.
+           FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: TASK_LOCK_EXPIRY_MINS }).toJSDate())})
+         }
+         BIND(IF(BOUND(?blocking), ?oldStatus, ${sparqlEscapeUri(TASK_STATUS_RUNNING)}) AS ?status)
          OPTIONAL {
            ?uri task:error ?error.
            ?error ?errorP ?errorV.
