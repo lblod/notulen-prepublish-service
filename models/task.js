@@ -50,10 +50,15 @@ export class TaskError {
   }
 }
 
-// TODO These should be config options
-const TASK_RETRY_DELAY_MS = 500;
-const TASK_RETRY_LIMIT = 10;
-const TASK_LOCK_EXPIRY_MINS = 10;
+const TASK_RETRY_DELAY_MS = process.env.TASK_RETRY_DELAY_MS
+  ? Number.parseInt(process.env.TASK_RETRY_DELAY_MS, 10)
+  : 2000;
+const TASK_RETRY_LIMIT = process.env.TASK_RETRY_LIMIT
+  ? Number.parseInt(process.env.TASK_RETRY_LIMIT, 10)
+  : 20;
+const TASK_LOCK_EXPIRY_MINS = process.env.TASK_LOCK_EXPIRY_MINS
+  ? Number.parseInt(process.env.TASK_LOCK_EXPIRY_MINS, 10)
+  : 5;
 
 export default class Task {
   /**
