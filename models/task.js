@@ -124,13 +124,14 @@ export default class Task {
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
      ${prefixMap['besluit'].toSparqlString()}
-     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
+     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?retries ?created ?error ?errorId ?errorMessage WHERE {
        BIND(${sparqlEscapeString(uuid)} AS ?uuid)
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ?type;
             dct:created ?created;
             dct:modified ?modified;
+            task:numberOfRetries ?retries;
             nuao:involves ?involves;
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
@@ -166,12 +167,13 @@ export default class Task {
      ${prefixMap['dct'].toSparqlString()}
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
-     SELECT ?uri ?uuid ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
+     SELECT ?uri ?uuid ?status ?modified ?created ?retries ?error ?errorId ?errorMessage WHERE {
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ${sparqlEscapeString(type)};
             dct:created ?created;
             dct:modified ?modified;
+            task:numberOfRetries ?retries;
             nuao:involves ${sparqlEscapeUri(meetingUri)};
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
@@ -213,6 +215,7 @@ export default class Task {
       created: binding.created.value,
       modified: binding.modified.value,
       status: binding.status.value,
+      retries: Number.parseInt(binding.retries.value, 10),
       involves: binding.involves.value,
       type: binding.type.value,
       error: taskError,
@@ -228,10 +231,21 @@ export default class Task {
    * @property {string} modified
    * @property {string} status
    * @property {string} uri
+   * @property {number} [retries]
    * @property {TaskError} [error]
    */
   /** @param {TaskArgs} taskArgs */
-  constructor({ id, uri, created, status, modified, type, involves, error }) {
+  constructor({
+    id,
+    uri,
+    created,
+    status,
+    modified,
+    type,
+    involves,
+    retries = 0,
+    error,
+  }) {
     /** @type {string} */
     this.id = id;
     /** @type {string} */
@@ -246,6 +260,8 @@ export default class Task {
     this.status = status;
     /** @type {string} */
     this.uri = uri;
+    /** @type {number} */
+    this.retries = retries;
     /** @type {TaskError | null} */
     this.error = error ?? null;
   }
@@ -328,8 +344,7 @@ export default class Task {
   async _tryToStart() {
     /** @type {Task | undefined} */
     let updated;
-    // TODO this should start at the queried value but we don't currently have it
-    let retryCount = 0;
+    let retryCount = this.retries;
     do {
       if (updated) {
         // updated is defined after the first loop, so wait before retrying
