@@ -50,6 +50,11 @@ export class TaskError {
   }
 }
 
+// TODO These should be config options
+const TASK_RETRY_DELAY_MS = 500;
+const TASK_RETRY_LIMIT = 10;
+const TASK_LOCK_EXPIRY_MINS = 10;
+
 export default class Task {
   /**
    * Creates a new task. If a running task of the same type for the same meeting already exists, it
@@ -321,57 +326,78 @@ export default class Task {
    * @returns {Promise<Task>}
    */
   async _tryToStart() {
-    //FIXME blockedBy
-    const queryString = `
-     ${prefixMap['mu'].toSparqlString()}
-     ${prefixMap['task'].toSparqlString()}
-     ${prefixMap['adms'].toSparqlString()}
-     ${prefixMap['dct'].toSparqlString()}
-     ${prefixMap['nuao'].toSparqlString()}
-     ${prefixMap['xsd'].toSparqlString()}
-
-     DELETE {
-       ?uri adms:status ?oldStatus.
-       ?uri dct:modified ?modified.
-       ?uri task:error ?error.
-       ?error ?errorP ?errorV.
-     }
-     INSERT {
-       ?uri adms:status ?status;
-            dct:modified ${sparqlEscapeDateTime(Date.now())}.
-     }
-     WHERE {
-       ?uri a task:Task;
-            mu:uuid ${sparqlEscapeString(this.id)};
-            dct:modified ?modified;
-            adms:status ?oldStatus.
-      OPTIONAL {
-        ?blocking a task:Task;
-          adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
-          dct:modified ?blockModified;
-          dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-          dct:type ${sparqlEscapeString(this.type)};
-          nuao:involves ${sparqlEscapeUri(this.involves)}.
-        FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: 10 }).toJSDate())})
+    /** @type {Task | undefined} */
+    let updated;
+    // TODO this should start at the queried value but we don't currently have it
+    let retryCount = 0;
+    do {
+      if (updated) {
+        // updated is defined after the first loop, so wait before retrying
+        await new Promise((res) => setTimeout(res, TASK_RETRY_DELAY_MS));
+        retryCount++;
       }
+      //FIXME blockedBy
+      const queryString = `
+       ${prefixMap['mu'].toSparqlString()}
+       ${prefixMap['task'].toSparqlString()}
+       ${prefixMap['adms'].toSparqlString()}
+       ${prefixMap['dct'].toSparqlString()}
+       ${prefixMap['nuao'].toSparqlString()}
+       ${prefixMap['xsd'].toSparqlString()}
 
-      BIND(IF(
-        BOUND(?blocking),
-        ?oldStatus,
-        ${sparqlEscapeUri(TASK_STATUS_RUNNING)}
-      ) AS ?status)
-       OPTIONAL {
+       DELETE {
+         ?uri adms:status ?oldStatus.
+         ?uri dct:modified ?modified.
+         ?uri task:numberOfRetries ?retries.
          ?uri task:error ?error.
          ?error ?errorP ?errorV.
        }
-    }`;
-    await update(queryString);
+       INSERT {
+         ?uri adms:status ?status;
+              task:numberOfRetries ${sparqlEscapeInt(retryCount)};
+              dct:modified ${sparqlEscapeDateTime(Date.now())}.
+       }
+       WHERE {
+         ?uri a task:Task;
+              mu:uuid ${sparqlEscapeString(this.id)};
+              dct:modified ?modified;
+              task:numberOfRetries ?retries;
+              adms:status ?oldStatus.
+        OPTIONAL {
+          ?blocking a task:Task;
+                    adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
+                    dct:modified ?blockModified;
+                    dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+                    dct:type ${sparqlEscapeString(this.type)};
+                    nuao:involves ${sparqlEscapeUri(this.involves)}.
+          FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: TASK_LOCK_EXPIRY_MINS }).toJSDate())})
+        }
 
-    // TODO add retry logic instead of just failing
-    const updated = await Task.find(this.id);
+        BIND(IF(
+          BOUND(?blocking),
+          ?oldStatus,
+          ${sparqlEscapeUri(TASK_STATUS_RUNNING)}
+        ) AS ?status)
+         OPTIONAL {
+           ?uri task:error ?error.
+           ?error ?errorP ?errorV.
+         }
+      }`;
+      await update(queryString);
+
+      updated = await Task.find(this.id);
+    } while (
+      updated.status !== TASK_STATUS_RUNNING &&
+      retryCount < TASK_RETRY_LIMIT
+    );
+
     if (updated.status !== TASK_STATUS_RUNNING) {
-      console.error('Task blocked');
-      throw new Error('Task blocked');
+      const err = new AppError(
+        503,
+        `Unable to unlock task after ${retryCount} retries. Task: ${this.uri}`
+      );
+      console.error(err);
+      throw err;
     }
     return updated;
   }
