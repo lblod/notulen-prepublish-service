@@ -4,13 +4,14 @@ import express from 'express';
 import Meeting from '../models/meeting.js';
 import Treatment from '../models/treatment.js';
 import SignedResource from '../models/signed-resource.js';
-import { returnEnsuredTaskId } from '../support/task-utils.js';
+import { ensureTask, returnEnsuredTaskId } from '../support/task-utils.js';
 import {
   TASK_STATUS_FAILURE,
   TASK_STATUS_RUNNING,
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
   TASK_TYPE_SIGNING_MEETING_NOTES,
+  TASK_TYPE_SIGNING_VERSIONED_TREATMENT,
 } from '../models/task.js';
 import validateMeeting from '../support/validate-meeting.js';
 import validateTreatment from '../support/validate-treatment.js';
@@ -195,6 +196,8 @@ router.post(
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
  */
 router.post('/signed-resources', async function (req, res, next) {
+  /** @type {Task | undefined} */
+  let signingTask;
   try {
     const { relationships } = parseBody(req.body);
     // @ts-ignore we could move to zod to get nice types here
@@ -205,6 +208,13 @@ router.post('/signed-resources', async function (req, res, next) {
       );
       const treatment = await Treatment.findUri(versionedTreatment.treatment);
       const meeting = await Meeting.findURI(treatment.meeting);
+      // Use a task but only for concurrency protection. Requests may timeout.
+      signingTask = await ensureTask(
+        meeting,
+        TASK_TYPE_SIGNING_VERSIONED_TREATMENT
+      );
+      signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
+
       const meetingErrors = validateMeeting(meeting);
       const treatmentErrors = await validateTreatment(treatment);
       const errors = [...meetingErrors, ...treatmentErrors];
@@ -223,6 +233,7 @@ router.post('/signed-resources', async function (req, res, next) {
           treatment.attachments
         );
         const signedResource = await SignedResource.findURI(signedResourceUri);
+        await signingTask.updateStatus(TASK_STATUS_SUCCESS);
         return res.send(signedResource.toMuResourceModel());
       }
     }
@@ -231,6 +242,7 @@ router.post('/signed-resources', async function (req, res, next) {
     const error = new Error(
       `An error occurred while signing the resource: ${err}`
     );
+    await signingTask?.updateStatus(TASK_STATUS_FAILURE, err.message);
     return next(error);
   }
 });
