@@ -131,7 +131,8 @@ export default class Task {
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
      ${prefixMap['besluit'].toSparqlString()}
-     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?retries ?created ?error ?errorId ?errorMessage WHERE {
+     ${prefixMap['ext'].toSparqlString()}
+     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?retries ?created ?createdResource ?error ?errorId ?errorMessage WHERE {
        BIND(${sparqlEscapeString(uuid)} AS ?uuid)
        ?uri a task:Task;
             mu:uuid ?uuid;
@@ -143,6 +144,9 @@ export default class Task {
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
         ?involves a besluit:Zitting.
+       OPTIONAL {
+         ?uri ext:createdResource ?createdResource.
+       }
        OPTIONAL {
          ?uri task:error ?error.
          ?error mu:uuid ?errorId.
@@ -174,7 +178,8 @@ export default class Task {
      ${prefixMap['dct'].toSparqlString()}
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
-     SELECT ?uri ?uuid ?status ?modified ?created ?retries ?error ?errorId ?errorMessage WHERE {
+     ${prefixMap['ext'].toSparqlString()}
+     SELECT ?uri ?uuid ?status ?modified ?created ?retries ?createdResource ?error ?errorId ?errorMessage WHERE {
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ${sparqlEscapeString(type)};
@@ -185,6 +190,9 @@ export default class Task {
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
 
+       OPTIONAL {
+         ?uri ext:createdResource ?createdResource.
+       }
        OPTIONAL {
          ?uri task:error ?error.
          ?error mu:uuid ?errorId.
@@ -224,6 +232,7 @@ export default class Task {
       status: binding.status.value,
       retries: Number.parseInt(binding.retries.value, 10),
       involves: binding.involves.value,
+      createdResource: binding.createdResource?.value,
       type: binding.type.value,
       error: taskError,
     });
@@ -238,6 +247,7 @@ export default class Task {
    * @property {string} modified
    * @property {string} status
    * @property {string} uri
+   * @property {string} [createdResource]
    * @property {number} [retries]
    * @property {TaskError} [error]
    */
@@ -250,6 +260,7 @@ export default class Task {
     modified,
     type,
     involves,
+    createdResource,
     retries = 0,
     error,
   }) {
@@ -267,6 +278,8 @@ export default class Task {
     this.status = status;
     /** @type {string} */
     this.uri = uri;
+    /** @type {string | undefined} */
+    this.createdResource = createdResource;
     /** @type {number} */
     this.retries = retries;
     /** @type {TaskError | null} */
@@ -277,9 +290,10 @@ export default class Task {
    * Internal - actually update status
    * @param {string} status - the status to set
    * @param {string} [reason] - an error reason to set as a message
+   * @param {string} [createdResource] - URI of the resource created, if successful
    * @returns {Promise<Task>}
    */
-  async _setStatus(status, reason) {
+  async _setStatus(status, reason, createdResource) {
     let taskError = null;
     if (reason) {
       taskError = new TaskError({ message: reason });
@@ -290,16 +304,19 @@ export default class Task {
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
      ${prefixMap['dct'].toSparqlString()}
+     ${prefixMap['ext'].toSparqlString()}
 
      DELETE {
        ?uri adms:status ?status.
        ?uri dct:modified ?modified.
+       ?uri ext:createdResource ?createdResource.
        ?uri task:error ?error.
        ?error ?errorP ?errorV.
      }
      INSERT {
        ?uri adms:status ${sparqlEscapeUri(status)};
             dct:modified ${sparqlEscapeDateTime(Date.now())}.
+       ${createdResource ? `?uri ext:createdResource ${sparqlEscapeUri(createdResource)}.` : ''}
        ${
          taskError
            ? `?uri task:error ${sparqlEscapeUri(taskError.uri)}.
@@ -314,6 +331,9 @@ export default class Task {
             mu:uuid ${sparqlEscapeString(this.id)};
             dct:modified ?modified;
             adms:status ?status.
+       OPTIONAL {
+         ?uri ext:createdResource ?createdResource.
+       }
        OPTIONAL {
          ?uri task:error ?error.
          ?error ?errorP ?errorV.
@@ -332,15 +352,16 @@ export default class Task {
    * proceed, or fails if it cannot after limited retries.
    * @param {string} status - the status to set
    * @param {string} [reason] - an error reason to set as a message
+   * @param {string} [createdResource] - URI of the resource created, if successful
    * @returns {Promise<Task>} - a task with the updated status. This could be a new object or could
    * be the same one, so modifications should not be made to the object.
    */
-  async updateStatus(status, reason) {
+  async updateStatus(status, reason, createdResource) {
     if (status === this.status) {
       return this;
     }
     if (status !== TASK_STATUS_RUNNING) {
-      return this._setStatus(status, reason);
+      return this._setStatus(status, reason, createdResource);
     }
     return this._tryToStart();
   }

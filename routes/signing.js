@@ -191,6 +191,67 @@ router.post(
   }
 );
 
+router.post(
+  '/signing/uittreksel/sign/:versionedTreatmentId',
+  async function (req, res, next) {
+    /** @type {Treatment | undefined} */
+    let treatment;
+    /** @type {Meeting | undefined} */
+    let meeting;
+    /** @type {Task | undefined} */
+    let signingTask;
+    try {
+      if (req.params.versionedTreatmentId) {
+        const versionedTreatment = await VersionedExtract.find(
+          req.params.versionedTreatmentId
+        );
+        treatment = await Treatment.findUri(versionedTreatment.treatment);
+        meeting = await Meeting.findURI(treatment.meeting);
+        signingTask = await returnEnsuredTaskId(
+          res,
+          meeting,
+          TASK_TYPE_SIGNING_VERSIONED_TREATMENT
+        );
+      }
+    } catch (err) {
+      console.error('Error while creating signed resource task', err);
+      const error = new Error(
+        `An error occurred while signing the resource task: ${err}`
+      );
+      return next(error);
+    }
+    try {
+      if (treatment && meeting && signingTask) {
+        signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
+        const meetingErrors = validateMeeting(meeting);
+        const treatmentErrors = await validateTreatment(treatment);
+        const errors = [...meetingErrors, ...treatmentErrors];
+        if (errors.length) {
+          await signingTask.updateStatus(
+            TASK_STATUS_FAILURE,
+            errors.join('; ')
+          );
+        } else {
+          const versionedExtractUri = await ensureVersionedExtract(
+            treatment,
+            meeting
+          );
+
+          await signVersionedExtract(
+            versionedExtractUri,
+            req.header('MU-SESSION-ID'),
+            'getekend',
+            treatment.attachments
+          );
+          signingTask.updateStatus(TASK_STATUS_SUCCESS);
+        }
+      }
+    } catch (err) {
+      console.error('Error while signing extract', err);
+      await signingTask?.updateStatus(TASK_STATUS_FAILURE, err.message);
+    }
+  }
+);
 /**
  * Creates a signed resource for the provided resource (currently only a treatment is supported)
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
