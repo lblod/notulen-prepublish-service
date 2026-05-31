@@ -1,7 +1,6 @@
-// @ts-strict-ignore
-
 /** @import { Response } from 'express' */
 import Task from '../models/task.js';
+import AppError from './error-utils.js';
 /** @import Meeting from '../models/meeting' */
 
 /**
@@ -10,11 +9,13 @@ import Task from '../models/task.js';
  * @param {string} [userUri]
  * */
 export async function ensureTask(meeting, taskType, userUri) {
-  let task = userUri
-    ? await Task.query({ meetingUri: meeting.uri, type: taskType, userUri })
-    : await Task.query({ meetingUri: meeting.uri, type: taskType });
+  /** @type {Task | null} */
+  let task = null;
   if (!task) {
     task = await Task.create(meeting, taskType, userUri);
+  }
+  if (!task) {
+    throw new AppError(500, 'Unable to create task');
   }
   return task;
 }

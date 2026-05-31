@@ -79,6 +79,7 @@ const prefixMap = {
   oslc: new Prefix("oslc", "http://open-services.net/ns/core#"),
   task: new Prefix("task", "http://redpencil.data.gift/vocabularies/tasks/"),
   nuao: new Prefix("nuao", "http://www.semanticdesktop.org/ontologies/2010/01/25/nuao#"),
+  xsd: new Prefix("xsd", "http://www.w3.org/2001/XMLSchema#"),
 };
 
 export { prefixes, prefixMap };

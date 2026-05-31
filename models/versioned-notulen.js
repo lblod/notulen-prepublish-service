@@ -60,7 +60,6 @@ export default class VersionedNotulen {
 
   /**
    * @typedef {Object} Params
-   * @property {string} [notulenUri]
    * @property {string} kind
    * @property {Meeting} meeting
    * @property {string} html
@@ -71,15 +70,10 @@ export default class VersionedNotulen {
    * @param {Params} args
    * @returns {Promise<VersionedNotulen>}
    */
-  static async create({ notulenUri, kind, meeting, html, publicTreatments }) {
-    let versionedNotulenUuid;
-    let versionedNotulenUri;
-    if (!notulenUri) {
-      versionedNotulenUuid = uuid();
-      versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
-    } else {
-      versionedNotulenUri = notulenUri;
-    }
+  static async create({ kind, meeting, html, publicTreatments }) {
+    const versionedNotulenUuid = uuid();
+    const versionedNotulenUri = `http://data.lblod.info/versioned-notulen/${versionedNotulenUuid}`;
+    console.warn('creating Vnotulen', versionedNotulenUri, meeting.uri);
     // defend against existing resource
     // an ask query is extremely fast
     // specifically not taking Tombstones into account here, this a create
@@ -104,7 +98,6 @@ export default class VersionedNotulen {
     await update(`
       PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
       PREFIX mu: <http://mu.semte.ch/vocabularies/core/>
-      PREFIX pav: <http://purl.org/pav/>
       PREFIX prov: <http://www.w3.org/ns/prov#>
 
       INSERT DATA{
