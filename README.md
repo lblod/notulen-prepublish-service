@@ -43,6 +43,9 @@ Once a specific document is generated for signing or publication the content is 
 ## configuration
 The following environment variables can be set to configure the service:
 
+  -  *TASK_RETRY_DELAY_MS*: The delay between retries of tasks in case they are blocked by a concurrent task. Default: `2000`
+  -  *TASK_RETRY_LIMIT*: The limit of number of retries of tasks in case they are blocked by a concurrent task. Default: `20`
+  -  *TASK_LOCK_EXPIRY_MINS*: The running time allowed for a task before it is considered 'stale' and is no longer considered as blocking for future tasks. Default: `5`
   -  *DATE_FORMAT*: datetime format passed to luxon, see the [table of tokens](https://moment.github.io/luxon/docs/manual/formatting.html#table-of-tokens) for more information. Default: `dd/MM/yyyy HH:mm:ss`
 
 ## model

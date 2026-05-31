@@ -129,8 +129,10 @@ router.post(
   '/signing/behandeling/publish/:zittingIdentifier/:behandelingUuid',
   async function (req, res, next) {
     try {
-      const meeting = await Meeting.find(req.params.zittingIdentifier);
-      const treatment = await Treatment.find(req.params.behandelingUuid);
+      const [meeting, treatment] = await Promise.all([
+        Meeting.find(req.params.zittingIdentifier),
+        Treatment.find(req.params.behandelingUuid),
+      ]);
       const meetingErrors = validateMeeting(meeting);
       const treatmentErrors = await validateTreatment(treatment);
       const errors = [...meetingErrors, ...treatmentErrors];
