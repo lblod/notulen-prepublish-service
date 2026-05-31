@@ -1,3 +1,13 @@
+
+## 3.0.0 (2026-05-31)
+
+#### :rocket: Enhancement
+* [#130](https://github.com/lblod/notulen-prepublish-service/pull/130) Block concurrent signing ([@piemonkey](https://github.com/piemonkey))
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
+
 ## 2.8.1 (2026-01-23)
 
 #### :bug: Bug Fix
