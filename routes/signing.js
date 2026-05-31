@@ -1,9 +1,6 @@
-// @ts-strict-ignore
-
 import express from 'express';
 import Meeting from '../models/meeting.js';
 import Treatment from '../models/treatment.js';
-import SignedResource from '../models/signed-resource.js';
 import { returnEnsuredTaskId } from '../support/task-utils.js';
 import {
   TASK_STATUS_FAILURE,
@@ -11,6 +8,7 @@ import {
   TASK_STATUS_SUCCESS,
   TASK_TYPE_SIGNING_DECISION_LIST,
   TASK_TYPE_SIGNING_MEETING_NOTES,
+  TASK_TYPE_SIGNING_VERSIONED_TREATMENT,
 } from '../models/task.js';
 import validateMeeting from '../support/validate-meeting.js';
 import validateTreatment from '../support/validate-treatment.js';
@@ -32,18 +30,6 @@ import {
   signVersionedExtract,
 } from '../support/extract-utils.js';
 import { fetchCurrentUser } from '../support/query-utils.js';
-import {
-  getCurrentVersion,
-  getLinkedDocuments,
-} from '../support/editor-document-utils.js';
-import {
-  ensureVersionedRegulatoryStatement,
-  signVersionedRegulatoryStatement,
-} from '../support/regulatory-statement-utils.js';
-import { getUri } from '../support/resource-utils.js';
-
-import { parseBody } from '../support/parse-body.js';
-import VersionedExtract from '../models/versioned-behandeling.js';
 /** @import Task from '../models/task' */
 
 const router = express.Router();
@@ -101,7 +87,7 @@ router.post(
         res,
         meeting,
         TASK_TYPE_SIGNING_DECISION_LIST,
-        userUri
+        userUri ?? undefined
       );
     } catch (err) {
       console.error('Error signing decision list', err);
@@ -123,6 +109,7 @@ router.post(
       );
       await signingTask.updateStatus(TASK_STATUS_SUCCESS);
     } catch (err) {
+      // @ts-ignore ignore unknown access
       signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
     }
   }
@@ -131,109 +118,72 @@ router.post(
 /**
  * Makes the current user sign the provided behandeling for the supplied document.
  * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
+ * The Task created has the signed resource uri connected to it, so that the status check can
+ * return the relevant data.
  */
 router.post(
-  '/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid',
+  '/signing/uittreksel/sign/:zittingIdentifier/:behandelingUuid',
   async function (req, res, next) {
+    /** @type {Treatment | undefined} */
+    let treatment;
+    /** @type {Meeting | undefined} */
+    let meeting;
+    /** @type {Task | undefined} */
+    let signingTask;
     try {
-      const [meeting, treatment] = await Promise.all([
+      [meeting, treatment] = await Promise.all([
         Meeting.find(req.params.zittingIdentifier),
         Treatment.find(req.params.behandelingUuid),
       ]);
-      const meetingErrors = validateMeeting(meeting);
-      const treatmentErrors = await validateTreatment(treatment);
-      const errors = [...meetingErrors, ...treatmentErrors];
-      if (errors.length) {
-        return res.status(400).send({ errors }).end();
-      } else {
-        const extractUri = await ensureVersionedExtract(treatment, meeting);
-        await signVersionedExtract(
-          extractUri,
-          req.header('MU-SESSION-ID'),
-          'getekend',
-          treatment.attachments
-        );
-        const treatmentEditorDocumentUri = await getUri(
-          treatment.editorDocumentUuid
-        );
-        const linkedRegulatoryStatementContainers = await getLinkedDocuments(
-          treatmentEditorDocumentUri
-        );
-        const linkedRegulatoryStatementDocuments = await Promise.all(
-          linkedRegulatoryStatementContainers.map(async (containerURI) =>
-            getCurrentVersion(containerURI)
-          )
-        );
-        const versionedRegulatoryStatements = await Promise.all(
-          linkedRegulatoryStatementDocuments.map(async (doc) =>
-            ensureVersionedRegulatoryStatement(doc, extractUri)
-          )
-        );
-        await Promise.all(
-          versionedRegulatoryStatements.map(async (versionedStatementUri) =>
-            signVersionedRegulatoryStatement(
-              versionedStatementUri,
-              req.header('MU-SESSION-ID'),
-              'getekend'
-            )
-          )
-        );
-        return res.send({ success: true }).end();
-      }
+      signingTask = await returnEnsuredTaskId(
+        res,
+        meeting,
+        TASK_TYPE_SIGNING_VERSIONED_TREATMENT
+      );
     } catch (err) {
-      console.error('Error signing behandeling', err);
+      console.error('Error while creating signed resource task', err);
       const error = new Error(
-        `An error occurred while signing the behandeling ${req.params.behandelingUuid}: ${err}`
+        `An error occurred while signing the resource task: ${err}`
       );
       return next(error);
     }
+    try {
+      if (treatment && meeting && signingTask) {
+        signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
+        const meetingErrors = validateMeeting(meeting);
+        const treatmentErrors = await validateTreatment(treatment);
+        const errors = [...meetingErrors, ...treatmentErrors];
+        if (errors.length) {
+          await signingTask.updateStatus(
+            TASK_STATUS_FAILURE,
+            errors.join('; ')
+          );
+        } else {
+          const versionedExtractUri = await ensureVersionedExtract(
+            treatment,
+            meeting
+          );
+
+          const signedResourceUri = await signVersionedExtract(
+            versionedExtractUri,
+            req.header('MU-SESSION-ID'),
+            'getekend',
+            treatment.attachments
+          );
+          await signingTask.updateStatus(
+            TASK_STATUS_SUCCESS,
+            undefined,
+            signedResourceUri
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Error while signing extract', err);
+      // @ts-ignore ignore unknown access
+      await signingTask?.updateStatus(TASK_STATUS_FAILURE, err.message);
+    }
   }
 );
-
-/**
- * Creates a signed resource for the provided resource (currently only a treatment is supported)
- * Ensures the prepublished behandeling that is signed is persisted in the store and attached to the document container
- */
-router.post('/signed-resources', async function (req, res, next) {
-  try {
-    const { relationships } = parseBody(req.body);
-    // @ts-ignore we could move to zod to get nice types here
-    const versionedTreatmentUuid = relationships?.['versioned-behandeling']?.id;
-    if (versionedTreatmentUuid) {
-      const versionedTreatment = await VersionedExtract.find(
-        versionedTreatmentUuid
-      );
-      const treatment = await Treatment.findUri(versionedTreatment.treatment);
-      const meeting = await Meeting.findURI(treatment.meeting);
-      const meetingErrors = validateMeeting(meeting);
-      const treatmentErrors = await validateTreatment(treatment);
-      const errors = [...meetingErrors, ...treatmentErrors];
-      if (errors.length) {
-        return res.status(400).send({ errors }).end();
-      } else {
-        const versionedExtractUri = await ensureVersionedExtract(
-          treatment,
-          meeting
-        );
-
-        const signedResourceUri = await signVersionedExtract(
-          versionedExtractUri,
-          req.header('MU-SESSION-ID'),
-          'getekend',
-          treatment.attachments
-        );
-        const signedResource = await SignedResource.findURI(signedResourceUri);
-        return res.send(signedResource.toMuResourceModel());
-      }
-    }
-  } catch (err) {
-    console.error('Error while creating signed resource', err);
-    const error = new Error(
-      `An error occurred while signing the resource: ${err}`
-    );
-    return next(error);
-  }
-});
 
 /**
  * Makes the current user sign the notulen for the supplied document.
@@ -254,10 +204,11 @@ router.post(
         res,
         meeting,
         TASK_TYPE_SIGNING_MEETING_NOTES,
-        userUri
+        userUri ?? undefined
       );
     } catch (err) {
       console.error('Error attempting to create signing task', err);
+      // @ts-ignore ignore unknown access
       await signingTask?.updateStatus(TASK_STATUS_FAILURE, err.message);
       const error = new Error(
         `An error occurred while signing the meeting notes ${req.params.zittingIdentifier}: ${err}`
@@ -277,7 +228,7 @@ router.post(
       for (const treatment of treatments) {
         const treatmentErrors = await validateTreatment(treatment);
         errors = [...errors, ...treatmentErrors];
-        attachments.push(...treatment.attachments);
+        attachments.push(...(treatment.attachments ?? []));
       }
       if (errors.length) {
         throw new Error(errors.join(', '));
@@ -297,6 +248,7 @@ router.post(
       await signingTask.updateStatus(TASK_STATUS_SUCCESS);
     } catch (err) {
       console.error('Error signing notulen', err);
+      // @ts-ignore ignore unknown access
       await signingTask.updateStatus(TASK_STATUS_FAILURE, err.message);
     }
   }
