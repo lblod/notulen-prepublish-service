@@ -275,8 +275,10 @@ router.post(
           (publicTreatment) => publicTreatment.id
         ) || [];
 
-      const meeting = await Meeting.find(meetingUuid);
-      const treatments = await Treatment.findAll({ meetingUuid });
+      const [meeting, treatments] = await Promise.all([
+        Meeting.find(meetingUuid),
+        Treatment.findAll({ meetingUuid }),
+      ]);
       const publicationHtml = await generateNotulenPreview(
         meeting,
         treatments,

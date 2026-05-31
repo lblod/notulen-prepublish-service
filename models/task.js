@@ -50,6 +50,16 @@ export class TaskError {
   }
 }
 
+const TASK_RETRY_DELAY_MS = process.env.TASK_RETRY_DELAY_MS
+  ? Number.parseInt(process.env.TASK_RETRY_DELAY_MS, 10)
+  : 2000;
+const TASK_RETRY_LIMIT = process.env.TASK_RETRY_LIMIT
+  ? Number.parseInt(process.env.TASK_RETRY_LIMIT, 10)
+  : 20;
+const TASK_LOCK_EXPIRY_MINS = process.env.TASK_LOCK_EXPIRY_MINS
+  ? Number.parseInt(process.env.TASK_LOCK_EXPIRY_MINS, 10)
+  : 5;
+
 export default class Task {
   /**
    * Creates a new task. If a running task of the same type for the same meeting already exists, it
@@ -119,13 +129,14 @@ export default class Task {
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
      ${prefixMap['besluit'].toSparqlString()}
-     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
+     SELECT ?uri ?uuid ?type ?involves ?status ?modified ?retries ?created ?error ?errorId ?errorMessage WHERE {
        BIND(${sparqlEscapeString(uuid)} AS ?uuid)
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ?type;
             dct:created ?created;
             dct:modified ?modified;
+            task:numberOfRetries ?retries;
             nuao:involves ?involves;
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
@@ -161,12 +172,13 @@ export default class Task {
      ${prefixMap['dct'].toSparqlString()}
      ${prefixMap['adms'].toSparqlString()}
      ${prefixMap['oslc'].toSparqlString()}
-     SELECT ?uri ?uuid ?status ?modified ?created ?error ?errorId ?errorMessage WHERE {
+     SELECT ?uri ?uuid ?status ?modified ?created ?retries ?error ?errorId ?errorMessage WHERE {
        ?uri a task:Task;
             mu:uuid ?uuid;
             dct:type ${sparqlEscapeString(type)};
             dct:created ?created;
             dct:modified ?modified;
+            task:numberOfRetries ?retries;
             nuao:involves ${sparqlEscapeUri(meetingUri)};
             dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
             adms:status ?status.
@@ -208,6 +220,7 @@ export default class Task {
       created: binding.created.value,
       modified: binding.modified.value,
       status: binding.status.value,
+      retries: Number.parseInt(binding.retries.value, 10),
       involves: binding.involves.value,
       type: binding.type.value,
       error: taskError,
@@ -223,10 +236,21 @@ export default class Task {
    * @property {string} modified
    * @property {string} status
    * @property {string} uri
+   * @property {number} [retries]
    * @property {TaskError} [error]
    */
   /** @param {TaskArgs} taskArgs */
-  constructor({ id, uri, created, status, modified, type, involves, error }) {
+  constructor({
+    id,
+    uri,
+    created,
+    status,
+    modified,
+    type,
+    involves,
+    retries = 0,
+    error,
+  }) {
     /** @type {string} */
     this.id = id;
     /** @type {string} */
@@ -241,6 +265,8 @@ export default class Task {
     this.status = status;
     /** @type {string} */
     this.uri = uri;
+    /** @type {number} */
+    this.retries = retries;
     /** @type {TaskError | null} */
     this.error = error ?? null;
   }
@@ -299,7 +325,9 @@ export default class Task {
   }
 
   /**
-   * Update the task status if necessary
+   * Update the task status if necessary. If the status matches, this is a no-op.
+   * Setting the task to RUNNING triggers block detection, which only returns once the task can
+   * proceed, or fails if it cannot after limited retries.
    * @param {string} status - the status to set
    * @param {string} [reason] - an error reason to set as a message
    * @returns {Promise<Task>} - a task with the updated status. This could be a new object or could
@@ -317,61 +345,81 @@ export default class Task {
 
   /**
    * Internal - try to set status to running, but does not do so if another running task already
-   * exists.
+   * exists. Retries a configurable number of times before failing.
    * @returns {Promise<Task>}
    */
   async _tryToStart() {
-    //FIXME blockedBy
-    const queryString = `
-     ${prefixMap['mu'].toSparqlString()}
-     ${prefixMap['task'].toSparqlString()}
-     ${prefixMap['adms'].toSparqlString()}
-     ${prefixMap['dct'].toSparqlString()}
-     ${prefixMap['nuao'].toSparqlString()}
-     ${prefixMap['xsd'].toSparqlString()}
-
-     DELETE {
-       ?uri adms:status ?oldStatus.
-       ?uri dct:modified ?modified.
-       ?uri task:error ?error.
-       ?error ?errorP ?errorV.
-     }
-     INSERT {
-       ?uri adms:status ?status;
-            dct:modified ${sparqlEscapeDateTime(Date.now())}.
-     }
-     WHERE {
-       ?uri a task:Task;
-            mu:uuid ${sparqlEscapeString(this.id)};
-            dct:modified ?modified;
-            adms:status ?oldStatus.
-      OPTIONAL {
-        ?blocking a task:Task;
-          adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
-          dct:modified ?blockModified;
-          dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
-          dct:type ${sparqlEscapeString(this.type)};
-          nuao:involves ${sparqlEscapeUri(this.involves)}.
-        FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: 10 }).toJSDate())})
+    /** @type {Task | undefined} */
+    let updated;
+    let retryCount = this.retries;
+    do {
+      if (updated) {
+        // updated is defined after the first loop, so wait before retrying
+        await new Promise((res) => setTimeout(res, TASK_RETRY_DELAY_MS));
+        retryCount++;
       }
+      const queryString = `
+       ${prefixMap['mu'].toSparqlString()}
+       ${prefixMap['task'].toSparqlString()}
+       ${prefixMap['adms'].toSparqlString()}
+       ${prefixMap['dct'].toSparqlString()}
+       ${prefixMap['nuao'].toSparqlString()}
+       ${prefixMap['xsd'].toSparqlString()}
+       ${prefixMap['ext'].toSparqlString()}
 
-      BIND(IF(
-        BOUND(?blocking),
-        ?oldStatus,
-        ${sparqlEscapeUri(TASK_STATUS_RUNNING)}
-      ) AS ?status)
-       OPTIONAL {
+       DELETE {
+         ?uri adms:status ?oldStatus.
+         ?uri dct:modified ?modified.
+         ?uri task:numberOfRetries ?retries.
+         ?uri ext:blockedBy ?oldBlocking.
          ?uri task:error ?error.
          ?error ?errorP ?errorV.
        }
-    }`;
-    await update(queryString);
+       INSERT {
+         ?uri adms:status ?status;
+              task:numberOfRetries ${sparqlEscapeInt(retryCount)};
+              ext:blockedBy ?blocking;
+              dct:modified ${sparqlEscapeDateTime(Date.now())}.
+       }
+       WHERE {
+         ?uri a task:Task;
+              mu:uuid ${sparqlEscapeString(this.id)};
+              dct:modified ?modified;
+              task:numberOfRetries ?retries;
+              adms:status ?oldStatus.
+         OPTIONAL {
+           ?uri ext:blockedBy ?oldBlocking.
+         }
+         OPTIONAL {
+           ?blocking a task:Task;
+                     adms:status ${sparqlEscapeUri(TASK_STATUS_RUNNING)};
+                     dct:modified ?blockModified;
+                     dct:creator <http://lblod.data.gift/services/notulen-prepublish-service>;
+                     dct:type ${sparqlEscapeString(this.type)};
+                     nuao:involves ${sparqlEscapeUri(this.involves)}.
+           FILTER (?blocking != ?uri && ?blockModified > ${sparqlEscapeDateTime(DateTime.now().minus({ minutes: TASK_LOCK_EXPIRY_MINS }).toJSDate())})
+         }
+         BIND(IF(BOUND(?blocking), ?oldStatus, ${sparqlEscapeUri(TASK_STATUS_RUNNING)}) AS ?status)
+         OPTIONAL {
+           ?uri task:error ?error.
+           ?error ?errorP ?errorV.
+         }
+      }`;
+      await update(queryString);
 
-    // TODO add retry logic instead of just failing
-    const updated = await Task.find(this.id);
+      updated = await Task.find(this.id);
+    } while (
+      updated.status !== TASK_STATUS_RUNNING &&
+      retryCount < TASK_RETRY_LIMIT
+    );
+
     if (updated.status !== TASK_STATUS_RUNNING) {
-      console.error('Task blocked');
-      throw new Error('Task blocked');
+      const err = new AppError(
+        503,
+        `Unable to unlock task after ${retryCount} retries. Task: ${this.uri}`
+      );
+      console.error(err);
+      throw err;
     }
     return updated;
   }

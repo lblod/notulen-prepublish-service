@@ -93,8 +93,10 @@ router.post(
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
-      const meeting = await Meeting.find(meetingUuid);
-      const userUri = await fetchCurrentUser(req.header('MU-SESSION-ID'));
+      const [meeting, userUri] = await Promise.all([
+        Meeting.find(meetingUuid),
+        fetchCurrentUser(req.header('MU-SESSION-ID')),
+      ]);
       signingTask = await returnEnsuredTaskId(
         res,
         meeting,
@@ -134,8 +136,10 @@ router.post(
   '/signing/behandeling/sign/:zittingIdentifier/:behandelingUuid',
   async function (req, res, next) {
     try {
-      const meeting = await Meeting.find(req.params.zittingIdentifier);
-      const treatment = await Treatment.find(req.params.behandelingUuid);
+      const [meeting, treatment] = await Promise.all([
+        Meeting.find(req.params.zittingIdentifier),
+        Treatment.find(req.params.behandelingUuid),
+      ]);
       const meetingErrors = validateMeeting(meeting);
       const treatmentErrors = await validateTreatment(treatment);
       const errors = [...meetingErrors, ...treatmentErrors];
@@ -242,8 +246,10 @@ router.post(
     let signingTask;
     try {
       const meetingUuid = req.params.zittingIdentifier;
-      const meeting = await Meeting.find(meetingUuid);
-      const userUri = await fetchCurrentUser(req.header('MU-SESSION-ID'));
+      const [meeting, userUri] = await Promise.all([
+        Meeting.find(meetingUuid),
+        fetchCurrentUser(req.header('MU-SESSION-ID')),
+      ]);
       signingTask = await returnEnsuredTaskId(
         res,
         meeting,
@@ -262,8 +268,10 @@ router.post(
     try {
       signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
       const meetingUuid = req.params.zittingIdentifier;
-      const meeting = await Meeting.find(meetingUuid);
-      const treatments = await Treatment.findAll({ meetingUuid });
+      const [meeting, treatments] = await Promise.all([
+        Meeting.find(meetingUuid),
+        Treatment.findAll({ meetingUuid }),
+      ]);
       let errors = validateMeeting(meeting);
       const attachments = [];
       for (const treatment of treatments) {

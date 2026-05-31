@@ -65,8 +65,10 @@ async function buildExtractForTreatment(
 
 // here for legacy purposes
 export async function buildAllExtractsForMeeting(meetingUuid) {
-  const treatments = await Treatment.findAll({ meetingUuid });
-  const meeting = await Meeting.find(meetingUuid);
+  const [treatments, meeting] = await Promise.all([
+    Treatment.findAll({ meetingUuid }),
+    Meeting.find(meetingUuid),
+  ]);
   const participationList = await fetchParticipationList(meeting.uri);
   let participantCache;
   if (participationList) {
