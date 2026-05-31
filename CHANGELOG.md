@@ -1,4 +1,15 @@
 
+
+## 3.1.0 (2026-05-31)
+
+#### :rocket: Enhancement
+* [#132](https://github.com/lblod/notulen-prepublish-service/pull/132) Use Tasks to prevent concurrent extract signing using existing endpoint ([@piemonkey](https://github.com/piemonkey))
+* [#131](https://github.com/lblod/notulen-prepublish-service/pull/131) Retry blocked tasks ([@piemonkey](https://github.com/piemonkey))
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
+
 ## 3.0.0 (2026-05-31)
 
 #### :rocket: Enhancement
