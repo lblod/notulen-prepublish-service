@@ -5,6 +5,7 @@ import { query, sparqlEscapeUri } from 'mu';
 import { prefixMap } from '../support/prefixes.js';
 
 export default class SignedResource {
+  /** @param {string} uri */
   static async findURI(uri) {
     const queryString = `
     ${prefixMap['mu'].toSparqlString()}
