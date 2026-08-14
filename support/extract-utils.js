@@ -76,7 +76,7 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
   if (participationList) {
     participantCache = buildParticipantCache(participationList);
   }
-  
+
   const meetingErrors = validateMeeting(meeting);
   const extractBuilders = treatments.map((treatment) =>
     buildExtractForTreatment(
