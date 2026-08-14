@@ -192,13 +192,13 @@ router.get(
   '/prepublish/notulen/:zittingIdentifier',
   handleWithJob(
     async (req) => {
-      const { html, errors } = await constructHtmlForMeetingNotes(
+      const { html, errors, warnings } = await constructHtmlForMeetingNotes(
         req.params.zittingIdentifier,
         true
       );
       return {
         data: {
-          attributes: { content: html, errors },
+          attributes: { content: html, errors, warnings },
           type: 'imported-notulen-contents',
         },
       };
@@ -219,7 +219,9 @@ router.post('/extract-previews', async function (req, res, next) {
     const html = constructHtmlForExtract(extractData);
 
     let errors = validateMeeting(extractData.meeting);
-    errors = errors.concat(await validateTreatment(extractData.treatment));
+    const { errors: treatmentErrors, warnings: treatmentWarnings } =
+      await validateTreatment(extractData.treatment);
+    errors = errors.concat(treatmentErrors);
     return res
       .status(201)
       .send({
@@ -229,6 +231,7 @@ router.post('/extract-previews', async function (req, res, next) {
           attributes: {
             html: html,
             'validation-errors': errors,
+            'validation-warnings': treatmentWarnings,
           },
           relationships: {
             treatment: {

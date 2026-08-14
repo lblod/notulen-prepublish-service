@@ -33,9 +33,12 @@ export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
   const meeting = await Meeting.find(meetingUuid);
   const treatments = await Treatment.findAll({ meetingUuid });
   let errors = validateMeeting(meeting);
+  let warnings = [];
   for (const treatment of treatments) {
-    const treatmentErrors = await validateTreatment(treatment);
+    const { errors: treatmentErrors, warnings: treatmentWarnings } =
+      await validateTreatment(treatment);
     errors = [...errors, ...treatmentErrors];
+    warnings = [...warnings, ...treatmentWarnings];
   }
   const meetingNotesData = await buildDataForMeetingNotes({
     meeting,
@@ -44,7 +47,7 @@ export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
     allPublic: true,
   });
   const html = constructHtmlForMeetingNotesFromData(meetingNotesData);
-  return { errors, html };
+  return { errors, warnings, html };
 }
 
 export async function buildDataForMeetingNotes({

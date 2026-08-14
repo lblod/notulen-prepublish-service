@@ -151,7 +151,7 @@ router.post(
       if (treatment && meeting && signingTask) {
         signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
         const meetingErrors = validateMeeting(meeting);
-        const treatmentErrors = await validateTreatment(treatment);
+        const { errors: treatmentErrors } = await validateTreatment(treatment);
         const errors = [...meetingErrors, ...treatmentErrors];
         if (errors.length) {
           await signingTask.updateStatus(
@@ -226,7 +226,7 @@ router.post(
       let errors = validateMeeting(meeting);
       const attachments = [];
       for (const treatment of treatments) {
-        const treatmentErrors = await validateTreatment(treatment);
+        const { errors: treatmentErrors } = await validateTreatment(treatment);
         errors = [...errors, ...treatmentErrors];
         attachments.push(...(treatment.attachments ?? []));
       }
