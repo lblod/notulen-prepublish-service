@@ -1,3 +1,4 @@
+// @ts-strict-ignore
 import Decision from '../models/decision.js';
 import { DECISION_TYPES_TO_LINK } from './besluit-types.js';
 /**
