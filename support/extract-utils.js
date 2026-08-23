@@ -50,12 +50,14 @@ async function buildExtractForTreatment(
     participantCache
   );
   const html = constructHtmlForExtract(data);
-  const treatmentErrors = await validateTreatment(treatment);
+  const { errors: treatmentErrors, warnings: treatmentWarnings } =
+    await validateTreatment(treatment);
   return {
     data: {
       attributes: {
         content: html,
         errors: [...meetingErrors, ...treatmentErrors],
+        warnings: treatmentWarnings,
         behandeling: treatment.uri,
         uuid: treatment.uuid,
       },
@@ -74,6 +76,7 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
   if (participationList) {
     participantCache = buildParticipantCache(participationList);
   }
+
   const meetingErrors = validateMeeting(meeting);
   const extractBuilders = treatments.map((treatment) =>
     buildExtractForTreatment(

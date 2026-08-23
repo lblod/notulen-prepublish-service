@@ -40,6 +40,10 @@ export default class Decision {
       (t) => t.predicate === 'http://data.europa.eu/eli/ontology#description'
     );
     const description = descriptionTriple?.object;
+    const linkedDecisionTriple = triples.find(
+      (t) => t.predicate === 'http://data.europa.eu/eli/ontology#consolidates'
+    );
+    const linkedDecision = linkedDecisionTriple?.object;
     const types = triples
       .filter(
         (t) =>
@@ -48,14 +52,15 @@ export default class Decision {
       )
       .map((type) => type.object);
     const uri = triples[0].subject;
-    return new Decision({ title, description, types, uri });
+    return new Decision({ title, description, types, uri, linkedDecision });
   }
 
-  constructor({ uri, title, description, types }) {
+  constructor({ uri, title, description, types, linkedDecision }) {
     this.uri = uri;
     this.title = title;
     this.description = description;
     this.types = types;
     this.typesAsText = types.join(' ');
+    this.linkedDecision = linkedDecision;
   }
 }

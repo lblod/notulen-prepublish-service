@@ -1,4 +1,6 @@
+// @ts-strict-ignore
 import Decision from '../models/decision.js';
+import { DECISION_TYPES_TO_LINK } from './besluit-types.js';
 /**
  * @import Treatment from '../models/treatment'
  */
@@ -19,10 +21,12 @@ const errorMessages = {
  */
 export default async function validateTreatment(treatment) {
   const errors = [];
+  const warnings = [];
   const documentId = treatment.editorDocumentUuid;
   if (documentId) {
     const decisions = await Decision.extractDecisionsFromDocument(documentId);
     for (let decision of decisions) {
+      console.log(JSON.stringify(decision));
       if (
         !decision.typesAsText.includes(
           'https://data.vlaanderen.be/id/concept/BesluitType/'
@@ -30,7 +34,22 @@ export default async function validateTreatment(treatment) {
       ) {
         errors.push(errorMessages.nl.besluitTypeRequired(decision.title));
       }
+      if (
+        !decision.linkedDecision &&
+        decision.types.filter((value) => DECISION_TYPES_TO_LINK.includes(value))
+          .length
+      ) {
+        warnings.push({
+          treatmentUri: treatment.uri,
+          documentContainerUri: treatment.documentContainerUri,
+          decisionTitle: decision.title,
+          type: 'linkedDecision',
+          decisionType: decision.types.filter((value) =>
+            DECISION_TYPES_TO_LINK.includes(value)
+          )[0],
+        });
+      }
     }
   }
-  return errors;
+  return { errors, warnings };
 }

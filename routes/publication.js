@@ -134,7 +134,7 @@ router.post(
         Treatment.find(req.params.behandelingUuid),
       ]);
       const meetingErrors = validateMeeting(meeting);
-      const treatmentErrors = await validateTreatment(treatment);
+      const { errors: treatmentErrors } = await validateTreatment(treatment);
       const errors = [...meetingErrors, ...treatmentErrors];
       if (errors.length) {
         return res.status(400).send({ errors }).end();
@@ -215,7 +215,7 @@ router.post(
       let errors = validateMeeting(meeting);
       const attachments = [];
       for (const treatment of treatments) {
-        const treatmentErrors = await validateTreatment(treatment);
+        const { errors: treatmentErrors } = await validateTreatment(treatment);
         errors = [...errors, ...treatmentErrors];
         if (treatment.attachments) {
           attachments.push(...treatment.attachments);
