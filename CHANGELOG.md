@@ -1,5 +1,15 @@
 
 
+
+## 3.2.0 (2026-08-23)
+
+#### :rocket: Enhancement
+* [#133](https://github.com/lblod/notulen-prepublish-service/pull/133) Generate linked decision warnings ([@lagartoverde](https://github.com/lagartoverde))
+
+#### Committers: 1
+- Oscar Rodriguez Villalobos ([@lagartoverde](https://github.com/lagartoverde))
+
+
 ## 3.1.0 (2026-05-31)
 
 #### :rocket: Enhancement
