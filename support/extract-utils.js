@@ -35,23 +35,26 @@ import { isCustomVote } from './vote-utils.js';
  * @param {Meeting} meeting
  * @param {string[]} meetingErrors
  * @param {*} participantCache
+ * @param {Map} [documentCache] - Cache of documents to be reused within a request
  */
 async function buildExtractForTreatment(
   treatment,
   meeting,
   meetingErrors,
-  participantCache
+  participantCache,
+  documentCache
 ) {
   const data = await buildExtractDataForTreatment(
     treatment,
     meeting,
     IS_PREVIEW,
     true,
-    participantCache
+    participantCache,
+    documentCache
   );
   const html = constructHtmlForExtract(data);
   const { errors: treatmentErrors, warnings: treatmentWarnings } =
-    await validateTreatment(treatment);
+    await validateTreatment(treatment, documentCache);
   return {
     data: {
       attributes: {
@@ -76,6 +79,7 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
   if (participationList) {
     participantCache = buildParticipantCache(participationList);
   }
+  const documentCache = new Map();
 
   const meetingErrors = validateMeeting(meeting);
   const extractBuilders = treatments.map((treatment) =>
@@ -83,7 +87,8 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
       treatment,
       meeting,
       meetingErrors,
-      participantCache
+      participantCache,
+      documentCache
     )
   );
   const extracts = await Promise.all(extractBuilders);
@@ -93,7 +98,8 @@ export async function buildAllExtractsForMeeting(meetingUuid) {
 export async function buildExtractData(
   treatmentUuid,
   previewType,
-  isPublic = true
+  isPublic = true,
+  documentCache
 ) {
   const treatment = await Treatment.find(treatmentUuid);
   const meeting = await Meeting.findURI(treatment.meeting);
@@ -101,7 +107,9 @@ export async function buildExtractData(
     treatment,
     meeting,
     previewType,
-    isPublic
+    isPublic,
+    null,
+    documentCache
   );
 }
 
@@ -111,6 +119,7 @@ export async function buildExtractData(
  * @param {string} previewType
  * @param {boolean} [isPublic=true]
  * @param {any} [participantCache=null]
+ * @param {Map} [documentCache] - Cache of documents to be reused within a request
  * @returns {Promise<ExtractData>}
  */
 export async function buildExtractDataForTreatment(
@@ -118,7 +127,8 @@ export async function buildExtractDataForTreatment(
   meeting,
   previewType,
   isPublic = true,
-  participantCache = null
+  participantCache = null,
+  documentCache
 ) {
   const agendapoint = await AgendaPoint.findURI(treatment.agendapoint);
 
@@ -151,7 +161,8 @@ export async function buildExtractDataForTreatment(
   }
 
   const decisions = await Decision.extractDecisionsFromDocument(
-    treatment.editorDocumentUuid
+    treatment.editorDocumentUuid,
+    documentCache
   );
 
   let content;
@@ -159,7 +170,8 @@ export async function buildExtractDataForTreatment(
     const document = await editorDocumentFromUuid(
       treatment.editorDocumentUuid,
       treatment.attachments,
-      previewType
+      previewType,
+      documentCache
     );
     content = document?.content ?? '';
   } else {

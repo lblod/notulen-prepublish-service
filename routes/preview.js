@@ -221,12 +221,18 @@ router.post('/extract-previews', async function (req, res, next) {
     if (!treatmentUuid) {
       throw new InvalidRequest('no valid treatment provided');
     }
-    const extractData = await buildExtractData(treatmentUuid, IS_PREVIEW);
+    const documentCache = new Map();
+    const extractData = await buildExtractData(
+      treatmentUuid,
+      IS_PREVIEW,
+      true,
+      documentCache
+    );
     const html = constructHtmlForExtract(extractData);
 
     let errors = validateMeeting(extractData.meeting);
     const { errors: treatmentErrors, warnings: treatmentWarnings } =
-      await validateTreatment(extractData.treatment);
+      await validateTreatment(extractData.treatment, documentCache);
     errors = errors.concat(treatmentErrors);
     return res
       .status(201)

@@ -36,11 +36,12 @@ export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
     Treatment.findAll({ meetingUuid }),
     Meeting.find(meetingUuid),
   ]);
+  const documentCache = new Map();
   let errors = validateMeeting(meeting);
   let warnings = [];
   for (const treatment of treatments) {
     const { errors: treatmentErrors, warnings: treatmentWarnings } =
-      await validateTreatment(treatment);
+      await validateTreatment(treatment, documentCache);
     errors = [...errors, ...treatmentErrors];
     warnings = [...warnings, ...treatmentWarnings];
   }
@@ -49,6 +50,7 @@ export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
     treatments,
     previewType,
     allPublic: true,
+    documentCache,
   });
   const html = constructHtmlForMeetingNotesFromData(meetingNotesData);
   return { errors, warnings, html };
@@ -60,6 +62,7 @@ export async function buildDataForMeetingNotes({
   previewType,
   publicTreatments = [],
   allPublic = false,
+  documentCache,
 }) {
   const agendapoints = await AgendaPoint.findAll({ meetingUuid: meeting.uuid });
   const defaultAgendaPointType = await Concept.find(
@@ -83,7 +86,8 @@ export async function buildDataForMeetingNotes({
         meeting,
         previewType,
         isPublic,
-        participantCache
+        participantCache,
+        documentCache
       );
       return data;
     })
@@ -120,7 +124,8 @@ export async function ensureVersionedNotulen(
   meeting,
   treatments,
   kind,
-  publicTreatments = []
+  publicTreatments = [],
+  documentCache
 ) {
   let versionedNotulen = await VersionedNotulen.query({ meeting, kind });
   if (versionedNotulen) {
@@ -146,6 +151,7 @@ export async function ensureVersionedNotulen(
       treatments,
       previewType: IS_FINAL,
       allPublic: true,
+      documentCache,
     });
     html = constructHtmlForMeetingNotesFromData(data);
   } else {
@@ -154,6 +160,7 @@ export async function ensureVersionedNotulen(
       treatments,
       previewType: IS_FINAL,
       publicTreatments,
+      documentCache,
     });
     html = constructHtmlForMeetingNotesFromData(data);
   }
@@ -170,7 +177,8 @@ export async function generateNotulenPreview(
   meeting,
   treatments,
   kind,
-  publicTreatments = []
+  publicTreatments = [],
+  documentCache
 ) {
   let html;
   if (kind === NOTULEN_KIND_FULL) {
@@ -179,6 +187,7 @@ export async function generateNotulenPreview(
       treatments,
       previewType: IS_FINAL,
       allPublic: true,
+      documentCache,
     });
     html = constructHtmlForMeetingNotesFromData(data);
   } else {
@@ -187,6 +196,7 @@ export async function generateNotulenPreview(
       treatments,
       previewType: IS_FINAL,
       publicTreatments,
+      documentCache,
     });
     html = constructHtmlForMeetingNotesFromData(data);
   }

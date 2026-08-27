@@ -218,6 +218,7 @@ router.post(
 
     try {
       signingTask = await signingTask.updateStatus(TASK_STATUS_RUNNING);
+      const documentCache = new Map();
       const meetingUuid = req.params.zittingIdentifier;
       const [meeting, treatments] = await Promise.all([
         Meeting.find(meetingUuid),
@@ -226,7 +227,10 @@ router.post(
       let errors = validateMeeting(meeting);
       const attachments = [];
       for (const treatment of treatments) {
-        const { errors: treatmentErrors } = await validateTreatment(treatment);
+        const { errors: treatmentErrors } = await validateTreatment(
+          treatment,
+          documentCache
+        );
         errors = [...errors, ...treatmentErrors];
         attachments.push(...(treatment.attachments ?? []));
       }
@@ -236,7 +240,9 @@ router.post(
       const versionedNotulenUri = await ensureVersionedNotulen(
         meeting,
         treatments,
-        NOTULEN_KIND_FULL
+        NOTULEN_KIND_FULL,
+        [],
+        documentCache
       );
       await signVersionedNotulen(
         versionedNotulenUri,

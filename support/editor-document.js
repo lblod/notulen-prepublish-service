@@ -7,7 +7,7 @@
 import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
-import { IS_FINAL } from './constants.js';
+import { IS_FINAL, IS_PREVIEW } from './constants.js';
 import { prefixMap } from './prefixes.js';
 /** @import Attachment from '../models/attachment';*/
 
@@ -90,11 +90,21 @@ class EditorDocument {
  * @param {Attachment[]} [attachments]
  * @param {string} [previewType] - defaults to IS_PREVIEW and does not set the
  * publication base url in attachments
+ * @param {Map} [documentCache] - Cache of documents to be reused within a request
  *
  * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
  * the EditorDocument
  */
-async function editorDocumentFromUuid(uuid, attachments, previewType) {
+async function editorDocumentFromUuid(
+  uuid,
+  attachments,
+  previewType = IS_PREVIEW,
+  documentCache
+) {
+  const cacheKey = `${uuid}-${previewType}-${attachments?.length}`;
+  const cached = documentCache?.get(cacheKey);
+  if (cached) return cached;
+
   // We have removed dc:title from here
   const queryResult = await query(
     `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
@@ -126,6 +136,9 @@ async function editorDocumentFromUuid(uuid, attachments, previewType) {
     context: JSON.parse(result.context.value),
     content,
   });
+  if (previewType === IS_PREVIEW) {
+    documentCache?.set(cacheKey, doc);
+  }
 
   return doc;
 }
