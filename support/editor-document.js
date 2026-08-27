@@ -4,18 +4,13 @@
  * Represents an rdfa-document as entered by the user in the frontend.
  */
 
-import { query, sparqlEscapeString, sparqlEscapeUri } from 'mu';
+import { query, sparqlEscapeString } from 'mu';
 import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
 import { IS_FINAL } from './constants.js';
 import { prefixMap } from './prefixes.js';
-/** @import Attachment from './attachment.js';*/
-/** @import { IS_PREVIEW } from './constants.js';*/
+/** @import Attachment from '../models/attachment';*/
 
-/**
- * removeTemplateComments: remove all nodes that are a template comment. This should be done for
- * anything that is not being edited.
- */
 class EditorDocument {
   constructor(content) {
     this.content = undefined;
@@ -62,6 +57,10 @@ class EditorDocument {
     }
   }
 
+  /**
+   * removeTemplateComments: remove all nodes that are a template comment. This should be done for
+   * anything that is not being edited.
+   */
   _removeTemplateComments() {
     const dom = this.getDom();
     const comments = [
@@ -89,8 +88,8 @@ class EditorDocument {
  * @param {string} uuid UUID which is coupled to the EditorDocument as
  * mu:uuid property.
  * @param {Attachment[]} [attachments]
- * @param {IS_FINAL | IS_PREVIEW} [previewType] - defaults to IS_PREVIEW and does not set the
- * publication base url
+ * @param {string} [previewType] - defaults to IS_PREVIEW and does not set the
+ * publication base url in attachments
  *
  * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
  * the EditorDocument
@@ -124,43 +123,6 @@ async function editorDocumentFromUuid(uuid, attachments, previewType) {
   const doc = new EditorDocument({
     uri: result.uri.value,
     // title: result.title,
-    context: JSON.parse(result.context.value),
-    content,
-  });
-
-  return doc;
-}
-
-/**
- * Retrieves the EditorDocument belonging to the supplied uri
- *
- * @method editorDocumentFromUuid
- *
- * @param {string} uri UUID which is coupled to the EditorDocument as
- * mu:uuid property.
- *
- * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
- * the EditorDocument
- */
-export async function editorDocumentFromUri(uri) {
-  const queryResult = await query(
-    `PREFIX ext: <http://mu.semte.ch/vocabularies/ext/>
-     SELECT * WHERE {
-      ${sparqlEscapeUri(
-        uri
-      )} a <http://mu.semte.ch/vocabularies/ext/EditorDocument>;
-            ext:editorDocumentContent ?content;
-            ext:editorDocumentContext ?context.
-     }`
-  );
-  if (queryResult.results.bindings.length === 0) {
-    console.log(`No content found for EditorDocument ${uri} returning null`);
-    return null;
-  }
-  const result = queryResult.results.bindings[0];
-  const content = result.content.value;
-  const doc = new EditorDocument({
-    uri,
     context: JSON.parse(result.context.value),
     content,
   });

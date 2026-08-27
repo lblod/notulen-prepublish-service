@@ -25,13 +25,17 @@ const PLANNED_AGENDAPOINT_TYPE_ID = 'bdf68a65-ce15-42c8-ae1b-19eeb39e20d0';
 export const NOTULEN_KIND_FULL = 'full';
 export const NOTULEN_KIND_PUBLIC = 'public';
 
-/**
- * This file contains helpers for exporting, signing and publishing content from the notule.
- */
+// This file contains helpers for exporting, signing and publishing content from the notule.
 
+/**
+ * @param {string} meetingUuid
+ * @param {string} previewType
+ */
 export async function constructHtmlForMeetingNotes(meetingUuid, previewType) {
-  const meeting = await Meeting.find(meetingUuid);
-  const treatments = await Treatment.findAll({ meetingUuid });
+  const [treatments, meeting] = await Promise.all([
+    Treatment.findAll({ meetingUuid }),
+    Meeting.find(meetingUuid),
+  ]);
   let errors = validateMeeting(meeting);
   let warnings = [];
   for (const treatment of treatments) {
