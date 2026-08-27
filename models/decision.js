@@ -5,8 +5,9 @@ import { cleanupTriples } from '../support/pre-importer.js';
 import { editorDocumentFromUuid } from '../support/editor-document.js';
 
 export default class Decision {
-  static async extractDecisionsFromDocument(editorDocumentUuid, previewType) {
-    const doc = await editorDocumentFromUuid(editorDocumentUuid, previewType);
+  /** @param {string} editorDocumentUuid */
+  static async extractDecisionsFromDocument(editorDocumentUuid) {
+    const doc = await editorDocumentFromUuid(editorDocumentUuid);
     const decisions = [];
     if (doc) {
       const contexts = analyse(doc.getTopDomNode()).map((c) => c.context);

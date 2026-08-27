@@ -9,6 +9,8 @@ import jsdom from 'jsdom';
 import { PUBLISHER_TEMPLATES } from './setup-handlebars.js';
 import { IS_FINAL } from './constants.js';
 import { prefixMap } from './prefixes.js';
+/** @import Attachment from './attachment.js';*/
+/** @import { IS_PREVIEW } from './constants.js';*/
 
 /**
  * removeTemplateComments: remove all nodes that are a template comment. This should be done for
@@ -84,10 +86,11 @@ class EditorDocument {
 /**
  * Retrieves the EditorDocument belonging to the supplied uuid
  *
- * @method editorDocumentFromUuid
- *
  * @param {string} uuid UUID which is coupled to the EditorDocument as
  * mu:uuid property.
+ * @param {Attachment[]} [attachments]
+ * @param {IS_FINAL | IS_PREVIEW} [previewType] - defaults to IS_PREVIEW and does not set the
+ * publication base url
  *
  * @return {Promise<EditorDocument | null>} Promise which resolves to an object representing
  * the EditorDocument
