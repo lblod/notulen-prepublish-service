@@ -18,13 +18,17 @@ const errorMessages = {
 
 /**
  * @param {Treatment} treatment
+ * @param {Map} [documentCache] - Cache of documents to be reused within a request
  */
-export default async function validateTreatment(treatment) {
+export default async function validateTreatment(treatment, documentCache) {
   const errors = [];
   const warnings = [];
   const documentId = treatment.editorDocumentUuid;
   if (documentId) {
-    const decisions = await Decision.extractDecisionsFromDocument(documentId);
+    const decisions = await Decision.extractDecisionsFromDocument(
+      documentId,
+      documentCache
+    );
     for (let decision of decisions) {
       console.log(JSON.stringify(decision));
       if (

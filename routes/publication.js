@@ -210,12 +210,16 @@ router.post(
       return next(error);
     }
     try {
+      const documentCache = new Map();
       await publishingTask.updateStatus(TASK_STATUS_RUNNING);
       const treatments = await Treatment.findAll({ meetingUuid });
       let errors = validateMeeting(meeting);
       const attachments = [];
       for (const treatment of treatments) {
-        const { errors: treatmentErrors } = await validateTreatment(treatment);
+        const { errors: treatmentErrors } = await validateTreatment(
+          treatment,
+          documentCache
+        );
         errors = [...errors, ...treatmentErrors];
         if (treatment.attachments) {
           attachments.push(...treatment.attachments);
@@ -229,7 +233,8 @@ router.post(
           meeting,
           treatments,
           NOTULEN_KIND_PUBLIC,
-          publicBehandelingUris
+          publicBehandelingUris,
+          documentCache
         );
         await publishVersionedNotulen(
           versionedNotulenUri,

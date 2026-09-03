@@ -3,10 +3,20 @@
 import { analyse } from '@lblod/marawa/rdfa-context-scanner.js';
 import { cleanupTriples } from '../support/pre-importer.js';
 import { editorDocumentFromUuid } from '../support/editor-document.js';
+import { IS_PREVIEW } from '../support/constants.js';
 
 export default class Decision {
-  static async extractDecisionsFromDocument(editorDocumentUuid, previewType) {
-    const doc = await editorDocumentFromUuid(editorDocumentUuid, previewType);
+  /**
+   * @param {string} editorDocumentUuid
+   * @param {Map} [documentCache] - Cache of documents to be reused within a request
+   */
+  static async extractDecisionsFromDocument(editorDocumentUuid, documentCache) {
+    const doc = await editorDocumentFromUuid(
+      editorDocumentUuid,
+      undefined,
+      IS_PREVIEW,
+      documentCache
+    );
     const decisions = [];
     if (doc) {
       const contexts = analyse(doc.getTopDomNode()).map((c) => c.context);

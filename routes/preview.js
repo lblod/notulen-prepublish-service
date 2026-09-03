@@ -100,7 +100,13 @@ router.get('/prepublish/job-result/:jobUuid', (req, res) => {
 
   if (prepublishJobResults.has(jobUuid)) {
     let { status, result } = prepublishJobResults.get(jobUuid);
-    prepublishJobResults.delete(jobUuid);
+    // Discard success statuses to avoid memory leak, but keep errors to provide a consistent return
+    // status, which allows the client to handle this well. This shouldn't be a problem for leaking
+    // memory, as if we spot increased memory usage, it signals that we have many failures that we
+    // need to fix.
+    if ([200, 201].includes(status)) {
+      prepublishJobResults.delete(jobUuid);
+    }
     if (status === 404) {
       // 404 is used to signify 'keep polling for a result', so we need to avoid sending it
       status = 400;
@@ -194,7 +200,7 @@ router.get(
     async (req) => {
       const { html, errors, warnings } = await constructHtmlForMeetingNotes(
         req.params.zittingIdentifier,
-        true
+        IS_PREVIEW
       );
       return {
         data: {
@@ -215,12 +221,18 @@ router.post('/extract-previews', async function (req, res, next) {
     if (!treatmentUuid) {
       throw new InvalidRequest('no valid treatment provided');
     }
-    const extractData = await buildExtractData(treatmentUuid, IS_PREVIEW);
+    const documentCache = new Map();
+    const extractData = await buildExtractData(
+      treatmentUuid,
+      IS_PREVIEW,
+      true,
+      documentCache
+    );
     const html = constructHtmlForExtract(extractData);
 
     let errors = validateMeeting(extractData.meeting);
     const { errors: treatmentErrors, warnings: treatmentWarnings } =
-      await validateTreatment(extractData.treatment);
+      await validateTreatment(extractData.treatment, documentCache);
     errors = errors.concat(treatmentErrors);
     return res
       .status(201)
