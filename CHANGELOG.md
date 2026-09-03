@@ -1,6 +1,16 @@
 
 
 
+
+## 3.3.0 (2026-09-03)
+
+#### :rocket: Enhancement
+* [#134](https://github.com/lblod/notulen-prepublish-service/pull/134) Maintain record of failed jobs to allow for consistent error codes ([@piemonkey](https://github.com/piemonkey))
+
+#### Committers: 1
+- [@piemonkey](https://github.com/piemonkey)
+
+
 ## 3.2.0 (2026-08-23)
 
 #### :rocket: Enhancement
