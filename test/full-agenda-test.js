@@ -1,3 +1,6 @@
+// @ts-nocheck
+// @ts-strict-ignore
+
 import {TurtleDoc} from '@nbittich/tortank-wasm';
 import {html_to_rdfa} from '@nbittich/rdfa-wasm';
 import { strict as assert,  } from 'assert';
@@ -29,7 +32,7 @@ const agendapoint2 = new AgendaPoint({
   title: 'agendapoint 2',
   addedAfter: 'http://my-example.org/agendapoints/1234',
   plannedPublic: true,
-  type: 'http://my-example.org/agendap'));oint-type/1',
+  type: 'http://my-example.org/agendapoint-type/1',
   typeName: 'gepland',
   description: 'a description for agendapoint 2',
   position: 2,
@@ -43,11 +46,12 @@ function constructAgenda() {
 describe('agenda publication template', function () {
   before(async function () {
     setupHandleBars();
+   
   });
 
   it('is the expected output', async function () {
-    const rdfa = html_to_rdfa(constructAgenda(), 'http://my-example.org/', '');
-    const doc = TurtleDoc.parse(rdfa);
+    const rdfaString = html_to_rdfa(constructAgenda(), 'http://my-example.org/', '');
+    const doc = TurtleDoc.parse(rdfaString);
     const expected = TurtleDoc.parse(await readFile("test/expected_output/agenda-publication.ttl", {encoding: 'utf8'}));
     
     const unexpected = doc.difference(expected);
