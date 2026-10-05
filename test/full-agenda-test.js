@@ -1,16 +1,15 @@
 // @ts-nocheck
 // @ts-strict-ignore
 
-import {TurtleDoc} from '@nbittich/tortank-wasm';
-import {html_to_rdfa} from '@nbittich/rdfa-wasm';
-import { strict as assert,  } from 'assert';
+import { TurtleDoc } from '@nbittich/tortank-wasm';
+import { html_to_rdfa } from '@nbittich/rdfa-wasm';
+import { strict as assert } from 'assert';
 import { before } from 'mocha';
 import { setupHandleBars } from '../support/setup-handlebars.js';
 import { constructHtmlForAgendaFromData } from '../support/agenda-utils.js';
 import Meeting from '../models/meeting.js';
 import AgendaPoint from '../models/agendapoint.js';
 import { readFile } from 'fs/promises';
-
 
 const meeting = new Meeting({
   uri: 'http://my-example.org/meeting/uuid',
@@ -46,20 +45,31 @@ function constructAgenda() {
 describe('agenda publication template', function () {
   before(async function () {
     setupHandleBars();
-   
   });
 
   it('is the expected output', async function () {
-    const rdfaString = html_to_rdfa(constructAgenda(), 'http://my-example.org/', '');
+    const rdfaString = html_to_rdfa(
+      constructAgenda(),
+      'http://my-example.org/',
+      ''
+    );
     const doc = TurtleDoc.parse(rdfaString);
-    const expected = TurtleDoc.parse(await readFile("test/expected_output/agenda-publication.ttl", {encoding: 'utf8'}));
-    
+    const expected = TurtleDoc.parse(
+      await readFile('test/expected_output/agenda-publication.ttl', {
+        encoding: 'utf8',
+      })
+    );
+
     const unexpected = doc.difference(expected);
     const missing = expected.difference(doc);
 
-    assert(unexpected.isEmpty(),
-    `Error: triple(s) constructed not in expected:\n ${unexpected.toJSONString()}`);
-    assert(missing.isEmpty(),
-    `Error: triple(s) expected not in constructed:\n ${missing.toJSONString()}`);
+    assert(
+      unexpected.isEmpty(),
+      `Error: triple(s) constructed not in expected:\n ${unexpected.toJSONString()}`
+    );
+    assert(
+      missing.isEmpty(),
+      `Error: triple(s) expected not in constructed:\n ${missing.toJSONString()}`
+    );
   });
 });
