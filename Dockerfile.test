@@ -1,0 +1,19 @@
+FROM semtech/mu-javascript-template:feature-seperate-server-start
+
+ENV NODE_ENV=development
+
+RUN mkdir -p /usr/src/app/app
+
+COPY . /usr/src/app/app/
+COPY . /app/
+
+WORKDIR /usr/src/app
+
+RUN ./prepare-package-json.sh && ./transpile-sources.sh
+
+WORKDIR /usr/src/dist
+
+RUN npm i && cp -R /usr/src/app/helpers/mu /usr/src/dist/node_modules/mu
+
+VOLUME [ "/usr/src/dist/test" ]
+CMD ["npm", "run", "test"]

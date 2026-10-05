@@ -17,6 +17,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
+    "@nbittich/rdfa-wasm": "^0.3.14",
+    "@nbittich/tortank-wasm": "^0.31.1",
     "@release-it-plugins/lerna-changelog": "^5.0.0",
     "@types/express": "^4.17.21",
     "@types/luxon": "^3.7.1",
@@ -42,7 +44,8 @@
     "lint:js:fix": "eslint . --fix",
     "lint:types": "tsc && tsc-strict",
     "release": "release-it",
-    "test": "mocha 'test/**/*.js' --exit"
+    "test": "mocha 'test/**/*.js' --exit",
+    "container-test": "docker build -f Dockerfile.test -t container-test . && docker run --rm container-test"
   },
   "repository": {
     "type": "git",

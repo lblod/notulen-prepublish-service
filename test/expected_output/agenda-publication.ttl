@@ -1,0 +1,20 @@
+<http://my-example.org/meeting/uuid> a <http://data.vlaanderen.be/ns/besluit#Zitting>;
+    <http://data.vlaanderen.be/ns/besluit#isGehoudenDoor> <http://my-example.org/bestuursorgaan/uuid>;
+    <http://data.vlaanderen.be/ns/besluit#geplandeStart> "2021-05-01T15:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+    <http://data.vlaanderen.be/ns/besluit#behandelt> <http://my-example.org/agendapoints/1234>, <http://my-example.org/agendapoints/1235>.
+
+<http://my-example.org/bestuursorgaan/uuid> a <http://data.vlaanderen.be/ns/besluit#Bestuursorgaan>.
+
+<http://my-example.org/agendapoints/1234> a <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+    <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> true;
+    <http://purl.org/dc/terms/title> "agendapoint 1";
+    <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> <http://my-example.org/agendapoint-type/1>.
+
+<http://my-example.org/agendapoint-type/1> a <http://www.w3.org/2004/02/skos/core#Concept>.
+
+<http://my-example.org/agendapoints/1235> a <http://data.vlaanderen.be/ns/besluit#Agendapunt>;
+    <http://data.vlaanderen.be/ns/besluit#geplandOpenbaar> true;
+    <http://purl.org/dc/terms/title> "agendapoint 2";
+    <http://data.vlaanderen.be/ns/besluit#Agendapunt.type> <http://my-example.org/agendapoint-type/1>;
+    <http://data.vlaanderen.be/ns/besluit#aangebrachtNa> <http://my-example.org/agendapoints/1234>;
+    <http://purl.org/dc/terms/description> "a description for agendapoint 2".
