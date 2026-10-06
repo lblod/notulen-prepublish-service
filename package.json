@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
-    "@nbittich/rdfa-wasm": "^0.3.14",
-    "@nbittich/tortank-wasm": "^0.31.1",
+    "@nbittich/rdfa-wasm": "^0.3.21",
+    "@nbittich/tortank-wasm": "^0.31.6",
     "@release-it-plugins/lerna-changelog": "^5.0.0",
     "@types/express": "^4.17.21",
     "@types/luxon": "^3.7.1",
